@@ -1,8 +1,12 @@
 package testUtils
 
 import (
+	"bytes"
+	"coinche/app"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"testing"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -44,4 +48,22 @@ func DropDb (connectionInfo string, dbName string, db *sqlx.DB) {
 	userDb := sqlx.MustOpen("pgx", connectionInfo) 
 	userDb.MustExec("DROP DATABASE " + dbName)
 	userDb.Close()
+}
+
+func DecodeToGames (buf *bytes.Buffer, test *testing.T) []app.Game {
+	var got []app.Game
+	err := json.NewDecoder(buf).Decode(&got)
+	if err != nil {
+		test.Fatalf("Unable to parse response from server %q into %q, '%v'", buf, "slice of Game", err)
+	}
+	return got
+}
+
+func DecodeToGame (buf *bytes.Buffer, test *testing.T) app.Game {
+	var got app.Game
+	err := json.NewDecoder(buf).Decode(&got)
+	if err != nil {
+		test.Fatalf("Unable to parse response from server %q into %q, '%v'", buf, "Game", err)
+	}
+	return got
 }

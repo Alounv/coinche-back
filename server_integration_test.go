@@ -31,10 +31,10 @@ func TestSettingAndGettingScores(test *testing.T) {
 
 	response := httptest.NewRecorder()
 	router.ServeHTTP(response, testUtils.NewGETGameRequest(1))
-
+	got := testUtils.DecodeToGame(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)
-	assert.Equal("{\"Name\":\"GAME ONE\",\"Id\":1}", response.Body.String())
+	assert.Equal(app.Game(app.Game{Name:"GAME ONE", Id:1}), got)
 
 	test.Cleanup(func() {
 		testUtils.DropDb(connectionInfo, dbName, db)

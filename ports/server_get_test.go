@@ -45,24 +45,30 @@ func TestServerGET(test *testing.T) {
 	router := SetupRouter(&mockStore)
 
 
-	test.Run("get a game", func(test *testing.T) {
+	test.Run("get a game 1", func(test *testing.T) {
+		want := app.Game(app.Game{Name:"GAME ONE", Id:1})
+
 		request := testUtils.NewGETGameRequest(1)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
+		got := testUtils.DecodeToGame(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
-		assert.Equal("{\"Name\":\"GAME ONE\",\"Id\":1}", response.Body.String())
+		assert.Equal(want, got)
 	})
 
-	test.Run("get a game", func(t *testing.T) {
+	test.Run("get a game 2", func(t *testing.T) {
+		want := app.Game(app.Game{Name:"GAME TWO", Id:2})
+
 		request := testUtils.NewGETGameRequest(2)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
+		got := testUtils.DecodeToGame(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
-		assert.Equal("{\"Name\":\"GAME TWO\",\"Id\":2}", response.Body.String())
+		assert.Equal(want, got)
 	})
 
 	test.Run("returns 404 on missing game", func(t *testing.T) {
