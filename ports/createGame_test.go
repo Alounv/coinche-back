@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestServerPOST(test *testing.T) {
+func TestCreateGame(test *testing.T) {
 	assert := assert.New(test)
-	mockStore := MockStore{
+	mockStore := MockGameService{
 		map[int]string{},
 		nil,
 	}

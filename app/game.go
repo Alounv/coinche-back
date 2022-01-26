@@ -1,9 +1,9 @@
 package app
 
 type GameServiceType interface {
-	GetAllGames() []Game
-	GetAGame(id int) Game
-	CreateAGame(name string) int
+	ListGames() []Game
+	GetGame(id int) Game
+	CreateGame(name string) int
 }
 
 type Game struct {
