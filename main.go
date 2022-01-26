@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	env.LoadEnv("../.env")
+	env.LoadEnv("")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 	dbName := os.Getenv("DB_NAME")
 	addr := os.Getenv("PORT")
