@@ -1,0 +1,40 @@
+{
+  "folders": [
+    {
+      "name": "Adapters",
+      "path": "adapters"
+    },
+    {
+      "name": "Ports",
+      "path": "ports"
+    },
+    {
+      "name": "App",
+      "path": "app"
+    },
+    {
+      "name": "Domain",
+      "path": "domain"
+    },
+    {
+      "name": "Utilities",
+      "path": "utilities"
+    },
+    {
+      "name": "[Root]",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "adapters": true,
+      "ports": true,
+      "app": true,
+      "domain": true,
+      "utilities": true
+    },
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  }
+}
