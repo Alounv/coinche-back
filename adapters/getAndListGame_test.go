@@ -5,9 +5,8 @@ import (
 	"coinche/utilities/env"
 	testUtils "coinche/utilities/test"
 	"os"
-	"time"
-
 	"testing"
+	"time"
 
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"

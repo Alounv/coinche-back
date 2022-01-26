@@ -27,7 +27,6 @@ func NewGameService(dsn string) *GameService {
 }
 
 func NewGameServiceFromDb(db *sqlx.DB) *GameService {
-
 	service := GameService{db}
 	service.CreatePlayerTableIfNeeded()
 
