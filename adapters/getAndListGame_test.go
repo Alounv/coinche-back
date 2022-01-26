@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGameService(test *testing.T) {
+func TestGameCreation(test *testing.T) {
 	assert := assert.New(test)
 	dbName := "testdb"
 	env.LoadEnv("../.env")
@@ -29,17 +29,18 @@ func TestGameService(test *testing.T) {
 		got := MockGameService.GetGame(1)
 
 		assert.Equal(want, got.Name)
-		assert.NotNil(got.Id)
+		assert.Equal(1, got.Id)
 	})
 
-	test.Run("create a game", func(test *testing.T) {
-		newName := "NEW GAME"
+	test.Run("list all games", func(test *testing.T) {
+		want := []app.Game{
+			{Name: "GAME ONE", Id: 1},
+			{Name: "GAME TWO", Id: 2},
+		}
 
-		newId := MockGameService.CreateGame(newName)
-		got := MockGameService.GetGame(newId)
+		got := MockGameService.ListGames()
 
-		assert.Equal(newName, got.Name)
-		assert.NotNil(newId, got.Id)
+		assert.Equal(want, got)
 	})
 
 	test.Cleanup(func() {
