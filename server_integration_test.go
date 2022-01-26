@@ -2,7 +2,6 @@ package main
 
 import (
 	"coinche/adapters"
-	"coinche/app"
 	"coinche/ports"
 	"coinche/utilities/env"
 	testUtils "coinche/utilities/test"
@@ -10,12 +9,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSettingAndGettingScores(test *testing.T) {
+func TestCreatingAndGettingGames(test *testing.T) {
 	assert := assert.New(test)
 
 	env.LoadEnv("")
@@ -23,7 +22,7 @@ func TestSettingAndGettingScores(test *testing.T) {
 	dbName := "testdb"
 
 	db := testUtils.CreateDb(connectionInfo, dbName)
-	mockGameService := NewGameServiceWithData(db)
+	mockGameService := adapters.NewGameServiceFromDb(db)
 
 	router := ports.SetupRouter(mockGameService)
 
@@ -34,21 +33,11 @@ func TestSettingAndGettingScores(test *testing.T) {
 	got := testUtils.DecodeToGame(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)
-	assert.Equal(app.Game(app.Game{Name: "GAME ONE", Id: 1}), got)
+	assert.Equal("NEW GAME", got.Name)
+	assert.Equal(1, got.Id)
+	assert.IsType(time.Time{}, got.CreatedAt)
 
 	test.Cleanup(func() {
 		testUtils.DropDb(connectionInfo, dbName, db)
 	})
-}
-
-func NewGameServiceWithData(db *sqlx.DB) *adapters.GameService {
-	store := adapters.NewGameServiceFromDb(db)
-
-	store.CreatePlayerTableIfNeeded()
-	store.CreateGames([]app.Game{
-		{Name: "GAME ONE", Id: 1},
-		{Name: "GAME TWO", Id: 2},
-	})
-
-	return store
 }

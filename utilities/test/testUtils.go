@@ -33,8 +33,9 @@ func CreateDb(connectionInfo string, dbName string) *sqlx.DB {
 	userDb := sqlx.MustOpen("pgx", connectionInfo)
 	_, err := userDb.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
-		fmt.Print("Hello")
 		fmt.Print(err)
+		userDb.MustExec("DROP DATABASE " + dbName)
+		userDb.MustExec("CREATE DATABASE " + dbName)
 	}
 	userDb.Close()
 

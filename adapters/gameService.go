@@ -8,7 +8,8 @@ import (
 var gameSchema = `
 CREATE TABLE game (
 	id serial PRIMARY KEY NOT NULL,
-	name text
+	name text,
+	createdAt timestamp NOT NULL DEFAULT now()
 )`
 
 type GameService struct {

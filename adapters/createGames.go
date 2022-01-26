@@ -2,7 +2,6 @@ package adapters
 
 import (
 	"coinche/app"
-	"fmt"
 
 	_ "github.com/jackc/pgx/stdlib"
 )
@@ -10,10 +9,11 @@ import (
 func (s *GameService) CreateGames(games []app.Game) {
 	tx := s.db.MustBegin()
 	for _, game := range games {
-		_, err := tx.Exec("INSERT INTO game (name) VALUES ($1)", game.Name)
-		if err != nil {
-			fmt.Println(err)
-		}
+		tx.MustExec(
+			`INSERT INTO game (id, name, createdAt)
+			VALUES ($1, $2, $3)`,
+			game.Id, game.Name, game.CreatedAt,
+		)
 	}
 	tx.Commit()
 }

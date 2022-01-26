@@ -4,6 +4,7 @@ import (
 	"coinche/utilities/env"
 	testUtils "coinche/utilities/test"
 	"os"
+	"time"
 
 	"testing"
 
@@ -28,7 +29,8 @@ func TestCreateGame(test *testing.T) {
 		got := MockGameService.GetGame(newId)
 
 		assert.Equal(newName, got.Name)
-		assert.NotNil(newId, got.Id)
+		assert.Equal(newId, got.Id)
+		assert.IsType(time.Time{}, got.CreatedAt)
 	})
 
 	test.Cleanup(func() {

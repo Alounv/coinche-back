@@ -5,6 +5,7 @@ import (
 	"coinche/utilities/env"
 	testUtils "coinche/utilities/test"
 	"os"
+	"time"
 
 	"testing"
 
@@ -34,8 +35,8 @@ func TestGameCreation(test *testing.T) {
 
 	test.Run("list all games", func(test *testing.T) {
 		want := []app.Game{
-			{Name: "GAME ONE", Id: 1},
-			{Name: "GAME TWO", Id: 2},
+			{Name: "GAME ONE", Id: 1, CreatedAt: time.Date(2009, 1, 1, 12, 0, 0, 0, time.UTC)},
+			{Name: "GAME TWO", Id: 2, CreatedAt: time.Date(2009, 1, 2, 12, 0, 0, 0, time.UTC)},
 		}
 
 		got := MockGameService.ListGames()
@@ -51,10 +52,9 @@ func TestGameCreation(test *testing.T) {
 func NewGameServiceWithData(db *sqlx.DB) *GameService {
 	store := NewGameServiceFromDb(db)
 
-	store.CreatePlayerTableIfNeeded()
 	store.CreateGames([]app.Game{
-		{Name: "GAME ONE", Id: 1},
-		{Name: "GAME TWO", Id: 2},
+		{Name: "GAME ONE", Id: 1, CreatedAt: time.Date(2009, 1, 1, 12, 0, 0, 0, time.UTC)},
+		{Name: "GAME TWO", Id: 2, CreatedAt: time.Date(2009, 1, 2, 12, 0, 0, 0, time.UTC)},
 	})
 
 	return store

@@ -1,5 +1,7 @@
 package app
 
+import "time"
+
 type GameServiceType interface {
 	ListGames() []Game
 	GetGame(id int) Game
@@ -7,6 +9,7 @@ type GameServiceType interface {
 }
 
 type Game struct {
-	Name string
-	Id   int
+	Id        int
+	Name      string
+	CreatedAt time.Time
 }
