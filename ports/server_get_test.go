@@ -11,12 +11,12 @@ import (
 )
 
 type MockStore struct {
-	names map[int]string
+	names    map[int]string
 	setCalls []string
 }
 
 func (s *MockStore) GetAGame(id int) app.Game {
-	game := app.Game{ Name: s.names[id], Id: id}
+	game := app.Game{Name: s.names[id], Id: id}
 	return game
 }
 
@@ -28,7 +28,7 @@ func (s *MockStore) CreateAGame(name string) int {
 func (s *MockStore) GetAllGames() []app.Game {
 	var games []app.Game
 	for id, name := range s.names {
-		games = append(games, app.Game{ Name: name, Id: id})
+		games = append(games, app.Game{Name: name, Id: id})
 	}
 	return games
 }
@@ -37,16 +37,15 @@ func TestServerGET(test *testing.T) {
 	assert := assert.New(test)
 	mockStore := MockStore{
 		map[int]string{
-		 	1: "GAME ONE",
+			1: "GAME ONE",
 			2: "GAME TWO",
 		},
 		nil,
 	}
 	router := SetupRouter(&mockStore)
 
-
 	test.Run("get a game 1", func(test *testing.T) {
-		want := app.Game(app.Game{Name:"GAME ONE", Id:1})
+		want := app.Game(app.Game{Name: "GAME ONE", Id: 1})
 
 		request := testUtils.NewGETGameRequest(1)
 		response := httptest.NewRecorder()
@@ -59,7 +58,7 @@ func TestServerGET(test *testing.T) {
 	})
 
 	test.Run("get a game 2", func(t *testing.T) {
-		want := app.Game(app.Game{Name:"GAME TWO", Id:2})
+		want := app.Game(app.Game{Name: "GAME TWO", Id: 2})
 
 		request := testUtils.NewGETGameRequest(2)
 		response := httptest.NewRecorder()
@@ -80,4 +79,3 @@ func TestServerGET(test *testing.T) {
 		assert.Equal(http.StatusNotFound, response.Code)
 	})
 }
-

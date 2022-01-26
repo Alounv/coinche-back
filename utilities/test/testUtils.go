@@ -29,8 +29,8 @@ func getNewRequest(route string, method string) *http.Request {
 	return request
 }
 
-func CreateDb (connectionInfo string, dbName string) *sqlx.DB {
-	userDb := sqlx.MustOpen("pgx", connectionInfo) 
+func CreateDb(connectionInfo string, dbName string) *sqlx.DB {
+	userDb := sqlx.MustOpen("pgx", connectionInfo)
 	_, err := userDb.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
 		fmt.Print("Hello")
@@ -38,19 +38,19 @@ func CreateDb (connectionInfo string, dbName string) *sqlx.DB {
 	}
 	userDb.Close()
 
-	db := sqlx.MustOpen("pgx", connectionInfo + " dbname=" + dbName)
+	db := sqlx.MustOpen("pgx", connectionInfo+" dbname="+dbName)
 	return db
 }
 
-func DropDb (connectionInfo string, dbName string, db *sqlx.DB) {
+func DropDb(connectionInfo string, dbName string, db *sqlx.DB) {
 	db.Close()
 
-	userDb := sqlx.MustOpen("pgx", connectionInfo) 
+	userDb := sqlx.MustOpen("pgx", connectionInfo)
 	userDb.MustExec("DROP DATABASE " + dbName)
 	userDb.Close()
 }
 
-func DecodeToGames (buf *bytes.Buffer, test *testing.T) []app.Game {
+func DecodeToGames(buf *bytes.Buffer, test *testing.T) []app.Game {
 	var got []app.Game
 	err := json.NewDecoder(buf).Decode(&got)
 	if err != nil {
@@ -59,7 +59,7 @@ func DecodeToGames (buf *bytes.Buffer, test *testing.T) []app.Game {
 	return got
 }
 
-func DecodeToGame (buf *bytes.Buffer, test *testing.T) app.Game {
+func DecodeToGame(buf *bytes.Buffer, test *testing.T) app.Game {
 	var got app.Game
 	err := json.NewDecoder(buf).Decode(&got)
 	if err != nil {

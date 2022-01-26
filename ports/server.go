@@ -42,13 +42,13 @@ func (server *Server) GetAGame(context *gin.Context) {
 
 func (server *Server) CreateAGame(context *gin.Context) {
 	name := context.Param("name")
-	
+
 	server.Store.CreateAGame(name)
 	context.JSON(http.StatusAccepted, gin.H{"status": "ok"})
 }
 
 func (server *Server) GetAllGames(context *gin.Context) {
 	games := server.Store.GetAllGames()
-	
+
 	context.JSON(http.StatusOK, games)
 }

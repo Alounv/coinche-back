@@ -7,6 +7,6 @@ type GameServiceType interface {
 }
 
 type Game struct {
-	Name  string
-	Id int
+	Name string
+	Id   int
 }

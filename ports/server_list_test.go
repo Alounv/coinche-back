@@ -15,8 +15,8 @@ func TestServerGETList(test *testing.T) {
 	mockStore := MockStore{
 		map[int]string{
 			1: "GAME ONE",
-		 	2: "GAME TWO",
-	 	},
+			2: "GAME TWO",
+		},
 		nil,
 	}
 	router := SetupRouter(&mockStore)
@@ -26,16 +26,14 @@ func TestServerGETList(test *testing.T) {
 		response := httptest.NewRecorder()
 
 		want := []app.Game{
-			{ Id: 1, Name: "GAME ONE"},
-			{ Id: 2, Name: "GAME TWO"},
+			{Id: 1, Name: "GAME ONE"},
+			{Id: 2, Name: "GAME TWO"},
 		}
 
 		router.ServeHTTP(response, request)
 		got := testUtils.DecodeToGames(response.Body, test)
-		
+
 		assert.Equal(http.StatusOK, response.Code)
 		assert.Equal(want, got)
 	})
 }
-
-

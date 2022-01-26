@@ -34,14 +34,14 @@ func TestSettingAndGettingScores(test *testing.T) {
 	got := testUtils.DecodeToGame(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)
-	assert.Equal(app.Game(app.Game{Name:"GAME ONE", Id:1}), got)
+	assert.Equal(app.Game(app.Game{Name: "GAME ONE", Id: 1}), got)
 
 	test.Cleanup(func() {
 		testUtils.DropDb(connectionInfo, dbName, db)
 	})
 }
 
-func NewGameServiceWithData (db *sqlx.DB) *adapters.GameService {
+func NewGameServiceWithData(db *sqlx.DB) *adapters.GameService {
 	store := adapters.NewGameServiceFromDb(db)
 
 	store.CreatePlayerTableIfNeeded()

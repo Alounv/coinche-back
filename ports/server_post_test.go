@@ -28,5 +28,3 @@ func TestServerPOST(test *testing.T) {
 		assert.Equal("NEW GAME", mockStore.setCalls[0])
 	})
 }
-
-

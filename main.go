@@ -22,5 +22,3 @@ func main() {
 	log.Print("Listening on ", addr)
 	router.Run(addr)
 }
-
-

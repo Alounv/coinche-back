@@ -34,7 +34,7 @@ func TestDB(test *testing.T) {
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME"
-		
+
 		newId := MockGameService.CreateAGame(newName)
 		got := MockGameService.GetAGame(newId)
 
@@ -47,7 +47,7 @@ func TestDB(test *testing.T) {
 	})
 }
 
-func NewGameServiceWithData (db *sqlx.DB) *GameService {
+func NewGameServiceWithData(db *sqlx.DB) *GameService {
 	store := NewGameServiceFromDb(db)
 
 	store.CreatePlayerTableIfNeeded()
