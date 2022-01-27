@@ -7,7 +7,7 @@ import (
 	_ "github.com/jackc/pgx/stdlib"
 )
 
-func (s *GameService) GetGame(id int) app.Game {
+func (s *dbGameService) GetGame(id int) app.Game {
 	var game app.Game
 	err := s.db.Get(&game, "SELECT * FROM game WHERE id=$1", id)
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 	_ "github.com/jackc/pgx/stdlib"
 )
 
-func (s *GameService) CreateGames(games []app.Game) {
+func (s *dbGameService) CreateGames(games []app.Game) {
 	tx := s.db.MustBegin()
 	for _, game := range games {
 		tx.MustExec(

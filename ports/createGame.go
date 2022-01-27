@@ -7,7 +7,7 @@ import (
 )
 
 func (server *Server) CreateGame(context *gin.Context) {
-	name := context.Param("name")
+	name := context.Query("name")
 
 	id := server.Store.CreateGame(name)
 	context.JSON(http.StatusAccepted, id)

@@ -13,18 +13,18 @@ import (
 func TestGetGame(test *testing.T) {
 	assert := assert.New(test)
 	mockStore := MockGameService{
-		map[int]string{
-			1: "GAME ONE",
-			2: "GAME TWO",
+		map[int]app.Game{
+			1: {Name: "GAME ONE"},
+			2: {Name: "GAME TWO", Full: true},
 		},
 		nil,
 	}
 	router := SetupRouter(&mockStore)
 
 	test.Run("get a game 1", func(test *testing.T) {
-		want := app.Game(app.Game{Name: "GAME ONE", Id: 1})
+		want := app.Game(app.Game{Name: "GAME ONE"})
 
-		request := testUtils.NewGETGameRequest(1)
+		request := testUtils.NewGetGameRequest(1)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -35,9 +35,9 @@ func TestGetGame(test *testing.T) {
 	})
 
 	test.Run("get a game 2", func(t *testing.T) {
-		want := app.Game(app.Game{Name: "GAME TWO", Id: 2})
+		want := app.Game(app.Game{Name: "GAME TWO", Full: true})
 
-		request := testUtils.NewGETGameRequest(2)
+		request := testUtils.NewGetGameRequest(2)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -48,7 +48,7 @@ func TestGetGame(test *testing.T) {
 	})
 
 	test.Run("returns 404 on missing game", func(t *testing.T) {
-		request := testUtils.NewGETGameRequest(3)
+		request := testUtils.NewGetGameRequest(3)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)

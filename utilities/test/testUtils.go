@@ -11,17 +11,17 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func NewPOSTGameRequest(name string) *http.Request {
-	route := fmt.Sprintf("/games/%s", name)
-	return getNewRequest(route, http.MethodPost)
+func NewCreateGameRequest(name string) *http.Request {
+	route := fmt.Sprintf("/games/create?name=%s", name)
+	return GetNewRequest(route, http.MethodPost)
 }
 
-func NewGETGameRequest(id int) *http.Request {
+func NewGetGameRequest(id int) *http.Request {
 	route := fmt.Sprintf("/games/%d", id)
-	return getNewRequest(route, http.MethodGet)
+	return GetNewRequest(route, http.MethodGet)
 }
 
-func getNewRequest(route string, method string) *http.Request {
+func GetNewRequest(route string, method string) *http.Request {
 	request, err := http.NewRequest(method, route, nil)
 	if err != nil {
 		panic(err)

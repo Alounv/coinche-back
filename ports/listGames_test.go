@@ -13,9 +13,9 @@ import (
 func TestListGames(test *testing.T) {
 	assert := assert.New(test)
 	mockStore := MockGameService{
-		map[int]string{
-			1: "GAME ONE",
-			2: "GAME TWO",
+		map[int]app.Game{
+			1: {Name: "GAME ONE"},
+			2: {Name: "GAME TWO"},
 		},
 		nil,
 	}
@@ -26,8 +26,8 @@ func TestListGames(test *testing.T) {
 		response := httptest.NewRecorder()
 
 		want := []app.Game{
-			{Id: 1, Name: "GAME ONE"},
-			{Id: 2, Name: "GAME TWO"},
+			{Name: "GAME ONE"},
+			{Name: "GAME TWO"},
 		}
 
 		router.ServeHTTP(response, request)

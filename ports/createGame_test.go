@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"coinche/app"
 	testUtils "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
@@ -12,13 +13,13 @@ import (
 func TestCreateGame(test *testing.T) {
 	assert := assert.New(test)
 	mockStore := MockGameService{
-		map[int]string{},
+		map[int]app.Game{},
 		nil,
 	}
 	router := SetupRouter(&mockStore)
 
 	test.Run("create a game", func(test *testing.T) {
-		request := testUtils.NewPOSTGameRequest("NEW GAME")
+		request := testUtils.NewCreateGameRequest("NEW GAME")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)

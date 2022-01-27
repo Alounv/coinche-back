@@ -26,10 +26,10 @@ func TestCreatingAndGettingGames(test *testing.T) {
 
 	router := ports.SetupRouter(mockGameService)
 
-	router.ServeHTTP(httptest.NewRecorder(), testUtils.NewPOSTGameRequest("NEW GAME"))
+	router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
 
 	response := httptest.NewRecorder()
-	router.ServeHTTP(response, testUtils.NewGETGameRequest(1))
+	router.ServeHTTP(response, testUtils.NewGetGameRequest(1))
 	got := testUtils.DecodeToGame(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)

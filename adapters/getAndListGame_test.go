@@ -48,7 +48,7 @@ func TestGameCreation(test *testing.T) {
 	})
 }
 
-func NewGameServiceWithData(db *sqlx.DB) *GameService {
+func NewGameServiceWithData(db *sqlx.DB) *dbGameService {
 	store := NewGameServiceFromDb(db)
 
 	store.CreateGames([]app.Game{

@@ -12,23 +12,32 @@ CREATE TABLE game (
 	createdAt timestamp NOT NULL DEFAULT now()
 )`
 
-type GameService struct {
+type dbGameService struct {
 	db *sqlx.DB
 }
 
-func (s *GameService) CreatePlayerTableIfNeeded() {
+func (s *dbGameService) CreatePlayerTableIfNeeded() {
 	s.db.Exec(gameSchema)
 }
 
-func NewGameService(dsn string) *GameService {
+func NewDBGameService(dsn string) *dbGameService {
 	db := sqlx.MustOpen("pgx", dsn)
 
 	return NewGameServiceFromDb(db)
 }
 
-func NewGameServiceFromDb(db *sqlx.DB) *GameService {
-	service := GameService{db}
+func NewGameServiceFromDb(db *sqlx.DB) *dbGameService {
+	service := dbGameService{db}
 	service.CreatePlayerTableIfNeeded()
 
 	return &service
+}
+
+type GameService struct {
+	dbGameService *dbGameService
+}
+
+func NewGameService(dsn string) *GameService {
+	dbService := NewDBGameService(dsn)
+	return &GameService{dbService}
 }
