@@ -1,7 +1,6 @@
 package adapters
 
 import (
-	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -9,7 +8,8 @@ var gameSchema = `
 CREATE TABLE game (
 	id serial PRIMARY KEY NOT NULL,
 	name text,
-	createdAt timestamp NOT NULL DEFAULT now()
+	createdAt timestamp NOT NULL DEFAULT now(),
+	players text[]
 )`
 
 type dbGameService struct {
@@ -20,7 +20,7 @@ func (s *dbGameService) CreatePlayerTableIfNeeded() {
 	s.db.Exec(gameSchema)
 }
 
-func NewDBGameService(dsn string) *dbGameService {
+func newDBGameService(dsn string) *dbGameService {
 	db := sqlx.MustOpen("pgx", dsn)
 
 	return NewDbGameServiceFromDb(db)

@@ -6,6 +6,8 @@ import (
 	"coinche/utilities/env"
 	"log"
 	"os"
+
+	_ "github.com/jackc/pgx/stdlib"
 )
 
 func main() {

@@ -23,10 +23,11 @@ func (s *GameService) CreateGame(name string) int {
 }
 
 func (s *GameService) JoinGame(id int, playerName string) error {
-	return nil
+	playersNames := s.DbGameService.GetGame(id).Players
+	return s.DbGameService.UpdateGame(id, playersNames)
 }
 
 func NewGameService(dsn string) *GameService {
-	dbService := NewDBGameService(dsn)
+	dbService := newDBGameService(dsn)
 	return &GameService{dbService}
 }

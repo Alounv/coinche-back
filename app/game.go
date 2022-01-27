@@ -23,4 +23,5 @@ type Game struct {
 	Name      string
 	Full      bool
 	CreatedAt time.Time
+	Players   []string
 }
