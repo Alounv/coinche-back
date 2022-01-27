@@ -19,7 +19,7 @@ func TestCreateGame(test *testing.T) {
 
 	db := testUtils.CreateDb(connectionInfo, dbName)
 
-	MockGameService := NewGameServiceFromDb(db)
+	MockGameService := NewDbGameServiceFromDb(db)
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME"

@@ -49,7 +49,7 @@ func TestGameCreation(test *testing.T) {
 }
 
 func NewGameServiceWithData(db *sqlx.DB) *dbGameService {
-	store := NewGameServiceFromDb(db)
+	store := NewDbGameServiceFromDb(db)
 
 	store.CreateGames([]app.Game{
 		{Name: "GAME ONE", Id: 1, CreatedAt: time.Date(2009, 1, 1, 12, 0, 0, 0, time.UTC)},

@@ -1,40 +1,29 @@
 package adapters
 
 import (
+	"coinche/app"
+
 	_ "github.com/jackc/pgx/stdlib"
-	"github.com/jmoiron/sqlx"
 )
 
-var gameSchema = `
-CREATE TABLE game (
-	id serial PRIMARY KEY NOT NULL,
-	name text,
-	createdAt timestamp NOT NULL DEFAULT now()
-)`
-
-type dbGameService struct {
-	db *sqlx.DB
-}
-
-func (s *dbGameService) CreatePlayerTableIfNeeded() {
-	s.db.Exec(gameSchema)
-}
-
-func NewDBGameService(dsn string) *dbGameService {
-	db := sqlx.MustOpen("pgx", dsn)
-
-	return NewGameServiceFromDb(db)
-}
-
-func NewGameServiceFromDb(db *sqlx.DB) *dbGameService {
-	service := dbGameService{db}
-	service.CreatePlayerTableIfNeeded()
-
-	return &service
-}
-
 type GameService struct {
-	dbGameService *dbGameService
+	DbGameService *dbGameService
+}
+
+func (s *GameService) ListGames() []app.Game {
+	return s.DbGameService.ListGames()
+}
+
+func (s *GameService) GetGame(id int) app.Game {
+	return s.DbGameService.GetGame(id)
+}
+
+func (s *GameService) CreateGame(name string) int {
+	return s.DbGameService.CreateGame(name)
+}
+
+func (s *GameService) JoinGame(id int, playerName string) error {
+	return nil
 }
 
 func NewGameService(dsn string) *GameService {

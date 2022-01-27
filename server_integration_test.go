@@ -22,9 +22,11 @@ func TestCreatingAndGettingGames(test *testing.T) {
 	dbName := "testdb"
 
 	db := testUtils.CreateDb(connectionInfo, dbName)
-	mockGameService := adapters.NewGameServiceFromDb(db)
 
-	router := ports.SetupRouter(mockGameService)
+	dbService := adapters.NewDbGameServiceFromDb(db)
+	gameService := &adapters.GameService{dbService}
+
+	router := ports.SetupRouter(gameService)
 
 	router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
 
