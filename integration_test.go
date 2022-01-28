@@ -5,7 +5,7 @@ import (
 	"coinche/app"
 	gameRepo "coinche/repository/game"
 	"coinche/utilities/env"
-	testUtils "coinche/utilities/test"
+	testutils "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -31,7 +31,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.connectionInfo = os.Getenv("SQLX_POSTGRES_INFO")
 	s.dbName = "testdb"
 
-	s.db = testUtils.CreateDb(s.connectionInfo, s.dbName)
+	s.db = testutils.CreateDb(s.connectionInfo, s.dbName)
 
 	gameRepo := gameRepo.NewGameRepoFromDb(s.db)
 	gameService := &app.GameService{GameRepo: gameRepo}
@@ -43,7 +43,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	test := s.T()
 	assert := assert.New(test)
 
-	s.router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
+	s.router.ServeHTTP(httptest.NewRecorder(), testutils.NewCreateGameRequest("NEW GAME"))
 
 	response := httptest.NewRecorder()
 	assert.Equal(http.StatusOK, response.Code)
@@ -54,9 +54,9 @@ func (s *IntegrationTestSuite) TestGetGame() {
 	assert := assert.New(test)
 
 	response := httptest.NewRecorder()
-	s.router.ServeHTTP(response, testUtils.NewGetGameRequest(1))
+	s.router.ServeHTTP(response, testutils.NewGetGameRequest(1))
 
-	got := testUtils.DecodeToGame(response.Body, test)
+	got := testutils.DecodeToGame(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal("NEW GAME", got.Name)
@@ -72,7 +72,7 @@ func (s *IntegrationTestSuite) TestListGames() {
 
 	s.router.ServeHTTP(response, request)
 
-	got := testUtils.DecodeToGames(response.Body, test)
+	got := testutils.DecodeToGames(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal(1, len(got))
@@ -86,16 +86,16 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	s.router.ServeHTTP(response, testUtils.NewJoinGameRequest(1, "player1"))
+	s.router.ServeHTTP(response, testutils.NewJoinGameRequest(1, "player1"))
 	assert.Equal(http.StatusAccepted, response.Code)
 
-	s.router.ServeHTTP(response, testUtils.NewGetGameRequest(1))
-	got := testUtils.DecodeToGame(response.Body, test)
+	s.router.ServeHTTP(response, testutils.NewGetGameRequest(1))
+	got := testutils.DecodeToGame(response.Body, test)
 	assert.Equal([]string{"player1"}, got.Players)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	testUtils.DropDb(s.connectionInfo, s.dbName, s.db)
+	testutils.DropDb(s.connectionInfo, s.dbName, s.db)
 }
 
 func TestIntegrationSuite(t *testing.T) {

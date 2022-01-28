@@ -1,14 +1,14 @@
 package api
 
 import (
-	gameApi "coinche/api/game"
+	gameapi "coinche/api/game"
 	"coinche/domain"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(gameService domain.GameServiceType) *gin.Engine {
-	gameAPIs := &gameApi.GameAPIs{Store: gameService}
+	gameAPIs := &gameapi.GameAPIs{Store: gameService}
 
 	router := gin.Default()
 	router.SetTrustedProxies([]string{"192.168.1.2"})

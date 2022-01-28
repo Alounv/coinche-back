@@ -1,9 +1,9 @@
-package gameApi
+package gameapi
 
 import (
 	"coinche/api"
 	"coinche/domain"
-	testUtils "coinche/utilities/test"
+	testutils "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,7 +23,7 @@ func TestJoinGame(test *testing.T) {
 	router := api.SetupRouter(&mockGameService)
 
 	test.Run("join game 1", func(test *testing.T) {
-		request := testUtils.NewJoinGameRequest(1, "Son Ly")
+		request := testutils.NewJoinGameRequest(1, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -32,7 +32,7 @@ func TestJoinGame(test *testing.T) {
 	})
 
 	test.Run("should fail when joining non existing game", func(test *testing.T) {
-		request := testUtils.NewJoinGameRequest(60, "Son Ly")
+		request := testutils.NewJoinGameRequest(60, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -41,7 +41,7 @@ func TestJoinGame(test *testing.T) {
 	})
 
 	test.Run("should fail when game is full", func(test *testing.T) {
-		request := testUtils.NewJoinGameRequest(2, "Son Ly")
+		request := testutils.NewJoinGameRequest(2, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)

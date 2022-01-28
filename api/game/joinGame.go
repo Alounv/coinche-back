@@ -1,4 +1,4 @@
-package gameApi
+package gameapi
 
 import (
 	"fmt"

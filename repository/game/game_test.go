@@ -3,7 +3,7 @@ package gameRepo
 import (
 	"coinche/domain"
 	"coinche/utilities/env"
-	testUtils "coinche/utilities/test"
+	testutils "coinche/utilities/test"
 	"os"
 	"testing"
 	"time"
@@ -19,7 +19,7 @@ func TestGameRepo(test *testing.T) {
 	env.LoadEnv("../../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
-	db := testUtils.CreateDb(connectionInfo, dbName)
+	db := testutils.CreateDb(connectionInfo, dbName)
 
 	gameService := NewGameRepoFromDb(db)
 
@@ -35,7 +35,7 @@ func TestGameRepo(test *testing.T) {
 	})
 
 	test.Cleanup(func() {
-		testUtils.DropDb(connectionInfo, dbName, db)
+		testutils.DropDb(connectionInfo, dbName, db)
 	})
 }
 
@@ -45,7 +45,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	env.LoadEnv("../../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
-	db := testUtils.CreateDb(connectionInfo, dbName)
+	db := testutils.CreateDb(connectionInfo, dbName)
 
 	GameService := NewGameServiceWithData(db)
 
@@ -78,7 +78,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 
 	test.Cleanup(func() {
-		testUtils.DropDb(connectionInfo, dbName, db)
+		testutils.DropDb(connectionInfo, dbName, db)
 	})
 }
 

@@ -1,9 +1,9 @@
-package gameApi
+package gameapi
 
 import (
 	"coinche/api"
 	"coinche/domain"
-	testUtils "coinche/utilities/test"
+	testutils "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,18 +25,18 @@ func TestGetGame(test *testing.T) {
 	test.Run("get a game 1", func(test *testing.T) {
 		want := domain.Game(domain.Game{Name: "GAME ONE"})
 
-		request := testUtils.NewGetGameRequest(1)
+		request := testutils.NewGetGameRequest(1)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
-		got := testUtils.DecodeToGame(response.Body, test)
+		got := testutils.DecodeToGame(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
 		assert.Equal(want, got)
 	})
 
 	test.Run("returns 404 on missing game", func(t *testing.T) {
-		request := testUtils.NewGetGameRequest(3)
+		request := testutils.NewGetGameRequest(3)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)

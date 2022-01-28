@@ -1,9 +1,9 @@
-package gameApi
+package gameapi
 
 import (
 	"coinche/api"
 	"coinche/domain"
-	testUtils "coinche/utilities/test"
+	testutils "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,7 +32,7 @@ func TestListGames(test *testing.T) {
 		}
 
 		router.ServeHTTP(response, request)
-		got := testUtils.DecodeToGames(response.Body, test)
+		got := testutils.DecodeToGames(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
 		assert.Equal(want, got)
