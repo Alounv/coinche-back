@@ -2,6 +2,7 @@ package main
 
 import (
 	"coinche/api"
+	gamerepo "coinche/repository/game"
 	"coinche/usecases"
 	"coinche/utilities/env"
 	"log"
@@ -15,7 +16,8 @@ func main() {
 	addr := os.Getenv("PORT")
 
 	dsn := connectionInfo + " dbname=" + dbName
-	gameService := usecases.NewGameService(dsn)
+	gameRepo := gamerepo.NewGameRepo(dsn)
+	gameService := usecases.NewGameService(gameRepo)
 
 	router := api.SetupRouter(gameService)
 

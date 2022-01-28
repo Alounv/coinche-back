@@ -2,9 +2,15 @@ package usecases
 
 import (
 	"coinche/domain"
-	gamerepo "coinche/repository/game"
 	"fmt"
 )
+
+type GameUsecase interface {
+	ListGames() []domain.Game
+	GetGame(id int) domain.Game
+	CreateGame(name string) int
+	JoinGame(id int, playerName string) error
+}
 
 type GameRepository interface {
 	ListGames() []domain.Game
@@ -14,6 +20,7 @@ type GameRepository interface {
 }
 
 type GameService struct {
+	GameUsecase
 	Repo GameRepository
 }
 
@@ -37,7 +44,6 @@ func (s *GameService) JoinGame(id int, playerName string) error {
 	return s.Repo.UpdateGame(id, playersNames)
 }
 
-func NewGameService(dsn string) *GameService {
-	dbService := gamerepo.NewGameRepo(dsn)
-	return &GameService{dbService}
+func NewGameService(repository GameRepository) *GameService {
+	return &GameService{Repo: repository}
 }
