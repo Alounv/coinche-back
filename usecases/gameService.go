@@ -8,14 +8,14 @@ import (
 type GameUsecaseInterface interface {
 	ListGames() []domain.Game
 	GetGame(id int) domain.Game
-	CreateGame(name string) int
+	CreateGame(name string, creatorName string) int
 	JoinGame(id int, playerName string) error
 }
 
 type GameRepositoryInterface interface {
 	ListGames() []domain.Game
 	GetGame(id int) domain.Game
-	CreateGame(name string) int
+	CreateGame(game domain.Game) int
 	UpdateGame(id int, playerNames []string) error
 }
 
@@ -32,8 +32,9 @@ func (s *GameService) GetGame(id int) domain.Game {
 	return s.Repo.GetGame(id)
 }
 
-func (s *GameService) CreateGame(name string) int {
-	return s.Repo.CreateGame(name)
+func (s *GameService) CreateGame(name string, creatorName string) int {
+	game := domain.NewGame(name, creatorName)
+	return s.Repo.CreateGame(game)
 }
 
 func (s *GameService) JoinGame(id int, playerName string) error {

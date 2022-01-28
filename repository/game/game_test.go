@@ -24,11 +24,13 @@ func TestGameRepo(test *testing.T) {
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
+		newPlayers := []string{"P1", "P2"}
 
-		newID := gameService.CreateGame(newName)
+		newID := gameService.CreateGame(domain.Game{Name: newName, Players: newPlayers})
 		got := gameService.GetGame(newID)
 
 		assert.Equal(newName, got.Name)
+		assert.Equal(newPlayers, got.Players)
 		assert.Equal(newID, got.ID)
 		assert.IsType(time.Time{}, got.CreatedAt)
 	})

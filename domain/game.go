@@ -25,3 +25,10 @@ func (game *Game) AddPlayer(playerName string) error {
 	game.Players = append(game.Players, playerName)
 	return err
 }
+
+func NewGame(name string, creatorName string) Game {
+	return Game{
+		Name:    name,
+		Players: []string{creatorName},
+	}
+}

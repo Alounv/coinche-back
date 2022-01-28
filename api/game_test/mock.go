@@ -15,7 +15,7 @@ func (s *MockGameService) GetGame(id int) domain.Game {
 	return s.games[id]
 }
 
-func (s *MockGameService) CreateGame(name string) int {
+func (s *MockGameService) CreateGame(name string, creatorName string) int {
 	s.setCalls = append(s.setCalls, name)
 	return 1
 }
