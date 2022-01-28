@@ -13,11 +13,11 @@ var wsupgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func GinSocketHandler(context *gin.Context) {
-	SocketHandler(context.Writer, context.Request)
+func GameSocketHandler(context *gin.Context) {
+	HTTPGameSocketHandler(context.Writer, context.Request)
 }
 
-func SocketHandler(writer http.ResponseWriter, request *http.Request) {
+func HTTPGameSocketHandler(writer http.ResponseWriter, request *http.Request) {
 	conn, err := wsupgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		fmt.Println(err)

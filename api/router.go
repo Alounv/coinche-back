@@ -11,7 +11,7 @@ func SetupRouter(gameUsecases usecases.GameUsecasesInterface) *gin.Engine {
 	gameAPIs := &gameapi.GameAPIs{Usecases: gameUsecases}
 
 	router := gin.Default()
-	err := router.SetTrustedProxies([]string{"192.168.1.2"})
+	err := router.SetTrustedProxies(nil)
 	if err != nil {
 		panic(err)
 	}
@@ -21,7 +21,7 @@ func SetupRouter(gameUsecases usecases.GameUsecasesInterface) *gin.Engine {
 	router.GET("/games/all", gameAPIs.ListGames)
 	router.POST("/games/:id/join", gameAPIs.JoinGame)
 
-	router.GET("/ws", gameapi.GinSocketHandler)
+	router.GET("/ws", gameapi.GameSocketHandler)
 
 	return router
 }

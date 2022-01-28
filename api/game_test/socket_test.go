@@ -84,7 +84,7 @@ func TestSocketHandler(test *testing.T) {
 		// c, _ := gin.CreateTestContext(w)
 		// c.Params = []gin.Param{gin.Param{Key: "k", Value: "v"}}
 
-		handler := http.HandlerFunc(gameapi.SocketHandler)
+		handler := http.HandlerFunc(gameapi.HTTPGameSocketHandler)
 
 		server, connection := newWSServer(test, handler)
 		defer server.Close()
