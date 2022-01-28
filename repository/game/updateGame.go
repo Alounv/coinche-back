@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func (s *GameRepo) UpdateGame(id int, players []string) error {
+func (s *GameRepositary) UpdateGame(id int, players []string) error {
 	var err error
 	_, err = s.db.Exec(
 		`

@@ -16,7 +16,7 @@ func main() {
 	addr := os.Getenv("PORT")
 
 	dsn := connectionInfo + " dbname=" + dbName
-	gameRepo := gamerepo.NewGameRepo(dsn)
+	gameRepo := gamerepo.NewGameRepository(dsn)
 	gameService := usecases.NewGameService(gameRepo)
 
 	router := api.SetupRouter(gameService)

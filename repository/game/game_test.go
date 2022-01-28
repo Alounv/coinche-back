@@ -84,7 +84,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 }
 
-func NewGameServiceWithData(db *sqlx.DB) *GameRepo {
+func NewGameServiceWithData(db *sqlx.DB) *GameRepositary {
 	dbGameService := NewGameRepoFromDb(db)
 
 	dbGameService.CreateGames([]domain.Game{

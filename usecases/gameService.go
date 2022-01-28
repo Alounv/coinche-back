@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-type GameUsecase interface {
+type GameUsecaseInterface interface {
 	ListGames() []domain.Game
 	GetGame(id int) domain.Game
 	CreateGame(name string) int
 	JoinGame(id int, playerName string) error
 }
 
-type GameRepository interface {
+type GameRepositoryInterface interface {
 	ListGames() []domain.Game
 	GetGame(id int) domain.Game
 	CreateGame(name string) int
@@ -20,8 +20,8 @@ type GameRepository interface {
 }
 
 type GameService struct {
-	GameUsecase
-	Repo GameRepository
+	GameUsecaseInterface
+	Repo GameRepositoryInterface
 }
 
 func (s *GameService) ListGames() []domain.Game {
@@ -44,6 +44,6 @@ func (s *GameService) JoinGame(id int, playerName string) error {
 	return s.Repo.UpdateGame(id, playersNames)
 }
 
-func NewGameService(repository GameRepository) *GameService {
+func NewGameService(repository GameRepositoryInterface) *GameService {
 	return &GameService{Repo: repository}
 }

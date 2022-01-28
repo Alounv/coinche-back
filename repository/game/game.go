@@ -15,25 +15,25 @@ CREATE TABLE game (
 	players text[]
 )`
 
-type GameRepo struct {
+type GameRepositary struct {
 	db *sqlx.DB
 }
 
-func (s *GameRepo) CreatePlayerTableIfNeeded() {
+func (s *GameRepositary) CreatePlayerTableIfNeeded() {
 	_, err := s.db.Exec(gameSchema)
 	if err != nil {
 		fmt.Print(err)
 	}
 }
 
-func NewGameRepo(dsn string) *GameRepo {
+func NewGameRepository(dsn string) *GameRepositary {
 	db := sqlx.MustOpen("pgx", dsn)
 
 	return NewGameRepoFromDb(db)
 }
 
-func NewGameRepoFromDb(db *sqlx.DB) *GameRepo {
-	service := GameRepo{db}
+func NewGameRepoFromDb(db *sqlx.DB) *GameRepositary {
+	service := GameRepositary{db}
 	service.CreatePlayerTableIfNeeded()
 
 	return &service

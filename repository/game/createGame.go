@@ -1,6 +1,6 @@
 package gamerepo
 
-func (s *GameRepo) CreateGame(name string) int {
+func (s *GameRepositary) CreateGame(name string) int {
 	var id int
 
 	err := s.db.QueryRow(
