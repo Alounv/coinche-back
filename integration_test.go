@@ -34,7 +34,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.db = testutils.CreateDb(s.connectionInfo, s.dbName)
 
 	gamerepo := gamerepo.NewGameRepoFromDb(s.db)
-	gameService := &usecases.GameService{GameRepo: gamerepo}
+	gameService := &usecases.GameService{Repo: gamerepo}
 
 	s.router = api.SetupRouter(gameService)
 }

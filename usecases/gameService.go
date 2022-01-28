@@ -6,35 +6,35 @@ import (
 	"fmt"
 )
 
-type GameServiceType interface {
+type GameRepository interface {
 	ListGames() []domain.Game
 	GetGame(id int) domain.Game
 	CreateGame(name string) int
-	JoinGame(id int, playerName string) error
+	UpdateGame(id int, playerNames []string) error
 }
 
 type GameService struct {
-	GameRepo *gamerepo.GameRepo
+	Repo GameRepository
 }
 
 func (s *GameService) ListGames() []domain.Game {
-	return s.GameRepo.ListGames()
+	return s.Repo.ListGames()
 }
 
 func (s *GameService) GetGame(id int) domain.Game {
-	return s.GameRepo.GetGame(id)
+	return s.Repo.GetGame(id)
 }
 
 func (s *GameService) CreateGame(name string) int {
-	return s.GameRepo.CreateGame(name)
+	return s.Repo.CreateGame(name)
 }
 
 func (s *GameService) JoinGame(id int, playerName string) error {
-	playersNames := s.GameRepo.GetGame(id).Players
+	playersNames := s.Repo.GetGame(id).Players
 	fmt.Print(playersNames)
 	playersNames = append(playersNames, playerName)
 	fmt.Print(playersNames)
-	return s.GameRepo.UpdateGame(id, playersNames)
+	return s.Repo.UpdateGame(id, playersNames)
 }
 
 func NewGameService(dsn string) *GameService {
