@@ -1,6 +1,7 @@
 package gameApi
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -34,6 +35,7 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 		}
 	default:
 		{
+			fmt.Print(err)
 			context.Status(http.StatusInternalServerError)
 		}
 	}

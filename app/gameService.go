@@ -3,6 +3,7 @@ package app
 import (
 	"coinche/domain"
 	gameRepo "coinche/repository/game"
+	"fmt"
 
 	_ "github.com/jackc/pgx/stdlib"
 )
@@ -25,6 +26,9 @@ func (s *GameService) CreateGame(name string) int {
 
 func (s *GameService) JoinGame(id int, playerName string) error {
 	playersNames := s.GameRepo.GetGame(id).Players
+	fmt.Print(playersNames)
+	playersNames = append(playersNames, playerName)
+	fmt.Print(playersNames)
 	return s.GameRepo.UpdateGame(id, playersNames)
 }
 

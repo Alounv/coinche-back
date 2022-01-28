@@ -47,12 +47,12 @@ func TestGameRepoWithInitialData(test *testing.T) {
 
 	db := testUtils.CreateDb(connectionInfo, dbName)
 
-	MockGameService := NewGameServiceWithData(db)
+	GameService := NewGameServiceWithData(db)
 
 	test.Run("get a game", func(test *testing.T) {
 		want := domain.Game{Name: "GAME ONE", Id: 1, Players: []string{}}
 
-		got := MockGameService.GetGame(1)
+		got := GameService.GetGame(1)
 
 		assert.Equal(want, got)
 	})
@@ -63,7 +63,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			{Name: "GAME TWO", Id: 2, Players: []string{"P1", "P2"}},
 		}
 
-		got := MockGameService.ListGames()
+		got := GameService.ListGames()
 
 		assert.Equal(want, got)
 	})
@@ -71,8 +71,8 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	test.Run("update a game", func(test *testing.T) {
 		want := []string{"P1", "P2"}
 
-		MockGameService.UpdateGame(2, want)
-		got := MockGameService.GetGame(2).Players
+		GameService.UpdateGame(2, want)
+		got := GameService.GetGame(2).Players
 
 		assert.Equal(want, got)
 	})

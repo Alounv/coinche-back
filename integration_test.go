@@ -15,32 +15,46 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func SetupTest() (*gin.Engine, *sqlx.DB, string, string) {
-	env.LoadEnv("")
-	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
-	dbName := "testdb"
-
-	db := testUtils.CreateDb(connectionInfo, dbName)
-
-	gameRepo := gameRepo.NewGameRepoFromDb(db)
-	gameService := &app.GameService{GameRepo: gameRepo}
-
-	router := api.SetupRouter(gameService)
-	return router, db, connectionInfo, dbName
+type IntegrationTestSuite struct {
+	suite.Suite
+	db             *sqlx.DB
+	connectionInfo string
+	dbName         string
+	router         *gin.Engine
 }
 
-func TestCreateAndGetGames(test *testing.T) {
+func (s *IntegrationTestSuite) SetupSuite() {
+	env.LoadEnv("")
+	s.connectionInfo = os.Getenv("SQLX_POSTGRES_INFO")
+	s.dbName = "testdb"
+
+	s.db = testUtils.CreateDb(s.connectionInfo, s.dbName)
+
+	gameRepo := gameRepo.NewGameRepoFromDb(s.db)
+	gameService := &app.GameService{GameRepo: gameRepo}
+
+	s.router = api.SetupRouter(gameService)
+}
+
+func (s *IntegrationTestSuite) TestCreateGame() {
+	test := s.T()
 	assert := assert.New(test)
-	router, db, connectionInfo, dbName := SetupTest()
+
+	s.router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
 
 	response := httptest.NewRecorder()
-	router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
+	assert.Equal(http.StatusOK, response.Code)
+}
 
-	router.ServeHTTP(response, testUtils.NewGetGameRequest(1))
+func (s *IntegrationTestSuite) TestGetGame() {
+	test := s.T()
+	assert := assert.New(test)
 
-	router.ServeHTTP(response, testUtils.NewJoinGameRequest(1, "player1"))
+	response := httptest.NewRecorder()
+	s.router.ServeHTTP(response, testUtils.NewGetGameRequest(1))
 
 	got := testUtils.DecodeToGame(response.Body, test)
 
@@ -48,8 +62,42 @@ func TestCreateAndGetGames(test *testing.T) {
 	assert.Equal("NEW GAME", got.Name)
 	assert.Equal(1, got.Id)
 	assert.IsType(time.Time{}, got.CreatedAt)
+}
 
-	test.Cleanup(func() {
-		testUtils.DropDb(connectionInfo, dbName, db)
-	})
+func (s *IntegrationTestSuite) TestListGames() {
+	test := s.T()
+	assert := assert.New(test)
+	request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)
+	response := httptest.NewRecorder()
+
+	s.router.ServeHTTP(response, request)
+
+	got := testUtils.DecodeToGames(response.Body, test)
+
+	assert.Equal(http.StatusOK, response.Code)
+	assert.Equal(1, len(got))
+	assert.Equal("NEW GAME", got[0].Name)
+	assert.Equal(1, got[0].Id)
+	assert.IsType(time.Time{}, got[0].CreatedAt)
+}
+
+func (s *IntegrationTestSuite) TestJoinGame() {
+	test := s.T()
+	assert := assert.New(test)
+	response := httptest.NewRecorder()
+
+	s.router.ServeHTTP(response, testUtils.NewJoinGameRequest(1, "player1"))
+	assert.Equal(http.StatusAccepted, response.Code)
+
+	s.router.ServeHTTP(response, testUtils.NewGetGameRequest(1))
+	got := testUtils.DecodeToGame(response.Body, test)
+	assert.Equal([]string{"player1"}, got.Players)
+}
+
+func (s *IntegrationTestSuite) TearDownSuite() {
+	testUtils.DropDb(s.connectionInfo, s.dbName, s.db)
+}
+
+func TestIntegrationSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationTestSuite))
 }
