@@ -1,10 +1,8 @@
-package gameRepo
+package gamerepo
 
 import (
 	"coinche/domain"
 	"strings"
-
-	_ "github.com/jackc/pgx/stdlib"
 )
 
 func (s *GameRepo) CreateGames(games []domain.Game) {
@@ -21,5 +19,8 @@ func (s *GameRepo) CreateGames(games []domain.Game) {
 			strings.Join(game.Players, ","),
 		)
 	}
-	tx.Commit()
+	err := tx.Commit()
+	if err != nil {
+		panic(err)
+	}
 }

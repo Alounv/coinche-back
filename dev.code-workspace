@@ -33,10 +33,7 @@
       "domain": true,
       "utilities": true
     },
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    },
-    "go.useLanguageGameAPIs": true,
+    "go.useLanguageServer": true,
     "gopls": {
       "formatting.gofumpt": true
     },

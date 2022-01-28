@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"testing"
 
+	_ "github.com/jackc/pgx/stdlib" // pgx driver
 	"github.com/jmoiron/sqlx"
 )
 

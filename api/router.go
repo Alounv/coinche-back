@@ -7,12 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupRouter is used in main.go, API tests and Integration tests to setup the router
 func SetupRouter(gameService domain.GameServiceType) *gin.Engine {
-	gameAPIs := &gameapi.GameAPIs{Store: gameService}
+	gameAPIs := &gameapi.GameAPIs{GameService: gameService}
 
 	router := gin.Default()
-	router.SetTrustedProxies([]string{"192.168.1.2"})
+	err := router.SetTrustedProxies([]string{"192.168.1.2"})
+	if err != nil {
+		panic(err)
+	}
 
 	router.GET("/games/:id", gameAPIs.GetGame)
 	router.POST("/games/create", gameAPIs.CreateGame)

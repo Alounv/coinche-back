@@ -2,14 +2,12 @@ package app
 
 import (
 	"coinche/domain"
-	gameRepo "coinche/repository/game"
+	gamerepo "coinche/repository/game"
 	"fmt"
-
-	_ "github.com/jackc/pgx/stdlib"
 )
 
 type GameService struct {
-	GameRepo *gameRepo.GameRepo
+	GameRepo *gamerepo.GameRepo
 }
 
 func (s *GameService) ListGames() []domain.Game {
@@ -33,6 +31,6 @@ func (s *GameService) JoinGame(id int, playerName string) error {
 }
 
 func NewGameService(dsn string) *GameService {
-	dbService := gameRepo.NewGameRepo(dsn)
+	dbService := gamerepo.NewGameRepo(dsn)
 	return &GameService{dbService}
 }

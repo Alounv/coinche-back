@@ -1,9 +1,7 @@
-package gameRepo
+package gamerepo
 
 import (
 	"strings"
-
-	_ "github.com/jackc/pgx/stdlib"
 )
 
 func (s *GameRepo) UpdateGame(id int, players []string) error {

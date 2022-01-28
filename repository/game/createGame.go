@@ -1,8 +1,4 @@
-package gameRepo
-
-import (
-	_ "github.com/jackc/pgx/stdlib"
-)
+package gamerepo
 
 func (s *GameRepo) CreateGame(name string) int {
 	var id int

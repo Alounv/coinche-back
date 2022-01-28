@@ -1,0 +1,9 @@
+engines:
+  # ... CONFIG CONTENT ...
+  golint:
+    enabled: true
+    # ... CONFIG CONTENT ...
+    checks:
+      GoLint/Comments/DocComments:
+        enabled: false
+# ... CONFIG CONTENT ...

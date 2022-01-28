@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// JoinGame is imported in api package
 func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 	stringID := context.Param("id")
 	id, err := strconv.Atoi(stringID)
@@ -18,7 +17,7 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 
 	playerName := context.Query("playerName")
 
-	err = gameAPIs.Store.JoinGame(id, playerName)
+	err = gameAPIs.GameService.JoinGame(id, playerName)
 
 	if err == nil {
 		context.Status(http.StatusAccepted)

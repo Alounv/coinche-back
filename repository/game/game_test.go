@@ -1,4 +1,4 @@
-package gameRepo
+package gamerepo
 
 import (
 	"coinche/domain"
@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,13 +23,13 @@ func TestGameRepo(test *testing.T) {
 	gameService := NewGameRepoFromDb(db)
 
 	test.Run("create a game", func(test *testing.T) {
-		newName := "NEW GAME"
+		newName := "NEW GAME ONE"
 
-		newId := gameService.CreateGame(newName)
-		got := gameService.GetGame(newId)
+		newID := gameService.CreateGame(newName)
+		got := gameService.GetGame(newID)
 
 		assert.Equal(newName, got.Name)
-		assert.Equal(newId, got.Id)
+		assert.Equal(newID, got.Id)
 		assert.IsType(time.Time{}, got.CreatedAt)
 	})
 
@@ -71,7 +70,10 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	test.Run("update a game", func(test *testing.T) {
 		want := []string{"P1", "P2", "P3", "P4"}
 
-		GameService.UpdateGame(2, want)
+		err := GameService.UpdateGame(2, want)
+		if err != nil {
+			panic(err)
+		}
 		got := GameService.GetGame(2).Players
 
 		assert.Equal(want, got)

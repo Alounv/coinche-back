@@ -1,6 +1,9 @@
-package gameRepo
+package gamerepo
 
 import (
+	"fmt"
+
+	_ "github.com/jackc/pgx/stdlib" // pgx driver
 	"github.com/jmoiron/sqlx"
 )
 
@@ -17,7 +20,10 @@ type GameRepo struct {
 }
 
 func (s *GameRepo) CreatePlayerTableIfNeeded() {
-	s.db.Exec(gameSchema)
+	_, err := s.db.Exec(gameSchema)
+	if err != nil {
+		fmt.Print(err)
+	}
 }
 
 func NewGameRepo(dsn string) *GameRepo {

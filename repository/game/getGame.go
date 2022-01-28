@@ -1,10 +1,9 @@
-package gameRepo
+package gamerepo
 
 import (
 	"coinche/domain"
 	"fmt"
 
-	_ "github.com/jackc/pgx/stdlib"
 	"github.com/lib/pq"
 )
 

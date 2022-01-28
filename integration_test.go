@@ -3,7 +3,7 @@ package main
 import (
 	"coinche/api"
 	"coinche/app"
-	gameRepo "coinche/repository/game"
+	gamerepo "coinche/repository/game"
 	"coinche/utilities/env"
 	testutils "coinche/utilities/test"
 	"net/http"
@@ -33,8 +33,8 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	s.db = testutils.CreateDb(s.connectionInfo, s.dbName)
 
-	gameRepo := gameRepo.NewGameRepoFromDb(s.db)
-	gameService := &app.GameService{GameRepo: gameRepo}
+	gamerepo := gamerepo.NewGameRepoFromDb(s.db)
+	gameService := &app.GameService{GameRepo: gamerepo}
 
 	s.router = api.SetupRouter(gameService)
 }
@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	assert.Equal(http.StatusOK, response.Code)
 }
 
-func (s *IntegrationTestSuite) TestGetGame() {
+func (s *IntegrationTestSuite) TestIntegrationGetGame() {
 	test := s.T()
 	assert := assert.New(test)
 
@@ -64,7 +64,7 @@ func (s *IntegrationTestSuite) TestGetGame() {
 	assert.IsType(time.Time{}, got.CreatedAt)
 }
 
-func (s *IntegrationTestSuite) TestListGames() {
+func (s *IntegrationTestSuite) TestIntegrationListGames() {
 	test := s.T()
 	assert := assert.New(test)
 	request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)
@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) TestListGames() {
 	assert.IsType(time.Time{}, got[0].CreatedAt)
 }
 
-func (s *IntegrationTestSuite) TestJoinGame() {
+func (s *IntegrationTestSuite) TestIntegrationJoinGame() {
 	test := s.T()
 	assert := assert.New(test)
 	response := httptest.NewRecorder()

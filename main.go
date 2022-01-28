@@ -1,13 +1,11 @@
 package main
 
 import (
-	"coinche/app"
 	"coinche/api"
+	"coinche/app"
 	"coinche/utilities/env"
 	"log"
 	"os"
-
-	_ "github.com/jackc/pgx/stdlib"
 )
 
 func main() {
@@ -22,5 +20,8 @@ func main() {
 	router := api.SetupRouter(gameService)
 
 	log.Print("Listening on ", addr)
-	router.Run(addr)
+	err := router.Run(addr)
+	if err != nil {
+		panic(err)
+	}
 }
