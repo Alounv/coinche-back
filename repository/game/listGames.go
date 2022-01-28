@@ -1,21 +1,21 @@
-package adapters
+package gameRepo
 
 import (
-	"coinche/app"
+	"coinche/domain"
 	"fmt"
 
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/lib/pq"
 )
 
-func (s *dbGameService) ListGames() []app.Game {
-	var games []app.Game
+func (s *GameRepo) ListGames() []domain.Game {
+	var games []domain.Game
 	rows, err := s.db.Query("SELECT * FROM game ")
 	if err != nil {
 		fmt.Println(err)
 	}
 	for rows.Next() {
-		var game app.Game
+		var game domain.Game
 		err = rows.Scan(
 			&game.Id,
 			&game.Name,

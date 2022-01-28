@@ -1,10 +1,10 @@
-package adapters
+package gameRepo
 
 import (
 	_ "github.com/jackc/pgx/stdlib"
 )
 
-func (s *dbGameService) CreateGame(name string) int {
+func (s *GameRepo) CreateGame(name string) int {
 	var id int
 
 	err := s.db.QueryRow(`

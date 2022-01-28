@@ -1,4 +1,4 @@
-package adapters
+package gameRepo
 
 import (
 	"github.com/jmoiron/sqlx"
@@ -12,22 +12,22 @@ CREATE TABLE game (
 	players text[]
 )`
 
-type dbGameService struct {
+type GameRepo struct {
 	db *sqlx.DB
 }
 
-func (s *dbGameService) CreatePlayerTableIfNeeded() {
+func (s *GameRepo) CreatePlayerTableIfNeeded() {
 	s.db.Exec(gameSchema)
 }
 
-func newDBGameService(dsn string) *dbGameService {
+func NewGameRepo(dsn string) *GameRepo {
 	db := sqlx.MustOpen("pgx", dsn)
 
-	return NewDbGameServiceFromDb(db)
+	return NewGameRepoFromDb(db)
 }
 
-func NewDbGameServiceFromDb(db *sqlx.DB) *dbGameService {
-	service := dbGameService{db}
+func NewGameRepoFromDb(db *sqlx.DB) *GameRepo {
+	service := GameRepo{db}
 	service.CreatePlayerTableIfNeeded()
 
 	return &service

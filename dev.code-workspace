@@ -1,12 +1,12 @@
 {
   "folders": [
     {
-      "name": "Adapters",
-      "path": "adapters"
+      "name": "Repository",
+      "path": "repository"
     },
     {
-      "name": "Ports",
-      "path": "ports"
+      "name": "Api",
+      "path": "api"
     },
     {
       "name": "App",
@@ -27,14 +27,18 @@
   ],
   "settings": {
     "files.exclude": {
-      "adapters": true,
-      "ports": true,
+      "repository": true,
+      "api": true,
       "app": true,
       "domain": true,
       "utilities": true
     },
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
+    },
+    "go.useLanguageGameAPIs": true,
+    "gopls": {
+      "formatting.gofumpt": true
     }
   }
 }

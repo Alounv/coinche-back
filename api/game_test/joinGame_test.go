@@ -1,7 +1,8 @@
-package ports
+package gameApi
 
 import (
-	"coinche/app"
+	"coinche/api"
+	"coinche/domain"
 	testUtils "coinche/utilities/test"
 	"fmt"
 	"net/http"
@@ -15,13 +16,13 @@ import (
 func TestJoinGame(test *testing.T) {
 	assert := assert.New(test)
 	mockGameService := MockGameService{
-		map[int]app.Game{
+		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
 			2: {Name: "GAME TWO", Full: true},
 		},
 		nil,
 	}
-	router := SetupRouter(&mockGameService)
+	router := api.SetupRouter(&mockGameService)
 
 	test.Run("join game 1", func(test *testing.T) {
 		request := NewJoinGameRequest(1, "Son Ly")

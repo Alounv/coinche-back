@@ -1,7 +1,8 @@
-package ports
+package gameApi
 
 import (
-	"coinche/app"
+	"coinche/api"
+	"coinche/domain"
 	testUtils "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
@@ -12,20 +13,20 @@ import (
 
 func TestListGames(test *testing.T) {
 	assert := assert.New(test)
-	mockStore := MockGameService{
-		map[int]app.Game{
+	gameService := MockGameService{
+		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
 			2: {Name: "GAME TWO"},
 		},
 		nil,
 	}
-	router := SetupRouter(&mockStore)
+	router := api.SetupRouter(&gameService)
 
 	test.Run("list games", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)
 		response := httptest.NewRecorder()
 
-		want := []app.Game{
+		want := []domain.Game{
 			{Name: "GAME ONE"},
 			{Name: "GAME TWO"},
 		}

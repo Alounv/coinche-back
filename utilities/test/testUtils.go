@@ -2,7 +2,7 @@ package testUtils
 
 import (
 	"bytes"
-	"coinche/app"
+	"coinche/domain"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -51,20 +51,20 @@ func DropDb(connectionInfo string, dbName string, db *sqlx.DB) {
 	userDb.Close()
 }
 
-func DecodeToGames(buf *bytes.Buffer, test *testing.T) []app.Game {
-	var got []app.Game
+func DecodeToGames(buf *bytes.Buffer, test *testing.T) []domain.Game {
+	var got []domain.Game
 	err := json.NewDecoder(buf).Decode(&got)
 	if err != nil {
-		test.Fatalf("Unable to parse response from server %q into %q, '%v'", buf, "slice of Game", err)
+		test.Fatalf("Unable to parse response from gameAPIs %q into %q, '%v'", buf, "slice of Game", err)
 	}
 	return got
 }
 
-func DecodeToGame(buf *bytes.Buffer, test *testing.T) app.Game {
-	var got app.Game
+func DecodeToGame(buf *bytes.Buffer, test *testing.T) domain.Game {
+	var got domain.Game
 	err := json.NewDecoder(buf).Decode(&got)
 	if err != nil {
-		test.Fatalf("Unable to parse response from server %q into %q, '%v'", buf, "Game", err)
+		test.Fatalf("Unable to parse response from gameAPIs %q into %q, '%v'", buf, "Game", err)
 	}
 	return got
 }

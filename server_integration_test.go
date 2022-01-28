@@ -1,8 +1,9 @@
 package main
 
 import (
-	"coinche/adapters"
-	"coinche/ports"
+	"coinche/api"
+	"coinche/app"
+	gameRepo "coinche/repository/game"
 	"coinche/utilities/env"
 	testUtils "coinche/utilities/test"
 	"net/http"
@@ -23,10 +24,10 @@ func TestCreatingAndGettingGames(test *testing.T) {
 
 	db := testUtils.CreateDb(connectionInfo, dbName)
 
-	dbService := adapters.NewDbGameServiceFromDb(db)
-	gameService := &adapters.GameService{dbService}
+	gameRepo := gameRepo.NewGameRepoFromDb(db)
+	gameService := &app.GameService{GameRepo: gameRepo}
 
-	router := ports.SetupRouter(gameService)
+	router := api.SetupRouter(gameService)
 
 	router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
 

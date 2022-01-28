@@ -1,16 +1,17 @@
-package ports
+package gameApi
 
 import (
-	"coinche/app"
+	"coinche/domain"
 	"errors"
+	"sort"
 )
 
 type MockGameService struct {
-	games    map[int]app.Game
+	games    map[int]domain.Game
 	setCalls []string
 }
 
-func (s *MockGameService) GetGame(id int) app.Game {
+func (s *MockGameService) GetGame(id int) domain.Game {
 	return s.games[id]
 }
 
@@ -19,11 +20,18 @@ func (s *MockGameService) CreateGame(name string) int {
 	return 1
 }
 
-func (s *MockGameService) ListGames() []app.Game {
-	var games []app.Game
+type ById []domain.Game
+
+func (a ById) Len() int           { return len(a) }
+func (a ById) Less(i, j int) bool { return a[i].Id < a[j].Id }
+func (a ById) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func (s *MockGameService) ListGames() []domain.Game {
+	var games []domain.Game
 	for _, val := range s.games {
 		games = append(games, val)
 	}
+	sort.Sort(ById(games))
 	return games
 }
 

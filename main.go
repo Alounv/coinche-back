@@ -1,8 +1,8 @@
 package main
 
 import (
-	"coinche/adapters"
-	"coinche/ports"
+	"coinche/app"
+	"coinche/api"
 	"coinche/utilities/env"
 	"log"
 	"os"
@@ -17,9 +17,9 @@ func main() {
 	addr := os.Getenv("PORT")
 
 	dsn := connectionInfo + " dbname=" + dbName
-	gameService := adapters.NewGameService(dsn)
+	gameService := app.NewGameService(dsn)
 
-	router := ports.SetupRouter(gameService)
+	router := api.SetupRouter(gameService)
 
 	log.Print("Listening on ", addr)
 	router.Run(addr)

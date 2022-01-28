@@ -1,4 +1,4 @@
-package ports
+package gameApi
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (server *Server) JoinGame(context *gin.Context) {
+func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 	stringId := context.Param("id")
 	id, err := strconv.Atoi(stringId)
 	if err != nil {
@@ -16,7 +16,7 @@ func (server *Server) JoinGame(context *gin.Context) {
 
 	playerName := context.Query("playerName")
 
-	err = server.Store.JoinGame(id, playerName)
+	err = gameAPIs.Store.JoinGame(id, playerName)
 
 	if err == nil {
 		context.Status(http.StatusAccepted)

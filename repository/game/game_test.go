@@ -1,21 +1,48 @@
-package adapters
+package gameRepo
 
 import (
-	"coinche/app"
+	"coinche/domain"
 	"coinche/utilities/env"
 	testUtils "coinche/utilities/test"
 	"os"
 	"testing"
+	"time"
 
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGameGetListUpdate(test *testing.T) {
+func TestGameRepo(test *testing.T) {
 	assert := assert.New(test)
 	dbName := "testdb"
-	env.LoadEnv("../.env")
+	env.LoadEnv("../../.env")
+	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
+
+	db := testUtils.CreateDb(connectionInfo, dbName)
+
+	gameService := NewGameRepoFromDb(db)
+
+	test.Run("create a game", func(test *testing.T) {
+		newName := "NEW GAME"
+
+		newId := gameService.CreateGame(newName)
+		got := gameService.GetGame(newId)
+
+		assert.Equal(newName, got.Name)
+		assert.Equal(newId, got.Id)
+		assert.IsType(time.Time{}, got.CreatedAt)
+	})
+
+	test.Cleanup(func() {
+		testUtils.DropDb(connectionInfo, dbName, db)
+	})
+}
+
+func TestGameRepoWithInitialData(test *testing.T) {
+	assert := assert.New(test)
+	dbName := "testdb"
+	env.LoadEnv("../../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
 	db := testUtils.CreateDb(connectionInfo, dbName)
@@ -23,7 +50,7 @@ func TestGameGetListUpdate(test *testing.T) {
 	MockGameService := NewGameServiceWithData(db)
 
 	test.Run("get a game", func(test *testing.T) {
-		want := app.Game{Name: "GAME ONE", Id: 1, Players: []string{}}
+		want := domain.Game{Name: "GAME ONE", Id: 1, Players: []string{}}
 
 		got := MockGameService.GetGame(1)
 
@@ -31,7 +58,7 @@ func TestGameGetListUpdate(test *testing.T) {
 	})
 
 	test.Run("list all games", func(test *testing.T) {
-		want := []app.Game{
+		want := []domain.Game{
 			{Name: "GAME ONE", Id: 1, Players: []string{}},
 			{Name: "GAME TWO", Id: 2, Players: []string{"P1", "P2"}},
 		}
@@ -55,10 +82,10 @@ func TestGameGetListUpdate(test *testing.T) {
 	})
 }
 
-func NewGameServiceWithData(db *sqlx.DB) *dbGameService {
-	dbGameService := NewDbGameServiceFromDb(db)
+func NewGameServiceWithData(db *sqlx.DB) *GameRepo {
+	dbGameService := NewGameRepoFromDb(db)
 
-	dbGameService.CreateGames([]app.Game{
+	dbGameService.CreateGames([]domain.Game{
 		{Name: "GAME ONE", Id: 1},
 		{Name: "GAME TWO", Id: 2, Players: []string{"P1", "P2"}},
 	})

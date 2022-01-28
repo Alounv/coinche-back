@@ -1,13 +1,13 @@
-package adapters
+package gameRepo
 
 import (
-	"coinche/app"
+	"coinche/domain"
 	"strings"
 
 	_ "github.com/jackc/pgx/stdlib"
 )
 
-func (s *dbGameService) CreateGames(games []app.Game) {
+func (s *GameRepo) CreateGames(games []domain.Game) {
 	tx := s.db.MustBegin()
 	for _, game := range games {
 		tx.MustExec(

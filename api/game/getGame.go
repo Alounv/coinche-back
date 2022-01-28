@@ -1,4 +1,4 @@
-package ports
+package gameApi
 
 import (
 	"net/http"
@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (server *Server) GetGame(context *gin.Context) {
+func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	stringId := context.Param("id")
 	id, err := strconv.Atoi(stringId)
 	if err != nil {
 		panic(err)
 	}
-	game := server.Store.GetGame(id)
+	game := gameAPIs.Store.GetGame(id)
 
 	if game.Name != "" {
 		context.JSON(http.StatusOK, game)
