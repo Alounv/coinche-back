@@ -23,7 +23,7 @@ func (s *MockGameService) CreateGame(name string) int {
 type ByID []domain.Game
 
 func (a ByID) Len() int           { return len(a) }
-func (a ByID) Less(i, j int) bool { return a[i].Id < a[j].Id }
+func (a ByID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 func (a ByID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func (s *MockGameService) ListGames() []domain.Game {

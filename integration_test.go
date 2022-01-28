@@ -60,7 +60,7 @@ func (s *IntegrationTestSuite) TestIntegrationGetGame() {
 
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal("NEW GAME", got.Name)
-	assert.Equal(1, got.Id)
+	assert.Equal(1, got.ID)
 	assert.IsType(time.Time{}, got.CreatedAt)
 }
 
@@ -77,7 +77,7 @@ func (s *IntegrationTestSuite) TestIntegrationListGames() {
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal(1, len(got))
 	assert.Equal("NEW GAME", got[0].Name)
-	assert.Equal(1, got[0].Id)
+	assert.Equal(1, got[0].ID)
 	assert.IsType(time.Time{}, got[0].CreatedAt)
 }
 

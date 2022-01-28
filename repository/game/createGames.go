@@ -13,7 +13,7 @@ func (s *GameRepo) CreateGames(games []domain.Game) {
 			INSERT INTO game (id, name, createdAt, players)
 			VALUES ($1, $2, $3, string_to_array($4, ','))
 			`,
-			game.Id,
+			game.ID,
 			game.Name,
 			game.CreatedAt,
 			strings.Join(game.Players, ","),

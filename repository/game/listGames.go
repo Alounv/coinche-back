@@ -16,7 +16,7 @@ func (s *GameRepo) ListGames() []domain.Game {
 	for rows.Next() {
 		var game domain.Game
 		err = rows.Scan(
-			&game.Id,
+			&game.ID,
 			&game.Name,
 			&game.CreatedAt,
 			(*pq.StringArray)(&game.Players),

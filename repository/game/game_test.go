@@ -29,7 +29,7 @@ func TestGameRepo(test *testing.T) {
 		got := gameService.GetGame(newID)
 
 		assert.Equal(newName, got.Name)
-		assert.Equal(newID, got.Id)
+		assert.Equal(newID, got.ID)
 		assert.IsType(time.Time{}, got.CreatedAt)
 	})
 
@@ -49,7 +49,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	GameService := NewGameServiceWithData(db)
 
 	test.Run("get a game", func(test *testing.T) {
-		want := domain.Game{Name: "GAME ONE", Id: 1, Players: []string{}}
+		want := domain.Game{Name: "GAME ONE", ID: 1, Players: []string{}}
 
 		got := GameService.GetGame(1)
 
@@ -58,8 +58,8 @@ func TestGameRepoWithInitialData(test *testing.T) {
 
 	test.Run("list all games", func(test *testing.T) {
 		want := []domain.Game{
-			{Name: "GAME ONE", Id: 1, Players: []string{}},
-			{Name: "GAME TWO", Id: 2, Players: []string{"P1", "P2"}},
+			{Name: "GAME ONE", ID: 1, Players: []string{}},
+			{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 		}
 
 		got := GameService.ListGames()
@@ -88,8 +88,8 @@ func NewGameServiceWithData(db *sqlx.DB) *GameRepo {
 	dbGameService := NewGameRepoFromDb(db)
 
 	dbGameService.CreateGames([]domain.Game{
-		{Name: "GAME ONE", Id: 1},
-		{Name: "GAME TWO", Id: 2, Players: []string{"P1", "P2"}},
+		{Name: "GAME ONE", ID: 1},
+		{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 	})
 
 	return dbGameService

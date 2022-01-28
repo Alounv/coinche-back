@@ -4,13 +4,6 @@ import (
 	"time"
 )
 
-type ErrorMessage int
-
-const (
-	ErrGameFull ErrorMessage = iota
-	ErrGameNotFound
-)
-
 type GameServiceType interface {
 	ListGames() []Game
 	GetGame(id int) Game
@@ -19,7 +12,7 @@ type GameServiceType interface {
 }
 
 type Game struct {
-	Id        int
+	ID        int
 	Name      string
 	Full      bool
 	CreatedAt time.Time
