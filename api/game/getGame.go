@@ -13,7 +13,7 @@ func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	game := gameAPIs.GameService.GetGame(id)
+	game := gameAPIs.Usecases.GetGame(id)
 
 	if game.Name != "" {
 		context.JSON(http.StatusOK, game)

@@ -35,8 +35,8 @@ func NewGameRepository(dsn string) *GameRepositary {
 }
 
 func NewGameRepositaryFromDb(db *sqlx.DB) *GameRepositary {
-	service := GameRepositary{db: db}
-	service.CreatePlayerTableIfNeeded()
+	gameRepositary := GameRepositary{db: db}
+	gameRepositary.CreatePlayerTableIfNeeded()
 
-	return &service
+	return &gameRepositary
 }

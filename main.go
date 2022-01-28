@@ -16,10 +16,10 @@ func main() {
 	addr := os.Getenv("PORT")
 
 	dsn := connectionInfo + " dbname=" + dbName
-	gameRepo := gamerepo.NewGameRepository(dsn)
-	gameService := usecases.NewGameService(gameRepo)
+	gameRepositary := gamerepo.NewGameRepository(dsn)
+	gameUsecases := usecases.NewGameUsecases(gameRepositary)
 
-	router := api.SetupRouter(gameService)
+	router := api.SetupRouter(gameUsecases)
 
 	log.Print("Listening on ", addr)
 	err := router.Run(addr)

@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(gameService usecases.GameUsecaseInterface) *gin.Engine {
-	gameAPIs := &gameapi.GameAPIs{GameService: gameService}
+func SetupRouter(gameUsecases usecases.GameUsecasesInterface) *gin.Engine {
+	gameAPIs := &gameapi.GameAPIs{Usecases: gameUsecases}
 
 	router := gin.Default()
 	err := router.SetTrustedProxies([]string{"192.168.1.2"})

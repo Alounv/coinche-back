@@ -20,14 +20,14 @@ func TestGameRepo(test *testing.T) {
 
 	db := testutils.CreateDb(connectionInfo, dbName)
 
-	gameService := NewGameRepositaryFromDb(db)
+	gameRepositary := NewGameRepositaryFromDb(db)
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
 		newPlayers := []string{"P1", "P2"}
 
-		newID := gameService.CreateGame(domain.Game{Name: newName, Players: newPlayers})
-		got := gameService.GetGame(newID)
+		newID := gameRepositary.CreateGame(domain.Game{Name: newName, Players: newPlayers})
+		got := gameRepositary.GetGame(newID)
 
 		assert.Equal(newName, got.Name)
 		assert.Equal(newPlayers, got.Players)
@@ -48,12 +48,12 @@ func TestGameRepoWithInitialData(test *testing.T) {
 
 	db := testutils.CreateDb(connectionInfo, dbName)
 
-	GameService := NewGameServiceWithData(db)
+	gameRepositary := NewGameRepositaryWithData(db)
 
 	test.Run("get a game", func(test *testing.T) {
 		want := domain.Game{Name: "GAME ONE", ID: 1, Players: []string{}}
 
-		got := GameService.GetGame(1)
+		got := gameRepositary.GetGame(1)
 
 		assert.Equal(want, got)
 	})
@@ -64,7 +64,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 		}
 
-		got := GameService.ListGames()
+		got := gameRepositary.ListGames()
 
 		assert.Equal(want, got)
 	})
@@ -72,11 +72,11 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	test.Run("update a game", func(test *testing.T) {
 		want := []string{"P1", "P2", "P3", "P4"}
 
-		err := GameService.UpdateGame(2, want)
+		err := gameRepositary.UpdateGame(2, want)
 		if err != nil {
 			panic(err)
 		}
-		got := GameService.GetGame(2).Players
+		got := gameRepositary.GetGame(2).Players
 
 		assert.Equal(want, got)
 	})
@@ -86,13 +86,13 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 }
 
-func NewGameServiceWithData(db *sqlx.DB) *GameRepositary {
-	dbGameService := NewGameRepositaryFromDb(db)
+func NewGameRepositaryWithData(db *sqlx.DB) *GameRepositary {
+	gameRepositary := NewGameRepositaryFromDb(db)
 
-	dbGameService.CreateGames([]domain.Game{
+	gameRepositary.CreateGames([]domain.Game{
 		{Name: "GAME ONE", ID: 1},
 		{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 	})
 
-	return dbGameService
+	return gameRepositary
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type GameUsecaseInterface interface {
+type GameUsecasesInterface interface {
 	ListGames() []domain.Game
 	GetGame(id int) domain.Game
 	CreateGame(name string, creatorName string) int
@@ -19,25 +19,25 @@ type GameRepositoryInterface interface {
 	UpdateGame(id int, playerNames []string) error
 }
 
-type GameService struct {
-	GameUsecaseInterface
+type GameUsecases struct {
+	GameUsecasesInterface
 	Repo GameRepositoryInterface
 }
 
-func (s *GameService) ListGames() []domain.Game {
+func (s *GameUsecases) ListGames() []domain.Game {
 	return s.Repo.ListGames()
 }
 
-func (s *GameService) GetGame(id int) domain.Game {
+func (s *GameUsecases) GetGame(id int) domain.Game {
 	return s.Repo.GetGame(id)
 }
 
-func (s *GameService) CreateGame(name string, creatorName string) int {
+func (s *GameUsecases) CreateGame(name string, creatorName string) int {
 	game := domain.NewGame(name, creatorName)
 	return s.Repo.CreateGame(game)
 }
 
-func (s *GameService) JoinGame(id int, playerName string) error {
+func (s *GameUsecases) JoinGame(id int, playerName string) error {
 	playersNames := s.Repo.GetGame(id).Players
 	fmt.Print(playersNames)
 	playersNames = append(playersNames, playerName)
@@ -45,6 +45,6 @@ func (s *GameService) JoinGame(id int, playerName string) error {
 	return s.Repo.UpdateGame(id, playersNames)
 }
 
-func NewGameService(repository GameRepositoryInterface) *GameService {
-	return &GameService{Repo: repository}
+func NewGameUsecases(repository GameRepositoryInterface) *GameUsecases {
+	return &GameUsecases{Repo: repository}
 }

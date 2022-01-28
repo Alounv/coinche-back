@@ -17,7 +17,7 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 
 	playerName := context.Query("playerName")
 
-	err = gameAPIs.GameService.JoinGame(id, playerName)
+	err = gameAPIs.Usecases.JoinGame(id, playerName)
 
 	if err == nil {
 		context.Status(http.StatusAccepted)

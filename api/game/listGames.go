@@ -7,7 +7,7 @@ import (
 )
 
 func (gameAPIs *GameAPIs) ListGames(context *gin.Context) {
-	games := gameAPIs.GameService.ListGames()
+	games := gameAPIs.Usecases.ListGames()
 
 	context.JSON(http.StatusOK, games)
 }

@@ -13,14 +13,14 @@ import (
 
 func TestJoinGame(test *testing.T) {
 	assert := assert.New(test)
-	mockGameService := MockGameService{
+	mockUsecases := MockGameUsecases{
 		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
 			2: {Name: "GAME TWO", Players: []string{"P1", "P2", "P3", "P4"}},
 		},
 		nil,
 	}
-	router := api.SetupRouter(&mockGameService)
+	router := api.SetupRouter(&mockUsecases)
 
 	test.Run("join game 1", func(test *testing.T) {
 		request := testutils.NewJoinGameRequest(1, "Son Ly")

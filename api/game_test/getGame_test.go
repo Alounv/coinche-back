@@ -13,14 +13,14 @@ import (
 
 func TestGetGame(test *testing.T) {
 	assert := assert.New(test)
-	mockStore := MockGameService{
+	mockUsecases := MockGameUsecases{
 		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
 			2: {Name: "GAME TWO", Players: []string{"P1", "P2", "P3", "P4"}},
 		},
 		nil,
 	}
-	router := api.SetupRouter(&mockStore)
+	router := api.SetupRouter(&mockUsecases)
 
 	test.Run("get a game 1", func(test *testing.T) {
 		want := domain.Game(domain.Game{Name: "GAME ONE"})
