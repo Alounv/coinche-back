@@ -1,6 +1,7 @@
 package gamerepo
 
 import (
+	"coinche/usecases"
 	"fmt"
 
 	_ "github.com/jackc/pgx/stdlib" // pgx driver
@@ -16,6 +17,7 @@ CREATE TABLE game (
 )`
 
 type GameRepositary struct {
+	usecases.GameRepositoryInterface
 	db *sqlx.DB
 }
 
@@ -29,11 +31,11 @@ func (s *GameRepositary) CreatePlayerTableIfNeeded() {
 func NewGameRepository(dsn string) *GameRepositary {
 	db := sqlx.MustOpen("pgx", dsn)
 
-	return NewGameRepoFromDb(db)
+	return NewGameRepositaryFromDb(db)
 }
 
-func NewGameRepoFromDb(db *sqlx.DB) *GameRepositary {
-	service := GameRepositary{db}
+func NewGameRepositaryFromDb(db *sqlx.DB) *GameRepositary {
+	service := GameRepositary{db: db}
 	service.CreatePlayerTableIfNeeded()
 
 	return &service

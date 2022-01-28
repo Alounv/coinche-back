@@ -20,7 +20,7 @@ func TestGameRepo(test *testing.T) {
 
 	db := testutils.CreateDb(connectionInfo, dbName)
 
-	gameService := NewGameRepoFromDb(db)
+	gameService := NewGameRepositaryFromDb(db)
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
@@ -85,7 +85,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 }
 
 func NewGameServiceWithData(db *sqlx.DB) *GameRepositary {
-	dbGameService := NewGameRepoFromDb(db)
+	dbGameService := NewGameRepositaryFromDb(db)
 
 	dbGameService.CreateGames([]domain.Game{
 		{Name: "GAME ONE", ID: 1},
