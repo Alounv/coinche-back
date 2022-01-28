@@ -1,4 +1,4 @@
-package gameapi
+package gameapitest
 
 import (
 	"coinche/api"
