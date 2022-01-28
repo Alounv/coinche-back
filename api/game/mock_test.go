@@ -29,7 +29,7 @@ func (s *MockGameService) ListGames() []domain.Game {
 
 func (s *MockGameService) JoinGame(id int, playerName string) error {
 	var err error
-	if _, existingId := s.games[id]; !existingId {
+	if _, existingID := s.games[id]; !existingID {
 		err = errors.New("Game not found")
 	} else if s.games[id].Full {
 		err = errors.New("Game is full")

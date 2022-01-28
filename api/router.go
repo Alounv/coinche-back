@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupRouter is used in main.go, API tests and Integration tests to setup the router
 func SetupRouter(gameService domain.GameServiceType) *gin.Engine {
 	gameAPIs := &gameapi.GameAPIs{Store: gameService}
 

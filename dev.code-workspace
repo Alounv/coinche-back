@@ -39,6 +39,7 @@
     "go.useLanguageGameAPIs": true,
     "gopls": {
       "formatting.gofumpt": true
-    }
+    },
+    "go.lintOnSave": "workspace"
   }
 }

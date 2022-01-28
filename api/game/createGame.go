@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateGame is exported for other packages such as repository and api
 func (gameAPIs *GameAPIs) CreateGame(context *gin.Context) {
 	name := context.Query("name")
 
