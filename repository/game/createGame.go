@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (s *GameRepositary) CreateGame(game domain.Game) int {
+func (s *GameRepository) CreateGame(game domain.Game) int {
 	var id int
 
 	err := s.db.QueryRow(

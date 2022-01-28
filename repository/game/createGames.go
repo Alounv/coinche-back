@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (s *GameRepositary) CreateGames(games []domain.Game) {
+func (s *GameRepository) CreateGames(games []domain.Game) {
 	tx := s.db.MustBegin()
 	for _, game := range games {
 		tx.MustExec(

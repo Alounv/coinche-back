@@ -7,7 +7,7 @@ import (
 	"github.com/lib/pq"
 )
 
-func (s *GameRepositary) ListGames() []domain.Game {
+func (s *GameRepository) ListGames() []domain.Game {
 	var games []domain.Game
 	rows, err := s.db.Query("SELECT * FROM game ")
 	if err != nil {

@@ -20,14 +20,14 @@ func TestGameRepo(test *testing.T) {
 
 	db := testutils.CreateDb(connectionInfo, dbName)
 
-	gameRepositary := NewGameRepositaryFromDb(db)
+	repository := NewGameRepositoryFromDb(db)
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
 		newPlayers := []string{"P1", "P2"}
 
-		newID := gameRepositary.CreateGame(domain.Game{Name: newName, Players: newPlayers})
-		got := gameRepositary.GetGame(newID)
+		newID := repository.CreateGame(domain.Game{Name: newName, Players: newPlayers})
+		got := repository.GetGame(newID)
 
 		assert.Equal(newName, got.Name)
 		assert.Equal(newPlayers, got.Players)
@@ -48,12 +48,12 @@ func TestGameRepoWithInitialData(test *testing.T) {
 
 	db := testutils.CreateDb(connectionInfo, dbName)
 
-	gameRepositary := NewGameRepositaryWithData(db)
+	repository := NewGameRepositoryWithData(db)
 
 	test.Run("get a game", func(test *testing.T) {
 		want := domain.Game{Name: "GAME ONE", ID: 1, Players: []string{}}
 
-		got := gameRepositary.GetGame(1)
+		got := repository.GetGame(1)
 
 		assert.Equal(want, got)
 	})
@@ -64,7 +64,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 		}
 
-		got := gameRepositary.ListGames()
+		got := repository.ListGames()
 
 		assert.Equal(want, got)
 	})
@@ -72,11 +72,11 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	test.Run("update a game", func(test *testing.T) {
 		want := []string{"P1", "P2", "P3", "P4"}
 
-		err := gameRepositary.UpdateGame(2, want)
+		err := repository.UpdateGame(2, want)
 		if err != nil {
 			panic(err)
 		}
-		got := gameRepositary.GetGame(2).Players
+		got := repository.GetGame(2).Players
 
 		assert.Equal(want, got)
 	})
@@ -86,13 +86,13 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 }
 
-func NewGameRepositaryWithData(db *sqlx.DB) *GameRepositary {
-	gameRepositary := NewGameRepositaryFromDb(db)
+func NewGameRepositoryWithData(db *sqlx.DB) *GameRepository {
+	repository := NewGameRepositoryFromDb(db)
 
-	gameRepositary.CreateGames([]domain.Game{
+	repository.CreateGames([]domain.Game{
 		{Name: "GAME ONE", ID: 1},
 		{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 	})
 
-	return gameRepositary
+	return repository
 }

@@ -16,27 +16,27 @@ CREATE TABLE game (
 	players text[]
 )`
 
-type GameRepositary struct {
+type GameRepository struct {
 	usecases.GameRepositoryInterface
 	db *sqlx.DB
 }
 
-func (s *GameRepositary) CreatePlayerTableIfNeeded() {
+func (s *GameRepository) CreatePlayerTableIfNeeded() {
 	_, err := s.db.Exec(gameSchema)
 	if err != nil {
 		fmt.Print(err)
 	}
 }
 
-func NewGameRepository(dsn string) *GameRepositary {
+func NewGameRepository(dsn string) *GameRepository {
 	db := sqlx.MustOpen("pgx", dsn)
 
-	return NewGameRepositaryFromDb(db)
+	return NewGameRepositoryFromDb(db)
 }
 
-func NewGameRepositaryFromDb(db *sqlx.DB) *GameRepositary {
-	gameRepositary := GameRepositary{db: db}
-	gameRepositary.CreatePlayerTableIfNeeded()
+func NewGameRepositoryFromDb(db *sqlx.DB) *GameRepository {
+	gameRepository := GameRepository{db: db}
+	gameRepository.CreatePlayerTableIfNeeded()
 
-	return &gameRepositary
+	return &gameRepository
 }
