@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
@@ -19,6 +20,11 @@ func NewCreateGameRequest(name string) *http.Request {
 func NewGetGameRequest(id int) *http.Request {
 	route := fmt.Sprintf("/games/%d", id)
 	return GetNewRequest(route, http.MethodGet)
+}
+
+func NewJoinGameRequest(id int, playerName string) *http.Request {
+	route := fmt.Sprintf("/games/%d/join?playerName=%s", id, url.QueryEscape(playerName))
+	return GetNewRequest(route, http.MethodPost)
 }
 
 func GetNewRequest(route string, method string) *http.Request {

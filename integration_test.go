@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreatingAndGettingGames(test *testing.T) {
-	assert := assert.New(test)
-
+func SetupTest() (*gin.Engine, *sqlx.DB, string, string) {
 	env.LoadEnv("")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 	dbName := "testdb"
@@ -28,11 +28,20 @@ func TestCreatingAndGettingGames(test *testing.T) {
 	gameService := &app.GameService{GameRepo: gameRepo}
 
 	router := api.SetupRouter(gameService)
+	return router, db, connectionInfo, dbName
+}
 
-	router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
+func TestCreateAndGetGames(test *testing.T) {
+	assert := assert.New(test)
+	router, db, connectionInfo, dbName := SetupTest()
 
 	response := httptest.NewRecorder()
+	router.ServeHTTP(httptest.NewRecorder(), testUtils.NewCreateGameRequest("NEW GAME"))
+
 	router.ServeHTTP(response, testUtils.NewGetGameRequest(1))
+
+	router.ServeHTTP(response, testUtils.NewJoinGameRequest(1, "player1"))
+
 	got := testUtils.DecodeToGame(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)

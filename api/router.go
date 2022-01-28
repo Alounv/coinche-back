@@ -8,7 +8,7 @@ import (
 )
 
 func SetupRouter(gameService domain.GameServiceType) *gin.Engine {
-	gameAPIs := &gameApi.GameAPIs{gameService}
+	gameAPIs := &gameApi.GameAPIs{Store: gameService}
 
 	router := gin.Default()
 	router.SetTrustedProxies([]string{"192.168.1.2"})

@@ -4,10 +4,8 @@ import (
 	"coinche/api"
 	"coinche/domain"
 	testUtils "coinche/utilities/test"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +23,7 @@ func TestJoinGame(test *testing.T) {
 	router := api.SetupRouter(&mockGameService)
 
 	test.Run("join game 1", func(test *testing.T) {
-		request := NewJoinGameRequest(1, "Son Ly")
+		request := testUtils.NewJoinGameRequest(1, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -34,7 +32,7 @@ func TestJoinGame(test *testing.T) {
 	})
 
 	test.Run("should fail when joining non existing game", func(test *testing.T) {
-		request := NewJoinGameRequest(60, "Son Ly")
+		request := testUtils.NewJoinGameRequest(60, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -43,16 +41,11 @@ func TestJoinGame(test *testing.T) {
 	})
 
 	test.Run("should fail when game is full", func(test *testing.T) {
-		request := NewJoinGameRequest(2, "Son Ly")
+		request := testUtils.NewJoinGameRequest(2, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
 
 		assert.Equal(http.StatusForbidden, response.Code)
 	})
-}
-
-func NewJoinGameRequest(id int, playerName string) *http.Request {
-	route := fmt.Sprintf("/games/%d/join?playerName=%s", id, url.QueryEscape(playerName))
-	return testUtils.GetNewRequest(route, http.MethodPost)
 }
