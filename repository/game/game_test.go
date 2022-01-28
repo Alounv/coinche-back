@@ -69,7 +69,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 
 	test.Run("update a game", func(test *testing.T) {
-		want := []string{"P1", "P2"}
+		want := []string{"P1", "P2", "P3", "P4"}
 
 		GameService.UpdateGame(2, want)
 		got := GameService.GetGame(2).Players
