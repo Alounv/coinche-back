@@ -18,6 +18,6 @@ func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	if game.Name != "" {
 		context.JSON(http.StatusOK, game)
 	} else {
-		context.JSON(http.StatusNotFound, gin.H{"error": "game not found"})
+		context.JSON(http.StatusNotFound, gin.H{"error": "GAME NOT FOUND"})
 	}
 }

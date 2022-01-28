@@ -2,12 +2,12 @@ package api
 
 import (
 	gameapi "coinche/api/game"
-	"coinche/domain"
+	"coinche/usecases"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(gameService domain.GameServiceType) *gin.Engine {
+func SetupRouter(gameService usecases.GameServiceType) *gin.Engine {
 	gameAPIs := &gameapi.GameAPIs{GameService: gameService}
 
 	router := gin.Default()

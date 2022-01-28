@@ -25,11 +25,11 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 	}
 
 	switch err.Error() {
-	case "Game not found":
+	case "GAME NOT FOUND":
 		{
 			context.Status(http.StatusNotFound)
 		}
-	case "Game is full":
+	case "GAME IS FULL":
 		{
 			context.Status(http.StatusForbidden)
 		}

@@ -9,8 +9,8 @@
       "path": "api"
     },
     {
-      "name": "App",
-      "path": "app"
+      "name": "Usecases",
+      "path": "usecases"
     },
     {
       "name": "Domain",
@@ -29,7 +29,7 @@
     "files.exclude": {
       "repository": true,
       "api": true,
-      "app": true,
+      "usecases": true,
       "domain": true,
       "utilities": true
     },

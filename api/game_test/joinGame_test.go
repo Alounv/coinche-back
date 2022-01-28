@@ -16,7 +16,7 @@ func TestJoinGame(test *testing.T) {
 	mockGameService := MockGameService{
 		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
-			2: {Name: "GAME TWO", Full: true},
+			2: {Name: "GAME TWO", Players: []string{"P1", "P2", "P3", "P4"}},
 		},
 		nil,
 	}
@@ -40,7 +40,7 @@ func TestJoinGame(test *testing.T) {
 		assert.Equal(http.StatusNotFound, response.Code)
 	})
 
-	test.Run("should fail when game is full", func(test *testing.T) {
+	test.Run("should fail when GAME IS FULL", func(test *testing.T) {
 		request := testutils.NewJoinGameRequest(2, "Son Ly")
 		response := httptest.NewRecorder()
 

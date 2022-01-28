@@ -2,8 +2,8 @@ package main
 
 import (
 	"coinche/api"
-	"coinche/app"
 	gamerepo "coinche/repository/game"
+	"coinche/usecases"
 	"coinche/utilities/env"
 	testutils "coinche/utilities/test"
 	"net/http"
@@ -34,7 +34,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.db = testutils.CreateDb(s.connectionInfo, s.dbName)
 
 	gamerepo := gamerepo.NewGameRepoFromDb(s.db)
-	gameService := &app.GameService{GameRepo: gamerepo}
+	gameService := &usecases.GameService{GameRepo: gamerepo}
 
 	s.router = api.SetupRouter(gameService)
 }

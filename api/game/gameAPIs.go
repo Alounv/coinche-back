@@ -1,9 +1,7 @@
 package gameapi
 
-import (
-	"coinche/domain"
-)
+import "coinche/usecases"
 
 type GameAPIs struct {
-	GameService domain.GameServiceType
+	GameService usecases.GameServiceType
 }

@@ -14,7 +14,7 @@ import (
 
 func TestGameRepo(test *testing.T) {
 	assert := assert.New(test)
-	dbName := "testdb"
+	dbName := "testgamerepodb"
 	env.LoadEnv("../../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
@@ -40,7 +40,7 @@ func TestGameRepo(test *testing.T) {
 
 func TestGameRepoWithInitialData(test *testing.T) {
 	assert := assert.New(test)
-	dbName := "testdb"
+	dbName := "testgamerepowithinitialdatadb"
 	env.LoadEnv("../../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 

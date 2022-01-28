@@ -1,10 +1,17 @@
-package app
+package usecases
 
 import (
 	"coinche/domain"
 	gamerepo "coinche/repository/game"
 	"fmt"
 )
+
+type GameServiceType interface {
+	ListGames() []domain.Game
+	GetGame(id int) domain.Game
+	CreateGame(name string) int
+	JoinGame(id int, playerName string) error
+}
 
 type GameService struct {
 	GameRepo *gamerepo.GameRepo

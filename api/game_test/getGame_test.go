@@ -16,7 +16,7 @@ func TestGetGame(test *testing.T) {
 	mockStore := MockGameService{
 		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
-			2: {Name: "GAME TWO", Full: true},
+			2: {Name: "GAME TWO", Players: []string{"P1", "P2", "P3", "P4"}},
 		},
 		nil,
 	}
