@@ -1,6 +1,7 @@
 package gameapi
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -24,14 +25,43 @@ func HTTPGameSocketHandler(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	err = SendMessage(conn, "connection established")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	for {
-		t, message, err := conn.ReadMessage()
+		message, err := ReceiveMessage(conn)
 		if err != nil {
 			break
 		}
-		err = conn.WriteMessage(t, message)
+		err = SendMessage(conn, message)
 		if err != nil {
 			break
 		}
 	}
+}
+
+func SendMessage(connection *websocket.Conn, msg string) error {
+	message, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	err = connection.WriteMessage(websocket.BinaryMessage, message)
+
+	return err
+}
+
+func ReceiveMessage(connection *websocket.Conn) (string, error) {
+	_, message, err := connection.ReadMessage()
+	if err != nil {
+		return "", err
+	}
+
+	var reply string
+	err = json.Unmarshal(message, &reply)
+
+	return reply, err
 }

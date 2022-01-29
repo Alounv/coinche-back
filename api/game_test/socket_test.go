@@ -2,7 +2,6 @@ package gameapitest
 
 import (
 	gameapi "coinche/api/game"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -44,56 +43,37 @@ func newWSServer(test *testing.T, handler http.Handler) (*httptest.Server, *webs
 	return server, connection
 }
 
-func sendMessage(test *testing.T, connection *websocket.Conn, msg string) {
-	test.Helper()
-
-	message, err := json.Marshal(msg)
-	if err != nil {
-		test.Fatal(err)
-	}
-
-	if err := connection.WriteMessage(websocket.BinaryMessage, message); err != nil {
-		test.Fatalf("%v", err)
-	}
-}
-
-func receiveWSMessage(test *testing.T, connection *websocket.Conn) string {
-	test.Helper()
-
-	_, message, err := connection.ReadMessage()
-	if err != nil {
-		test.Fatalf("%v", err)
-	}
-
-	var reply string
-	err = json.Unmarshal(message, &reply)
-	if err != nil {
-		test.Fatal(err)
-	}
-
-	return reply
-}
-
 func TestSocketHandler(test *testing.T) {
 	assert := assert.New(test)
+	handler := http.HandlerFunc(gameapi.HTTPGameSocketHandler)
 
-	test.Run("Can connect and recieve a message", func(test *testing.T) {
-		// gin.SetMode(gin.TestMode)
+	server, connection := newWSServer(test, handler)
 
-		// w := httptest.NewRecorder()
-		// c, _ := gin.CreateTestContext(w)
-		// c.Params = []gin.Param{gin.Param{Key: "k", Value: "v"}}
+	test.Run("Can connect and receive a message", func(test *testing.T) {
+		reply1, _ := gameapi.ReceiveMessage(connection)
 
-		handler := http.HandlerFunc(gameapi.HTTPGameSocketHandler)
+		assert.Equal("connection established", reply1)
+	})
 
-		server, connection := newWSServer(test, handler)
-		defer server.Close()
-		defer connection.Close()
-
-		sendMessage(test, connection, "hello")
-
-		reply := receiveWSMessage(test, connection)
+	test.Run("Can send a message", func(test *testing.T) {
+		err := gameapi.SendMessage(connection, "hello")
+		if err != nil {
+			test.Fatal(err)
+		}
+		reply, _ := gameapi.ReceiveMessage(connection)
 
 		assert.Equal("hello", reply)
+	})
+
+	/*test.Run("Can close the connection", func(test *testing.T) {
+		connection.Close()
+		err := gameapi.SendMessage(connection, "hello")
+
+		assert.EqualError(err, "write tcp 127.0.0.1:52624->127.0.0.1:52623: use of closed network connection")
+	})*/
+
+	test.Cleanup(func() {
+		server.Close()
+		connection.Close()
 	})
 }
