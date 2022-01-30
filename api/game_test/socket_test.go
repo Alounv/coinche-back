@@ -65,12 +65,12 @@ func TestSocketHandler(test *testing.T) {
 		assert.Equal("hello", reply)
 	})
 
-	/*test.Run("Can close the connection", func(test *testing.T) {
+	test.Run("Can close the connection", func(test *testing.T) {
 		connection.Close()
 		err := gameapi.SendMessage(connection, "hello")
 
-		assert.EqualError(err, "write tcp 127.0.0.1:52624->127.0.0.1:52623: use of closed network connection")
-	})*/
+		assert.NotNil(err)
+	})
 
 	test.Cleanup(func() {
 		server.Close()
