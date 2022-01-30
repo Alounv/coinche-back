@@ -2,6 +2,7 @@ package gameapitest
 
 import (
 	gameapi "coinche/api/game"
+	"coinche/domain"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -45,11 +46,22 @@ func newWSServer(test *testing.T, handler http.Handler) (*httptest.Server, *webs
 
 func TestSocketHandler(test *testing.T) {
 	assert := assert.New(test)
-	handler := http.HandlerFunc(gameapi.HTTPGameSocketHandler)
+	mockUsecases := MockGameUsecases{
+		map[int]domain.Game{
+			1: {Name: "GAME ONE"},
+			2: {Name: "GAME TWO"},
+		},
+		nil,
+	}
+
+	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
+		gameapi.HTTPGameSocketHandler(w, r, &mockUsecases)
+	}
+	handler := http.HandlerFunc(funcForHandlerFunc)
 
 	server, connection := newWSServer(test, handler)
 
-	test.Run("Can connect and receive a message", func(test *testing.T) {
+	test.Run("Can connect and receive the game", func(test *testing.T) {
 		reply1, _ := gameapi.ReceiveMessage(connection)
 
 		assert.Equal("connection established", reply1)

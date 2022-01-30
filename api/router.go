@@ -21,7 +21,7 @@ func SetupRouter(gameUsecases usecases.GameUsecasesInterface) *gin.Engine {
 	router.GET("/games/all", gameAPIs.ListGames)
 	router.POST("/games/:id/join", gameAPIs.JoinGame)
 
-	router.GET("/ws", gameapi.GameSocketHandler)
+	router.GET("/ws", gameAPIs.GameSocketHandler)
 
 	return router
 }

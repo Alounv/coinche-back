@@ -1,6 +1,7 @@
 package gameapi
 
 import (
+	"coinche/usecases"
 	"encoding/json"
 	"net/http"
 
@@ -13,11 +14,15 @@ var wsupgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func GameSocketHandler(context *gin.Context) {
-	HTTPGameSocketHandler(context.Writer, context.Request)
+func (gameAPIs *GameAPIs) GameSocketHandler(context *gin.Context) {
+	HTTPGameSocketHandler(context.Writer, context.Request, gameAPIs.Usecases)
 }
 
-func HTTPGameSocketHandler(writer http.ResponseWriter, request *http.Request) {
+func HTTPGameSocketHandler(
+	writer http.ResponseWriter,
+	request *http.Request,
+	usecases usecases.GameUsecasesInterface,
+) {
 	conn, err := wsupgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		panic(err)
