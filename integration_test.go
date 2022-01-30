@@ -43,7 +43,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	test := s.T()
 	assert := assert.New(test)
 
-	s.router.ServeHTTP(httptest.NewRecorder(), testutils.NewCreateGameRequest("NEW GAME"))
+	s.router.ServeHTTP(httptest.NewRecorder(), testutils.NewCreateGameRequest(test, "NEW GAME"))
 
 	response := httptest.NewRecorder()
 	assert.Equal(http.StatusOK, response.Code)
@@ -54,7 +54,7 @@ func (s *IntegrationTestSuite) TestIntegrationGetGame() {
 	assert := assert.New(test)
 
 	response := httptest.NewRecorder()
-	s.router.ServeHTTP(response, testutils.NewGetGameRequest(1))
+	s.router.ServeHTTP(response, testutils.NewGetGameRequest(test, 1))
 
 	got := testutils.DecodeToGame(response.Body, test)
 
@@ -86,10 +86,10 @@ func (s *IntegrationTestSuite) TestIntegrationJoinGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	s.router.ServeHTTP(response, testutils.NewJoinGameRequest(1, "player1"))
+	s.router.ServeHTTP(response, testutils.NewJoinGameRequest(test, 1, "player1"))
 	assert.Equal(http.StatusAccepted, response.Code)
 
-	s.router.ServeHTTP(response, testutils.NewGetGameRequest(1))
+	s.router.ServeHTTP(response, testutils.NewGetGameRequest(test, 1))
 	got := testutils.DecodeToGame(response.Body, test)
 	assert.Equal([]string{"player1"}, got.Players)
 }

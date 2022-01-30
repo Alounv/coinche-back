@@ -2,7 +2,6 @@ package gameapi
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,14 +20,12 @@ func GameSocketHandler(context *gin.Context) {
 func HTTPGameSocketHandler(writer http.ResponseWriter, request *http.Request) {
 	conn, err := wsupgrader.Upgrade(writer, request, nil)
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	err = SendMessage(conn, "connection established")
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	for {

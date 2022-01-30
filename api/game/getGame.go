@@ -1,6 +1,7 @@
 package gameapi
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,9 +12,12 @@ func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	stringID := context.Param("id")
 	id, err := strconv.Atoi(stringID)
 	if err != nil {
-		panic(err)
+		fmt.Println("ID format is wrong", err)
 	}
-	game := gameAPIs.Usecases.GetGame(id)
+	game, err := gameAPIs.Usecases.GetGame(id)
+	if err != nil {
+		fmt.Println("Game not found", err)
+	}
 
 	if game.Name != "" {
 		context.JSON(http.StatusOK, game)

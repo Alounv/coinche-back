@@ -4,9 +4,8 @@ import (
 	"strings"
 )
 
-func (s *GameRepository) UpdateGame(id int, players []string) error {
-	var err error
-	_, err = s.db.Exec(
+func (s *GameRepository) UpdatePlayers(id int, players []string) error {
+	_, err := s.db.Exec(
 		`
 		UPDATE game
 		SET players = string_to_array($1, ',')

@@ -20,12 +20,13 @@ func TestGetGame(test *testing.T) {
 		},
 		nil,
 	}
+
 	router := api.SetupRouter(&mockUsecases)
 
 	test.Run("get a game 1", func(test *testing.T) {
 		want := domain.Game(domain.Game{Name: "GAME ONE"})
 
-		request := testutils.NewGetGameRequest(1)
+		request := testutils.NewGetGameRequest(test, 1)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -36,7 +37,7 @@ func TestGetGame(test *testing.T) {
 	})
 
 	test.Run("returns 404 on missing game", func(t *testing.T) {
-		request := testutils.NewGetGameRequest(3)
+		request := testutils.NewGetGameRequest(test, 3)
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)

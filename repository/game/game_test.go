@@ -27,7 +27,10 @@ func TestGameRepo(test *testing.T) {
 		newPlayers := []string{"P1", "P2"}
 
 		newID := repository.CreateGame(domain.Game{Name: newName, Players: newPlayers})
-		got := repository.GetGame(newID)
+		got, err := repository.GetGame(newID)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(newName, got.Name)
 		assert.Equal(newPlayers, got.Players)
@@ -53,7 +56,10 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	test.Run("get a game", func(test *testing.T) {
 		want := domain.Game{Name: "GAME ONE", ID: 1, Players: []string{}}
 
-		got := repository.GetGame(1)
+		got, err := repository.GetGame(1)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(want, got)
 	})
@@ -72,13 +78,16 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	test.Run("update a game", func(test *testing.T) {
 		want := []string{"P1", "P2", "P3", "P4"}
 
-		err := repository.UpdateGame(2, want)
+		err := repository.UpdatePlayers(2, want)
 		if err != nil {
 			panic(err)
 		}
-		got := repository.GetGame(2).Players
+		game, err := repository.GetGame(2)
+		if err != nil {
+			test.Fatal(err)
+		}
 
-		assert.Equal(want, got)
+		assert.Equal(want, game.Players)
 	})
 
 	test.Cleanup(func() {

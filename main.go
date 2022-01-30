@@ -5,7 +5,7 @@ import (
 	gamerepo "coinche/repository/game"
 	"coinche/usecases"
 	"coinche/utilities/env"
-	"log"
+	"fmt"
 	"os"
 )
 
@@ -21,7 +21,7 @@ func main() {
 
 	router := api.SetupRouter(gameUsecases)
 
-	log.Print("Listening on ", addr)
+	fmt.Println("Listening on ", addr)
 	err := router.Run(addr)
 	if err != nil {
 		panic(err)

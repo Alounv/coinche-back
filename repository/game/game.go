@@ -21,11 +21,9 @@ type GameRepository struct {
 	db *sqlx.DB
 }
 
-func (s *GameRepository) CreatePlayerTableIfNeeded() {
+func (s *GameRepository) CreatePlayerTableIfNeeded() error {
 	_, err := s.db.Exec(gameSchema)
-	if err != nil {
-		fmt.Print(err)
-	}
+	return err
 }
 
 func NewGameRepository(dsn string) *GameRepository {
@@ -36,7 +34,10 @@ func NewGameRepository(dsn string) *GameRepository {
 
 func NewGameRepositoryFromDb(db *sqlx.DB) *GameRepository {
 	gameRepository := GameRepository{db: db}
-	gameRepository.CreatePlayerTableIfNeeded()
+	err := gameRepository.CreatePlayerTableIfNeeded()
+	if err != nil {
+		fmt.Println("No need to create the table.", err)
+	}
 
 	return &gameRepository
 }

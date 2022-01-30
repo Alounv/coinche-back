@@ -23,7 +23,7 @@ func TestJoinGame(test *testing.T) {
 	router := api.SetupRouter(&mockUsecases)
 
 	test.Run("join game 1", func(test *testing.T) {
-		request := testutils.NewJoinGameRequest(1, "Son Ly")
+		request := testutils.NewJoinGameRequest(test, 1, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -32,7 +32,7 @@ func TestJoinGame(test *testing.T) {
 	})
 
 	test.Run("should fail when joining non existing game", func(test *testing.T) {
-		request := testutils.NewJoinGameRequest(60, "Son Ly")
+		request := testutils.NewJoinGameRequest(test, 60, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
@@ -41,7 +41,7 @@ func TestJoinGame(test *testing.T) {
 	})
 
 	test.Run("should fail when GAME IS FULL", func(test *testing.T) {
-		request := testutils.NewJoinGameRequest(2, "Son Ly")
+		request := testutils.NewJoinGameRequest(test, 2, "Son Ly")
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)

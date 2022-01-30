@@ -13,25 +13,25 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func NewCreateGameRequest(name string) *http.Request {
+func NewCreateGameRequest(test *testing.T, name string) *http.Request {
 	route := fmt.Sprintf("/games/create?name=%s", name)
-	return GetNewRequest(route, http.MethodPost)
+	return GetNewRequest(test, route, http.MethodPost)
 }
 
-func NewGetGameRequest(id int) *http.Request {
+func NewGetGameRequest(test *testing.T, id int) *http.Request {
 	route := fmt.Sprintf("/games/%d", id)
-	return GetNewRequest(route, http.MethodGet)
+	return GetNewRequest(test, route, http.MethodGet)
 }
 
-func NewJoinGameRequest(id int, playerName string) *http.Request {
+func NewJoinGameRequest(test *testing.T, id int, playerName string) *http.Request {
 	route := fmt.Sprintf("/games/%d/join?playerName=%s", id, url.QueryEscape(playerName))
-	return GetNewRequest(route, http.MethodPost)
+	return GetNewRequest(test, route, http.MethodPost)
 }
 
-func GetNewRequest(route string, method string) *http.Request {
+func GetNewRequest(test *testing.T, route string, method string) *http.Request {
 	request, err := http.NewRequest(method, route, nil)
 	if err != nil {
-		panic(err)
+		test.Fatal(err)
 	}
 	return request
 }
@@ -40,7 +40,7 @@ func CreateDb(connectionInfo string, dbName string) *sqlx.DB {
 	userDb := sqlx.MustOpen("pgx", connectionInfo)
 	_, err := userDb.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print("Database already existing, drop before creation", err)
 		userDb.MustExec("DROP DATABASE " + dbName)
 		userDb.MustExec("CREATE DATABASE " + dbName)
 	}

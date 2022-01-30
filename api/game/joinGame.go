@@ -1,7 +1,6 @@
 package gameapi
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,7 +11,8 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 	stringID := context.Param("id")
 	id, err := strconv.Atoi(stringID)
 	if err != nil {
-		panic(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid ID"})
+		return
 	}
 
 	playerName := context.Query("playerName")
@@ -25,18 +25,19 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 	}
 
 	switch err.Error() {
-	case "GAME NOT FOUND":
+	case "GAME NOT FOUND":
 		{
 			context.Status(http.StatusNotFound)
+			return
 		}
-	case "GAME IS FULL":
+	case "GAME IS FULL":
 		{
 			context.Status(http.StatusForbidden)
+			return
 		}
 	default:
 		{
-			fmt.Print(err)
-			context.Status(http.StatusInternalServerError)
+			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 	}
 }

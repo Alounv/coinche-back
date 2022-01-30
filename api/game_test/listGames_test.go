@@ -27,8 +27,8 @@ func TestListGames(test *testing.T) {
 		response := httptest.NewRecorder()
 
 		want := []domain.Game{
-			{Name: "GAME ONE"},
-			{Name: "GAME TWO"},
+			{ID: 1, Name: "GAME ONE"},
+			{ID: 2, Name: "GAME TWO"},
 		}
 
 		router.ServeHTTP(response, request)

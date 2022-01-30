@@ -1,8 +1,6 @@
 package env
 
 import (
-	"log"
-
 	"github.com/joho/godotenv"
 )
 
@@ -13,6 +11,6 @@ func LoadEnv(path string) {
 
 	err := godotenv.Load(path)
 	if err != nil {
-		log.Fatalf("Error 1 loading .env file")
+		panic("Error loading .env file")
 	}
 }

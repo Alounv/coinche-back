@@ -19,7 +19,7 @@ func (game Game) IsFull() bool {
 func (game *Game) AddPlayer(playerName string) error {
 	var err error
 	if len(game.Players) == 4 {
-		err = errors.New("GAME IS FULL")
+		err = errors.New("GAME IS FULL")
 	}
 
 	game.Players = append(game.Players, playerName)

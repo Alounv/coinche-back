@@ -2,7 +2,6 @@ package gamerepo
 
 import (
 	"coinche/domain"
-	"fmt"
 
 	"github.com/lib/pq"
 )
@@ -11,7 +10,7 @@ func (s *GameRepository) ListGames() []domain.Game {
 	var games []domain.Game
 	rows, err := s.db.Query("SELECT * FROM game ")
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 	for rows.Next() {
 		var game domain.Game
@@ -22,7 +21,7 @@ func (s *GameRepository) ListGames() []domain.Game {
 			(*pq.StringArray)(&game.Players),
 		)
 		if err != nil {
-			fmt.Println(err)
+			panic(err)
 		}
 		games = append(games, game)
 	}
