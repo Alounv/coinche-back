@@ -17,13 +17,18 @@ func (game Game) IsFull() bool {
 }
 
 func (game *Game) AddPlayer(playerName string) error {
-	var err error
 	if len(game.Players) == 4 {
-		err = errors.New("GAME IS FULL")
+		return errors.New("GAME IS FULL")
+	}
+
+	for _, name := range game.Players { // the player is already in the game, just return
+		if name == playerName {
+			return nil
+		}
 	}
 
 	game.Players = append(game.Players, playerName)
-	return err
+	return nil
 }
 
 func NewGame(name string, creatorName string) Game {

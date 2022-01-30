@@ -36,13 +36,20 @@ func (s *MockGameUsecases) ListGames() []domain.Game {
 	return games
 }
 
-func (s *MockGameUsecases) JoinGame(id int, playerName string) error {
+func (s *MockGameUsecases) JoinGame(id int, playerName string) (domain.Game, error) {
 	var err error
-	if _, existingID := s.games[id]; !existingID {
+	game, existingID := s.games[id]
+	if !existingID {
 		err = errors.New("GAME NOT FOUND")
-	} else if s.games[id].IsFull() {
+	} else if id == 2 {
 		err = errors.New("GAME IS FULL")
 	}
 
-	return err
+	gameWithNewPlayer := domain.Game{
+		ID:        id,
+		Name:      game.Name,
+		CreatedAt: game.CreatedAt,
+		Players:   append(game.Players, playerName),
+	}
+	return gameWithNewPlayer, err
 }

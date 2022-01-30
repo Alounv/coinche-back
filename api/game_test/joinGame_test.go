@@ -40,7 +40,7 @@ func TestJoinGame(test *testing.T) {
 		assert.Equal(http.StatusNotFound, response.Code)
 	})
 
-	test.Run("should fail when GAME IS FULL", func(test *testing.T) {
+	test.Run("should fail when GAME IS FULL", func(test *testing.T) {
 		request := testutils.NewJoinGameRequest(test, 2, "Son Ly")
 		response := httptest.NewRecorder()
 

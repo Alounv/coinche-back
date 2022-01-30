@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	assert.Equal(http.StatusOK, response.Code)
 }
 
-func (s *IntegrationTestSuite) TestIntegrationGetGame() {
+func (s *IntegrationTestSuite) TestGetGame() {
 	test := s.T()
 	assert := assert.New(test)
 
@@ -64,7 +64,7 @@ func (s *IntegrationTestSuite) TestIntegrationGetGame() {
 	assert.IsType(time.Time{}, got.CreatedAt)
 }
 
-func (s *IntegrationTestSuite) TestIntegrationListGames() {
+func (s *IntegrationTestSuite) TestListGames() {
 	test := s.T()
 	assert := assert.New(test)
 	request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)
@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) TestIntegrationListGames() {
 	assert.IsType(time.Time{}, got[0].CreatedAt)
 }
 
-func (s *IntegrationTestSuite) TestIntegrationJoinGame() {
+func (s *IntegrationTestSuite) TestJoinGame() {
 	test := s.T()
 	assert := assert.New(test)
 	response := httptest.NewRecorder()

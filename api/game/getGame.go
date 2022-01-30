@@ -11,7 +11,7 @@ import (
 func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	stringID := context.Param("id")
 	id, err := strconv.Atoi(stringID)
-	if err != nil {
+	if err != nil { // CONTEXT.JSON()...
 		fmt.Println("ID format is wrong", err)
 	}
 	game, err := gameAPIs.Usecases.GetGame(id)
@@ -22,6 +22,6 @@ func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	if game.Name != "" {
 		context.JSON(http.StatusOK, game)
 	} else {
-		context.JSON(http.StatusNotFound, gin.H{"error": "GAME NOT FOUND"})
+		context.JSON(http.StatusNotFound, gin.H{"error": "GAME NOT FOUND"})
 	}
 }

@@ -55,16 +55,17 @@ func TestSocketHandler(test *testing.T) {
 	}
 
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		gameapi.HTTPGameSocketHandler(w, r, &mockUsecases)
+		gameapi.HTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
 	}
 	handler := http.HandlerFunc(funcForHandlerFunc)
 
 	server, connection := newWSServer(test, handler)
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
-		reply1, _ := gameapi.ReceiveMessage(connection)
+		got, _ := gameapi.ReceiveGame(connection)
+		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: []string{"player"}})
 
-		assert.Equal("connection established", reply1)
+		assert.Equal(want, got)
 	})
 
 	test.Run("Can send a message", func(test *testing.T) {

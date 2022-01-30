@@ -8,7 +8,7 @@ type GameUsecasesInterface interface {
 	ListGames() []domain.Game
 	GetGame(id int) (domain.Game, error)
 	CreateGame(name string, creatorName string) int
-	JoinGame(id int, playerName string) error
+	JoinGame(id int, playerName string) (domain.Game, error)
 }
 
 type GameRepositoryInterface interface {
@@ -36,17 +36,17 @@ func (s *GameUsecases) CreateGame(name string, creatorName string) int {
 	return s.Repo.CreateGame(game)
 }
 
-func (s *GameUsecases) JoinGame(id int, playerName string) error {
+func (s *GameUsecases) JoinGame(id int, playerName string) (domain.Game, error) {
 	game, err := s.Repo.GetGame(id)
 	if err != nil {
-		return err
+		return game, err
 	}
 	err = game.AddPlayer(playerName)
 	if err != nil {
-		return err
+		return game, err
 	}
 	err = s.Repo.UpdatePlayers(game.ID, game.Players)
-	return err
+	return game, err
 }
 
 func NewGameUsecases(repository GameRepositoryInterface) *GameUsecases {
