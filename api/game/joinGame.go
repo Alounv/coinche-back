@@ -1,11 +1,21 @@
 package gameapi
 
 import (
+	"coinche/domain"
+	"coinche/usecases"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
+
+var wsupgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 	stringID := context.Param("id")
@@ -17,27 +27,98 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 
 	playerName := context.Query("playerName")
 
-	_, err = gameAPIs.Usecases.JoinGame(id, playerName)
+	JoinGameHTTPGameSocketHandler(context.Writer, context.Request, gameAPIs.Usecases, id, playerName)
+}
 
-	if err == nil {
-		context.Status(http.StatusAccepted)
-		return
+func JoinGameHTTPGameSocketHandler(
+	writer http.ResponseWriter,
+	request *http.Request,
+	usecases usecases.GameUsecasesInterface,
+	id int,
+	playerName string,
+) {
+	connection, err := wsupgrader.Upgrade(writer, request, nil)
+	if err != nil {
+		panic(err)
 	}
 
-	switch err.Error() {
-	case "GAME NOT FOUND":
-		{
-			context.Status(http.StatusNotFound)
-			return
+	game, err := usecases.JoinGame(id, playerName)
+	if err != nil {
+		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
+		if err != nil {
+			panic(err)
 		}
-	case "GAME IS FULL":
-		{
-			context.Status(http.StatusForbidden)
-			return
+		connection.Close()
+	}
+
+	err = sendGame(connection, game)
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		message, err := ReceiveMessage(connection)
+		if err != nil {
+			break
 		}
-	default:
-		{
-			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		err = SendMessage(connection, message)
+		if err != nil {
+			break
 		}
 	}
+}
+
+func sendGame(connection *websocket.Conn, game domain.Game) error {
+	message, err := json.Marshal(game)
+	if err != nil {
+		return err
+	}
+
+	err = send(connection, message)
+	return err
+}
+
+func SendMessage(connection *websocket.Conn, msg string) error {
+	message, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	err = send(connection, message)
+	return err
+}
+
+func send(connection *websocket.Conn, message []byte) error {
+	err := connection.WriteMessage(websocket.BinaryMessage, message)
+	return err
+}
+
+func ReceiveGame(connection *websocket.Conn) (domain.Game, error) {
+	var game domain.Game
+	message, err := receive(connection)
+	if err != nil {
+		return game, err
+	}
+
+	err = json.Unmarshal(message, &game)
+	return game, err
+}
+
+func ReceiveMessage(connection *websocket.Conn) (string, error) {
+	var reply string
+	message, err := receive(connection)
+	if err != nil {
+		return "", err
+	}
+
+	err = json.Unmarshal(message, &reply)
+	return reply, err
+}
+
+func receive(connection *websocket.Conn) ([]byte, error) {
+	_, message, err := connection.ReadMessage()
+	if err != nil {
+		return nil, err
+	}
+	return message, err
 }

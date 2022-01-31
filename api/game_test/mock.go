@@ -12,7 +12,11 @@ type MockGameUsecases struct {
 }
 
 func (s *MockGameUsecases) GetGame(id int) (domain.Game, error) {
-	return s.games[id], nil
+	game, existingID := s.games[id]
+	if !existingID {
+		return domain.Game{}, errors.New("NO GAME FOUND")
+	}
+	return game, nil
 }
 
 func (s *MockGameUsecases) CreateGame(name string, creatorName string) int {
@@ -40,9 +44,7 @@ func (s *MockGameUsecases) JoinGame(id int, playerName string) (domain.Game, err
 	var err error
 	game, existingID := s.games[id]
 	if !existingID {
-		err = errors.New("GAME NOT FOUND")
-	} else if id == 2 {
-		err = errors.New("GAME IS FULL")
+		err = errors.New("TEST JOIN FAIL")
 	}
 
 	gameWithNewPlayer := domain.Game{

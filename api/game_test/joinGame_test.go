@@ -1,51 +1,94 @@
 package gameapitest
 
 import (
-	"coinche/api"
+	gameapi "coinche/api/game"
 	"coinche/domain"
 	testutils "coinche/utilities/test"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJoinGame(test *testing.T) {
+func TestFailingSocketHandler(test *testing.T) {
+	assert := assert.New(test)
+	mockUsecases := MockGameUsecases{
+		map[int]domain.Game{},
+		nil,
+	}
+
+	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
+		gameapi.JoinGameHTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
+	}
+	handler := http.HandlerFunc(funcForHandlerFunc)
+
+	server, connection := testutils.NewWSServer(test, handler)
+
+	test.Run("Receive error when failing to join", func(test *testing.T) {
+		got, _ := gameapi.ReceiveMessage(connection)
+		want := "Could not join this game: TEST JOIN FAIL"
+
+		assert.Equal(want, got)
+	})
+
+	test.Run("Close the connection when failing to join", func(test *testing.T) {
+		err := gameapi.SendMessage(connection, "hello")
+		if err != nil {
+			test.Fatal(err)
+		}
+		_, err = gameapi.ReceiveMessage(connection)
+		assert.NotNil(err)
+	})
+
+	test.Cleanup(func() {
+		server.Close()
+		connection.Close()
+	})
+}
+
+func TestSocketHandler(test *testing.T) {
 	assert := assert.New(test)
 	mockUsecases := MockGameUsecases{
 		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
-			2: {Name: "GAME TWO", Players: []string{"P1", "P2", "P3", "P4"}},
+			2: {Name: "GAME TWO"},
 		},
 		nil,
 	}
-	router := api.SetupRouter(&mockUsecases)
 
-	test.Run("join game 1", func(test *testing.T) {
-		request := testutils.NewJoinGameRequest(test, 1, "Son Ly")
-		response := httptest.NewRecorder()
+	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
+		gameapi.JoinGameHTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
+	}
+	handler := http.HandlerFunc(funcForHandlerFunc)
 
-		router.ServeHTTP(response, request)
+	server, connection := testutils.NewWSServer(test, handler)
 
-		assert.Equal(http.StatusAccepted, response.Code)
+	test.Run("Can connect and receive the game", func(test *testing.T) {
+		got, _ := gameapi.ReceiveGame(connection)
+		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: []string{"player"}})
+
+		assert.Equal(want, got)
 	})
 
-	test.Run("should fail when joining non existing game", func(test *testing.T) {
-		request := testutils.NewJoinGameRequest(test, 60, "Son Ly")
-		response := httptest.NewRecorder()
+	test.Run("Can send a message", func(test *testing.T) {
+		err := gameapi.SendMessage(connection, "hello")
+		if err != nil {
+			test.Fatal(err)
+		}
+		reply, _ := gameapi.ReceiveMessage(connection)
 
-		router.ServeHTTP(response, request)
-
-		assert.Equal(http.StatusNotFound, response.Code)
+		assert.Equal("hello", reply)
 	})
 
-	test.Run("should fail when GAME IS FULL", func(test *testing.T) {
-		request := testutils.NewJoinGameRequest(test, 2, "Son Ly")
-		response := httptest.NewRecorder()
+	test.Run("Can close the connection", func(test *testing.T) {
+		connection.Close()
+		err := gameapi.SendMessage(connection, "hello")
 
-		router.ServeHTTP(response, request)
+		assert.NotNil(err)
+	})
 
-		assert.Equal(http.StatusForbidden, response.Code)
+	test.Cleanup(func() {
+		server.Close()
+		connection.Close()
 	})
 }

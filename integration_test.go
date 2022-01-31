@@ -81,18 +81,19 @@ func (s *IntegrationTestSuite) TestListGames() {
 	assert.IsType(time.Time{}, got[0].CreatedAt)
 }
 
-func (s *IntegrationTestSuite) TestJoinGame() {
+/*func (s *IntegrationTestSuite) TestJoinGame() {
 	test := s.T()
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
 	s.router.ServeHTTP(response, testutils.NewJoinGameRequest(test, 1, "player1"))
 	assert.Equal(http.StatusAccepted, response.Code)
+	assert.Equal(http.StatusAccepted, response.Body.String())
 
 	s.router.ServeHTTP(response, testutils.NewGetGameRequest(test, 1))
 	got := testutils.DecodeToGame(response.Body, test)
 	assert.Equal([]string{"player1"}, got.Players)
-}
+}*/
 
 func (s *IntegrationTestSuite) TearDownSuite() {
 	testutils.DropDb(s.connectionInfo, s.dbName, s.db)

@@ -36,7 +36,7 @@ func TestGetGame(test *testing.T) {
 		assert.Equal(want, got)
 	})
 
-	test.Run("returns 404 on missing game", func(t *testing.T) {
+	test.Run("returns 404 on missing game", func(t *testing.T) {
 		request := testutils.NewGetGameRequest(test, 3)
 		response := httptest.NewRecorder()
 
