@@ -18,7 +18,7 @@ func TestFailingSocketHandler(test *testing.T) {
 	}
 
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		gameapi.JoinGameHTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
+		gameapi.HTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
 	}
 	handler := http.HandlerFunc(funcForHandlerFunc)
 
@@ -57,7 +57,7 @@ func TestSocketHandler(test *testing.T) {
 	}
 
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		gameapi.JoinGameHTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
+		gameapi.HTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
 	}
 	handler := http.HandlerFunc(funcForHandlerFunc)
 

@@ -2,6 +2,8 @@ package main
 
 import (
 	"coinche/api"
+	gameapi "coinche/api/game"
+	"coinche/domain"
 	gamerepo "coinche/repository/game"
 	"coinche/usecases"
 	"coinche/utilities/env"
@@ -24,6 +26,7 @@ type IntegrationTestSuite struct {
 	connectionInfo string
 	dbName         string
 	router         *gin.Engine
+	gameUsecases   *usecases.GameUsecases
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
@@ -34,9 +37,9 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.db = testutils.CreateDb(s.connectionInfo, s.dbName)
 
 	gameRepository := gamerepo.NewGameRepositoryFromDb(s.db)
-	gameUsecases := &usecases.GameUsecases{Repo: gameRepository}
+	s.gameUsecases = &usecases.GameUsecases{Repo: gameRepository}
 
-	s.router = api.SetupRouter(gameUsecases)
+	s.router = api.SetupRouter(s.gameUsecases)
 }
 
 func (s *IntegrationTestSuite) TestCreateGame() {
@@ -81,19 +84,30 @@ func (s *IntegrationTestSuite) TestListGames() {
 	assert.IsType(time.Time{}, got[0].CreatedAt)
 }
 
-/*func (s *IntegrationTestSuite) TestJoinGame() {
+func (s *IntegrationTestSuite) TestJoinGame() {
 	test := s.T()
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	s.router.ServeHTTP(response, testutils.NewJoinGameRequest(test, 1, "player1"))
-	assert.Equal(http.StatusAccepted, response.Code)
-	assert.Equal(http.StatusAccepted, response.Body.String())
+	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
+		gameapi.HTTPGameSocketHandler(w, r, s.gameUsecases, 1, "player")
+	}
+	socketHandler := http.HandlerFunc(funcForHandlerFunc)
+	server, connection := testutils.NewWSServer(s.T(), socketHandler)
+	receivedGame, _ := gameapi.ReceiveGame(connection)
+
+	assert.IsType(domain.Game{}, receivedGame)
 
 	s.router.ServeHTTP(response, testutils.NewGetGameRequest(test, 1))
 	got := testutils.DecodeToGame(response.Body, test)
-	assert.Equal([]string{"player1"}, got.Players)
-}*/
+
+	assert.Equal([]string{"player"}, got.Players)
+
+	test.Cleanup(func() {
+		server.Close()
+		connection.Close()
+	})
+}
 
 func (s *IntegrationTestSuite) TearDownSuite() {
 	testutils.DropDb(s.connectionInfo, s.dbName, s.db)

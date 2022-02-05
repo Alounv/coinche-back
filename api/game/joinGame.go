@@ -27,10 +27,10 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 
 	playerName := context.Query("playerName")
 
-	JoinGameHTTPGameSocketHandler(context.Writer, context.Request, gameAPIs.Usecases, id, playerName)
+	HTTPGameSocketHandler(context.Writer, context.Request, gameAPIs.Usecases, id, playerName)
 }
 
-func JoinGameHTTPGameSocketHandler(
+func HTTPGameSocketHandler(
 	writer http.ResponseWriter,
 	request *http.Request,
 	usecases usecases.GameUsecasesInterface,
