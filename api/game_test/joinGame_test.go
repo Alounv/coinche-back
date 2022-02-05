@@ -4,7 +4,6 @@ import (
 	gameapi "coinche/api/game"
 	"coinche/domain"
 	testutils "coinche/utilities/test"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,12 +16,7 @@ func TestFailingSocketHandler(test *testing.T) {
 		nil,
 	}
 
-	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		gameapi.HTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
-	}
-	handler := http.HandlerFunc(funcForHandlerFunc)
-
-	server, connection := testutils.NewWSServer(test, handler)
+	server, connection := testutils.NewGameWebSocketServer(test, &mockUsecases, 1, "player")
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
 		got, _ := gameapi.ReceiveMessage(connection)
@@ -56,12 +50,7 @@ func TestSocketHandler(test *testing.T) {
 		nil,
 	}
 
-	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		gameapi.HTTPGameSocketHandler(w, r, &mockUsecases, 1, "player")
-	}
-	handler := http.HandlerFunc(funcForHandlerFunc)
-
-	server, connection := testutils.NewWSServer(test, handler)
+	server, connection := testutils.NewGameWebSocketServer(test, &mockUsecases, 1, "player")
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
 		got, _ := gameapi.ReceiveGame(connection)

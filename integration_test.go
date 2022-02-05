@@ -89,11 +89,7 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		gameapi.HTTPGameSocketHandler(w, r, s.gameUsecases, 1, "player")
-	}
-	socketHandler := http.HandlerFunc(funcForHandlerFunc)
-	server, connection := testutils.NewWSServer(s.T(), socketHandler)
+	server, connection := testutils.NewGameWebSocketServer(s.T(), s.gameUsecases, 1, "player")
 	receivedGame, _ := gameapi.ReceiveGame(connection)
 
 	assert.IsType(domain.Game{}, receivedGame)
