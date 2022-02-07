@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -36,8 +35,7 @@ func (game *Game) RemovePlayer(playerName string) error {
 	newPlayers := []string{}
 	for _, name := range game.Players {
 		if name != playerName {
-			fmt.Println(name, playerName, name != playerName)
-			newPlayers = append(newPlayers, playerName)
+			newPlayers = append(newPlayers, name)
 		}
 	}
 
