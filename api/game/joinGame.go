@@ -61,7 +61,17 @@ func HTTPGameSocketHandler(
 		if err != nil {
 			break
 		}
-		err = SendMessage(connection, message)
+		if message == "leave" {
+			err = usecases.LeaveGame(id, playerName)
+			if err != nil {
+				fmt.Println("Could not leave this game: ", err)
+				break
+			}
+			err = SendMessage(connection, "Has left the game")
+			connection.Close()
+		} else {
+			err = SendMessage(connection, message)
+		}
 		if err != nil {
 			break
 		}

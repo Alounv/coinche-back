@@ -29,7 +29,7 @@ func httpToWS(test *testing.T, u string) string {
 	return wsURL.String()
 }
 
-func NewWebSocketServer(test *testing.T, handler http.Handler) (*httptest.Server, *websocket.Conn) {
+func newServer(test *testing.T, handler http.Handler) (*httptest.Server, *websocket.Conn) {
 	test.Helper()
 
 	server := httptest.NewServer(handler)
@@ -54,5 +54,5 @@ func NewGameWebSocketServer(
 	}
 	socketHandler := http.HandlerFunc(funcForHandlerFunc)
 
-	return NewWebSocketServer(test, socketHandler)
+	return newServer(test, socketHandler)
 }

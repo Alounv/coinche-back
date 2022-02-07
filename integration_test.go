@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -27,6 +28,8 @@ type IntegrationTestSuite struct {
 	dbName         string
 	router         *gin.Engine
 	gameUsecases   *usecases.GameUsecases
+	server         *httptest.Server
+	connection     *websocket.Conn
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
@@ -89,8 +92,8 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	server, connection := testutils.NewGameWebSocketServer(s.T(), s.gameUsecases, 1, "player")
-	receivedGame, _ := gameapi.ReceiveGame(connection)
+	s.server, s.connection = testutils.NewGameWebSocketServer(s.T(), s.gameUsecases, 1, "player")
+	receivedGame, _ := gameapi.ReceiveGame(s.connection)
 
 	assert.IsType(domain.Game{}, receivedGame)
 
@@ -98,15 +101,32 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	got := testutils.DecodeToGame(response.Body, test)
 
 	assert.Equal([]string{"player"}, got.Players)
+}
 
-	test.Cleanup(func() {
-		server.Close()
-		connection.Close()
-	})
+func (s *IntegrationTestSuite) TestLeaveUnstartedGame() {
+	test := s.T()
+	assert := assert.New(test)
+	response := httptest.NewRecorder()
+
+	err := gameapi.SendMessage(s.connection, "leave")
+	if err != nil {
+		test.Fatal(err)
+	}
+
+	message, _ := gameapi.ReceiveMessage(s.connection)
+
+	assert.Equal("Has left the game", message)
+
+	s.router.ServeHTTP(response, testutils.NewGetGameRequest(test, 1))
+	got := testutils.DecodeToGame(response.Body, test)
+
+	assert.Equal([]string{}, got.Players)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
 	testutils.DropDb(s.connectionInfo, s.dbName, s.db)
+	s.server.Close()
+	s.connection.Close()
 }
 
 func TestIntegrationSuite(t *testing.T) {

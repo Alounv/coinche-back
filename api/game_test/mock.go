@@ -55,3 +55,13 @@ func (s *MockGameUsecases) JoinGame(id int, playerName string) (domain.Game, err
 	}
 	return gameWithNewPlayer, err
 }
+
+func (s *MockGameUsecases) LeaveGame(id int, playerName string) error {
+	var err error
+	_, existingID := s.games[id]
+	if !existingID {
+		err = errors.New("TEST LEAVE FAIL")
+	}
+
+	return err
+}

@@ -69,6 +69,16 @@ func TestSocketHandler(test *testing.T) {
 		assert.Equal("hello", reply)
 	})
 
+	test.Run("Can leave the game", func(test *testing.T) {
+		err := gameapi.SendMessage(connection, "leave")
+		if err != nil {
+			test.Fatal(err)
+		}
+		reply, _ := gameapi.ReceiveMessage(connection)
+
+		assert.Equal("Has left the game", reply)
+	})
+
 	test.Run("Can close the connection", func(test *testing.T) {
 		connection.Close()
 		err := gameapi.SendMessage(connection, "hello")
