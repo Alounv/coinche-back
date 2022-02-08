@@ -82,7 +82,7 @@ func TestSocketHandler(test *testing.T) {
 		assert.Equal(want, got)
 	})
 
-	test.Run("Receive the bidding phase when full", func(test *testing.T) {
+	test.Run("Receive the teaming phase when full", func(test *testing.T) {
 		s2, c2 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P2")
 		s3, c3 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P3")
 		s4, c4 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P4")
@@ -94,7 +94,7 @@ func TestSocketHandler(test *testing.T) {
 
 		assert.Equal("GAME ONE", got.Name)
 		assert.Equal([]string{"P1", "P2", "P3", "P4"}, got.Players)
-		assert.Equal(domain.Bidding, got.Phase)
+		assert.Equal(domain.Teaming, got.Phase)
 	})
 
 	test.Run("Try to join when already in game", func(test *testing.T) {
@@ -107,7 +107,7 @@ func TestSocketHandler(test *testing.T) {
 
 		assert.Equal("GAME ONE", got.Name)
 		assert.Equal([]string{"P1", "P2", "P3", "P4"}, got.Players)
-		assert.Equal(domain.Bidding, got.Phase)
+		assert.Equal(domain.Teaming, got.Phase)
 	})
 
 	test.Run("Can send a message", func(test *testing.T) {

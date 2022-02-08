@@ -40,7 +40,7 @@ func (repo *MockGameRepo) UpdatePlayers(id int, players []string, phase domain.P
 	}
 	game.Players = players
 	if game.IsFull() && (game.Phase == domain.Preparation) {
-		game.Phase = domain.Bidding
+		game.Phase = domain.Teaming
 	}
 	return nil
 }

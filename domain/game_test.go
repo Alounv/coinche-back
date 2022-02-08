@@ -83,7 +83,7 @@ func TestGamePhases(test *testing.T) {
 	assert := assert.New(test)
 	testGame := Game{
 		ID:      2,
-		Name:    "FullGameName",
+		Name:    "GAME TWO",
 		Players: []string{"P1", "P2", "P3"},
 	}
 
@@ -91,21 +91,41 @@ func TestGamePhases(test *testing.T) {
 		assert.Equal(Preparation, testGame.Phase)
 	})
 
-	test.Run("should be in bidding phase when full", func(test *testing.T) {
+	test.Run("should be in teaming phase when full", func(test *testing.T) {
 		err := testGame.AddPlayer("P4")
 		assert.NoError(err)
-		assert.Equal(Bidding, testGame.Phase)
+		assert.Equal(Teaming, testGame.Phase)
 	})
 
-	test.Run("should stay in bidding if trying to add existing player", func(test *testing.T) {
+	test.Run("should stay in teaming if trying to add existing player", func(test *testing.T) {
 		err := testGame.AddPlayer("P4")
 		assert.Error(err)
-		assert.Equal(Bidding, testGame.Phase)
+		assert.Equal(Teaming, testGame.Phase)
 	})
 
 	test.Run("should go in pause phase is players go less than 4 after preparation", func(test *testing.T) {
 		err := testGame.RemovePlayer("P4")
 		assert.NoError(err)
 		assert.Equal(Pause, testGame.Phase)
+	})
+}
+
+func TestTeamingPhase(test *testing.T) {
+	assert := assert.New(test)
+	testGame := Game{
+		ID:      2,
+		Name:    "GAME TWO",
+		Players: []string{"P1", "P2", "P3", "P4"},
+		Phase:   Teaming,
+	}
+
+	test.Run("should be in teaming phase", func(test *testing.T) {
+		assert.Equal(Teaming, testGame.Phase)
+	})
+
+	test.Run("can assign a team to a player", func(test *testing.T) {
+		err := testGame.AssignTeam("P1", "Team1")
+
+		assert.NoError(err)
 	})
 }

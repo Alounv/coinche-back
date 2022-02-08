@@ -9,10 +9,11 @@ type Phase int
 
 const (
 	Preparation Phase = 0
-	Bidding     Phase = 1
-	Playing     Phase = 2
-	Counting    Phase = 3
-	Pause       Phase = 4
+	Teaming     Phase = 1
+	Bidding     Phase = 2
+	Playing     Phase = 3
+	Counting    Phase = 4
+	Pause       Phase = 5
 )
 
 type Game struct {
@@ -27,6 +28,7 @@ const (
 	ErrAlreadyInGame  = "ALREADY IN GAME"
 	ErrGameFull       = "GAME IS FULL"
 	ErrPlayerNotFound = "PLAYER NOT FOUND"
+	ErrNotTeaming     = "NOT IN TEAMING PHASE"
 )
 
 func (game Game) IsFull() bool {
@@ -46,7 +48,7 @@ func (game *Game) AddPlayer(playerName string) error {
 
 	game.Players = append(game.Players, playerName)
 	if game.IsFull() && game.Phase == Preparation {
-		game.Phase = Bidding
+		game.Phase = Teaming
 	}
 	return nil
 }
@@ -67,6 +69,14 @@ func (game *Game) RemovePlayer(playerName string) error {
 	if !game.IsFull() && game.Phase != Preparation {
 		game.Phase = Pause
 	}
+	return nil
+}
+
+func (game *Game) AssignTeam(playerName string, teamName string) error {
+	if game.Phase != Teaming {
+		return errors.New(ErrNotTeaming)
+	}
+
 	return nil
 }
 
