@@ -18,6 +18,7 @@ func (s *GameRepository) ListGames() []domain.Game {
 			&game.ID,
 			&game.Name,
 			&game.CreatedAt,
+			&game.Phase,
 			(*pq.StringArray)(&game.Players),
 		)
 		if err != nil {

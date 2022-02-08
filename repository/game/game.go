@@ -13,6 +13,7 @@ CREATE TABLE game (
 	id serial PRIMARY KEY NOT NULL,
 	name text,
 	createdAt timestamp NOT NULL DEFAULT now(),
+	phase integer DEFAULT 0,
 	players text[]
 )`
 

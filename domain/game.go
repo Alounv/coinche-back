@@ -12,6 +12,7 @@ const (
 	Bidding     Phase = 1
 	Playing     Phase = 2
 	Counting    Phase = 3
+	Pause       Phase = 4
 )
 
 type Game struct {
@@ -22,23 +23,29 @@ type Game struct {
 	Phase     Phase
 }
 
+const (
+	ErrAlreadyInGame  = "ALREADY IN GAME"
+	ErrGameFull       = "GAME IS FULL"
+	ErrPlayerNotFound = "PLAYER NOT FOUND"
+)
+
 func (game Game) IsFull() bool {
 	return len(game.Players) == 4
 }
 
 func (game *Game) AddPlayer(playerName string) error {
-	if len(game.Players) == 4 {
-		return errors.New("GAME IS FULL")
-	}
-
 	for _, name := range game.Players {
 		if name == playerName {
-			return errors.New("PLAYER NAME ALREADY IN GAME")
+			return errors.New(ErrAlreadyInGame)
 		}
 	}
 
-	game.Players = append(game.Players, playerName)
 	if len(game.Players) == 4 {
+		return errors.New(ErrGameFull)
+	}
+
+	game.Players = append(game.Players, playerName)
+	if len(game.Players) == 4 && game.Phase == Preparation {
 		game.Phase = Bidding
 	}
 	return nil
@@ -53,10 +60,13 @@ func (game *Game) RemovePlayer(playerName string) error {
 	}
 
 	if len(newPlayers) == len(game.Players) {
-		return errors.New("PLAYER NOT FOUND")
+		return errors.New(ErrPlayerNotFound)
 	}
 
 	game.Players = newPlayers
+	if len(game.Players) == 3 && game.Phase != Preparation {
+		game.Phase = Pause
+	}
 	return nil
 }
 

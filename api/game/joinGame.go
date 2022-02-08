@@ -44,11 +44,13 @@ func HTTPGameSocketHandler(
 
 	game, err := usecases.JoinGame(id, playerName)
 	if err != nil {
-		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
-		if err != nil {
-			panic(err)
+		if err.Error() != domain.ErrAlreadyInGame {
+			err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
+			if err != nil {
+				panic(err)
+			}
+			connection.Close()
 		}
-		connection.Close()
 	}
 
 	err = sendGame(connection, game)

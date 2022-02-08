@@ -10,12 +10,13 @@ func (s *GameRepository) CreateGames(games []domain.Game) {
 	for _, game := range games {
 		tx.MustExec(
 			`
-			INSERT INTO game (id, name, createdAt, players)
-			VALUES ($1, $2, $3, string_to_array($4, ','))
+			INSERT INTO game (id, name, createdAt, phase, players)
+			VALUES ($1, $2, $3, $4, string_to_array($5, ','))
 			`,
 			game.ID,
 			game.Name,
 			game.CreatedAt,
+			game.Phase,
 			strings.Join(game.Players, ","),
 		)
 	}

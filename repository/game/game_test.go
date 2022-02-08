@@ -76,9 +76,9 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 
 	test.Run("update a game", func(test *testing.T) {
-		want := []string{"P1", "P2", "P3", "P4"}
+		players := []string{"P1", "P2", "P3", "P4"}
 
-		err := repository.UpdatePlayers(2, want)
+		err := repository.UpdatePlayers(2, players, domain.Pause)
 		if err != nil {
 			panic(err)
 		}
@@ -87,7 +87,8 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			test.Fatal(err)
 		}
 
-		assert.Equal(want, game.Players)
+		assert.Equal(players, game.Players)
+		assert.Equal(domain.Pause, game.Phase)
 	})
 
 	test.Cleanup(func() {

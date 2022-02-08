@@ -12,6 +12,7 @@ func (s *GameRepository) GetGame(id int) (domain.Game, error) {
 		&game.ID,
 		&game.Name,
 		&game.CreatedAt,
+		&game.Phase,
 		(*pq.StringArray)(&game.Players),
 	)
 

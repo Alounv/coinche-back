@@ -27,15 +27,11 @@ func TestListGames(test *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)
 		response := httptest.NewRecorder()
 
-		want := []domain.Game{
-			{ID: 1, Name: "GAME ONE"},
-			{ID: 2, Name: "GAME TWO"},
-		}
-
 		router.ServeHTTP(response, request)
 		got := testutils.DecodeToGames(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
-		assert.Equal(want, got)
+		assert.Contains(got, domain.Game{ID: 1, Name: "GAME ONE"})
+		assert.Contains(got, domain.Game{ID: 2, Name: "GAME TWO"})
 	})
 }

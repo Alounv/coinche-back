@@ -33,12 +33,15 @@ func (repo *MockGameRepo) CreateGame(game domain.Game) int {
 	return newId
 }
 
-func (repo *MockGameRepo) UpdatePlayers(id int, players []string) error {
+func (repo *MockGameRepo) UpdatePlayers(id int, players []string, phase domain.Phase) error {
 	game, ok := repo.games[id]
 	if !ok {
 		return errors.New("GAME NOT FOUND")
 	}
 	game.Players = players
+	if (len(game.Players) == 4) && (game.Phase == domain.Preparation) {
+		game.Phase = domain.Bidding
+	}
 	return nil
 }
 

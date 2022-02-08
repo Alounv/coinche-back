@@ -22,7 +22,7 @@ func TestFailingSocketHandler(test *testing.T) {
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
 
-	server, connection := testutils.NewGameWebSocketServer(test, gameUsecases, 1, "player")
+	server, connection := testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P1")
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
 		got, _ := gameapi.ReceiveMessage(connection)
@@ -58,20 +58,21 @@ func TestSocketHandler(test *testing.T) {
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
 
 	var s1 *httptest.Server
-	var c1 *websocket.Conn
-
 	var s2 *httptest.Server
 	var s3 *httptest.Server
 	var s4 *httptest.Server
+	var s5 *httptest.Server
 
+	var c1 *websocket.Conn
 	var c2 *websocket.Conn
 	var c3 *websocket.Conn
 	var c4 *websocket.Conn
+	var c5 *websocket.Conn
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
-		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: []string{"player"}})
+		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: []string{"P1"}})
 
-		s1, c1 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "player")
+		s1, c1 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P1")
 
 		got, err := gameapi.ReceiveGame(c1)
 		if err != nil {
@@ -82,17 +83,31 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Receive the bidding phase when full", func(test *testing.T) {
-		s2, c2 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "player2")
-		s3, c3 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "player3")
-		s4, c4 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "player4")
+		s2, c2 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P2")
+		s3, c3 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P3")
+		s4, c4 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P4")
 
 		got, err := gameapi.ReceiveGame(c4)
 		if err != nil {
 			test.Fatal(err)
 		}
-		want := domain.Game{ID: 1, Name: "GAME ONE", Players: []string{"player", "player2", "player3", "player4"}, Phase: 1}
 
-		assert.Equal(want, got)
+		assert.Equal("GAME ONE", got.Name)
+		assert.Equal([]string{"P1", "P2", "P3", "P4"}, got.Players)
+		assert.Equal(domain.Bidding, got.Phase)
+	})
+
+	test.Run("Try to join when already in game", func(test *testing.T) {
+		s5, c5 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P4")
+
+		got, err := gameapi.ReceiveGame(c5)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal("GAME ONE", got.Name)
+		assert.Equal([]string{"P1", "P2", "P3", "P4"}, got.Players)
+		assert.Equal(domain.Bidding, got.Phase)
 	})
 
 	test.Run("Can send a message", func(test *testing.T) {
@@ -137,5 +152,7 @@ func TestSocketHandler(test *testing.T) {
 		c3.Close()
 		s4.Close()
 		c4.Close()
+		s5.Close()
+		c5.Close()
 	})
 }
