@@ -33,7 +33,7 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context) {
 func HTTPGameSocketHandler(
 	writer http.ResponseWriter,
 	request *http.Request,
-	usecases usecases.GameUsecasesInterface,
+	usecases *usecases.GameUsecases,
 	id int,
 	playerName string,
 ) {

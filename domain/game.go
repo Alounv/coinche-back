@@ -5,11 +5,21 @@ import (
 	"time"
 )
 
+type Phase int
+
+const (
+	Preparation Phase = 0
+	Bidding     Phase = 1
+	Playing     Phase = 2
+	Counting    Phase = 3
+)
+
 type Game struct {
 	ID        int
 	Name      string
 	CreatedAt time.Time
 	Players   []string
+	Phase     Phase
 }
 
 func (game Game) IsFull() bool {
@@ -28,6 +38,9 @@ func (game *Game) AddPlayer(playerName string) error {
 	}
 
 	game.Players = append(game.Players, playerName)
+	if len(game.Players) == 4 {
+		game.Phase = Bidding
+	}
 	return nil
 }
 
@@ -51,5 +64,6 @@ func NewGame(name string, creatorName string) Game {
 	return Game{
 		Name:    name,
 		Players: []string{creatorName},
+		Phase:   Preparation,
 	}
 }

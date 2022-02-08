@@ -1,8 +1,9 @@
-package gameapitest
+package gameapi
 
 import (
 	"coinche/api"
 	"coinche/domain"
+	"coinche/usecases"
 	testutils "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
@@ -13,14 +14,14 @@ import (
 
 func TestListGames(test *testing.T) {
 	assert := assert.New(test)
-	mockUsecases := MockGameUsecases{
-		map[int]domain.Game{
+	mockRepository := usecases.NewMockGameRepo(
+		map[int]*domain.Game{
 			1: {Name: "GAME ONE"},
 			2: {Name: "GAME TWO"},
 		},
-		nil,
-	}
-	router := api.SetupRouter(&mockUsecases)
+	)
+	gameUsecases := usecases.NewGameUsecases(&mockRepository)
+	router := api.SetupRouter(gameUsecases)
 
 	test.Run("list games", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)

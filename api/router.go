@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(gameUsecases usecases.GameUsecasesInterface) *gin.Engine {
+func SetupRouter(gameUsecases *usecases.GameUsecases) *gin.Engine {
 	gameAPIs := &gameapi.GameAPIs{Usecases: gameUsecases}
 
 	router := gin.Default()

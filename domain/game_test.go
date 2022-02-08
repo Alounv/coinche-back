@@ -34,7 +34,7 @@ func TestAddPlayer(test *testing.T) {
 		err := testGame.AddPlayer("P3")
 
 		assert.Equal(testGame.Players, []string{"P1", "P2", "P3"})
-		assert.Nil(err)
+		assert.NoError(err)
 	})
 
 	test.Run("should fail to add player when full", func(test *testing.T) {
@@ -62,7 +62,7 @@ func TestRemovePlayer(test *testing.T) {
 	test.Run("should remove player", func(test *testing.T) {
 		err := testGame.RemovePlayer("P2")
 
-		assert.Nil(err)
+		assert.NoError(err)
 		assert.Equal([]string{"P1", "P3", "P4"}, testGame.Players)
 	})
 
@@ -70,5 +70,24 @@ func TestRemovePlayer(test *testing.T) {
 		err := testGame.RemovePlayer("P2")
 
 		assert.Error(err)
+	})
+}
+
+func TestGamePhases(test *testing.T) {
+	assert := assert.New(test)
+	testGame := Game{
+		ID:      2,
+		Name:    "FullGameName",
+		Players: []string{"P1", "P2", "P3"},
+	}
+
+	test.Run("should be in preparation phase", func(test *testing.T) {
+		assert.Equal(Preparation, testGame.Phase)
+	})
+
+	test.Run("should be in bidding phase when full", func(test *testing.T) {
+		err := testGame.AddPlayer("P4")
+		assert.NoError(err)
+		assert.Equal(Bidding, testGame.Phase)
 	})
 }
