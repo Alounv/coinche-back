@@ -40,12 +40,12 @@ func (game *Game) AddPlayer(playerName string) error {
 		}
 	}
 
-	if len(game.Players) == 4 {
+	if game.IsFull() {
 		return errors.New(ErrGameFull)
 	}
 
 	game.Players = append(game.Players, playerName)
-	if len(game.Players) == 4 && game.Phase == Preparation {
+	if game.IsFull() && game.Phase == Preparation {
 		game.Phase = Bidding
 	}
 	return nil
@@ -64,7 +64,7 @@ func (game *Game) RemovePlayer(playerName string) error {
 	}
 
 	game.Players = newPlayers
-	if len(game.Players) == 3 && game.Phase != Preparation {
+	if !game.IsFull() && game.Phase != Preparation {
 		game.Phase = Pause
 	}
 	return nil

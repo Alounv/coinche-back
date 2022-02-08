@@ -39,7 +39,7 @@ func (repo *MockGameRepo) UpdatePlayers(id int, players []string, phase domain.P
 		return errors.New("GAME NOT FOUND")
 	}
 	game.Players = players
-	if (len(game.Players) == 4) && (game.Phase == domain.Preparation) {
+	if game.IsFull() && (game.Phase == domain.Preparation) {
 		game.Phase = domain.Bidding
 	}
 	return nil
