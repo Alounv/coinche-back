@@ -117,15 +117,36 @@ func TestTeamingPhase(test *testing.T) {
 		Name:    "GAME TWO",
 		Players: []string{"P1", "P2", "P3", "P4"},
 		Phase:   Teaming,
+		Teams:   map[string]Team{},
 	}
 
 	test.Run("should be in teaming phase", func(test *testing.T) {
 		assert.Equal(Teaming, testGame.Phase)
 	})
 
-	test.Run("can assign a team to a player", func(test *testing.T) {
+	test.Run("can create a team", func(test *testing.T) {
+		want := []string{"P1"}
+
 		err := testGame.AssignTeam("P1", "Team1")
 
 		assert.NoError(err)
+		assert.Equal(1, len(testGame.Teams))
+		assert.Equal(want, testGame.Teams["Team1"].Players)
+	})
+
+	test.Run("can join a team", func(test *testing.T) {
+		want := []string{"P1", "P2"}
+
+		err := testGame.AssignTeam("P2", "Team1")
+
+		assert.NoError(err)
+		assert.Equal(1, len(testGame.Teams))
+		assert.Equal(want, testGame.Teams["Team1"].Players)
+	})
+
+	test.Run("should fail when team is full", func(test *testing.T) {
+		err := testGame.AssignTeam("P3", "Team1")
+
+		assert.Equal(err.Error(), ErrTeamFull)
 	})
 }

@@ -21,7 +21,12 @@ type Game struct {
 	Name      string
 	CreatedAt time.Time
 	Players   []string
+	Teams     map[string]Team
 	Phase     Phase
+}
+
+type Team struct {
+	Players []string
 }
 
 const (
@@ -30,6 +35,7 @@ const (
 	ErrGameFull        = "GAME IS FULL"
 	ErrPlayerNotFound  = "PLAYER NOT FOUND"
 	ErrNotTeaming      = "NOT IN TEAMING PHASE"
+	ErrTeamFull        = "TEAM IS FULL"
 )
 
 func (game Game) IsFull() bool {
@@ -79,6 +85,22 @@ func (game *Game) RemovePlayer(playerName string) error {
 func (game *Game) AssignTeam(playerName string, teamName string) error {
 	if game.Phase != Teaming {
 		return errors.New(ErrNotTeaming)
+	}
+
+	if team, ok := game.Teams[teamName]; ok {
+		if len(team.Players) == 2 {
+			return errors.New(ErrTeamFull)
+		}
+
+		team.Players = append(team.Players, playerName)
+
+		game.Teams[teamName] = team
+
+		return nil
+	}
+
+	game.Teams[teamName] = Team{
+		Players: []string{playerName},
 	}
 
 	return nil
