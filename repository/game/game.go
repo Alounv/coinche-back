@@ -2,7 +2,6 @@ package gamerepo
 
 import (
 	"coinche/usecases"
-	"fmt"
 
 	_ "github.com/jackc/pgx/stdlib" // pgx driver
 	"github.com/jmoiron/sqlx"
@@ -11,34 +10,49 @@ import (
 var gameSchema = `
 CREATE TABLE game (
 	id serial PRIMARY KEY NOT NULL,
-	name text,
+	name text NOT NULL,
 	createdAt timestamp NOT NULL DEFAULT now(),
-	phase integer DEFAULT 0,
-	players text[]
+	phase integer DEFAULT 0
 )`
+
+var playerSchema = `
+	CREATE TABLE player (
+		id serial PRIMARY KEY NOT NULL,
+		name text NOT NULL,
+		gameid integer NOT NULL REFERENCES game(id),
+		createdAt timestamp NOT NULL DEFAULT now()
+	)`
 
 type GameRepository struct {
 	usecases.GameRepositoryInterface
 	db *sqlx.DB
 }
 
-func (s *GameRepository) CreatePlayerTableIfNeeded() error {
+func (s *GameRepository) CreateGameTableIfNeeded() error {
 	_, err := s.db.Exec(gameSchema)
 	return err
 }
 
-func NewGameRepository(dsn string) *GameRepository {
+func (s *GameRepository) CreatePlayerTableIfNeeded() error {
+	_, err := s.db.Exec(playerSchema)
+	return err
+}
+
+func NewGameRepository(dsn string) (*GameRepository, error) {
 	db := sqlx.MustOpen("pgx", dsn)
 
 	return NewGameRepositoryFromDb(db)
 }
 
-func NewGameRepositoryFromDb(db *sqlx.DB) *GameRepository {
+func NewGameRepositoryFromDb(db *sqlx.DB) (*GameRepository, error) {
 	gameRepository := GameRepository{db: db}
-	err := gameRepository.CreatePlayerTableIfNeeded()
+
+	err := gameRepository.CreateGameTableIfNeeded()
 	if err != nil {
-		fmt.Println("No need to create the table.", err)
+		return &gameRepository, err
 	}
 
-	return &gameRepository
+	err = gameRepository.CreatePlayerTableIfNeeded()
+
+	return &gameRepository, err
 }

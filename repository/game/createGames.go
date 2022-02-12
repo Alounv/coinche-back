@@ -2,26 +2,40 @@ package gamerepo
 
 import (
 	"coinche/domain"
-	"strings"
 )
 
-func (s *GameRepository) CreateGames(games []domain.Game) {
+func (s *GameRepository) CreateGames(games []domain.Game) error {
 	tx := s.db.MustBegin()
+
 	for _, game := range games {
-		tx.MustExec(
+		_, err := tx.Exec(
 			`
-			INSERT INTO game (id, name, createdAt, phase, players)
-			VALUES ($1, $2, $3, $4, string_to_array($5, ','))
+			INSERT INTO game (id, name, createdAt, phase)
+			VALUES ($1, $2, $3, $4)
 			`,
 			game.ID,
 			game.Name,
 			game.CreatedAt,
 			game.Phase,
-			strings.Join(game.Players, ","),
 		)
+		if err != nil {
+			return err
+		}
+
+		for _, playerName := range game.Players {
+			_, err := tx.Exec(
+				`
+				INSERT INTO player (name, gameid) 
+				VALUES ($1, $2)
+				`,
+				playerName,
+				game.ID,
+			)
+			if err != nil {
+				return err
+			}
+		}
 	}
-	err := tx.Commit()
-	if err != nil {
-		panic(err)
-	}
+
+	return tx.Commit()
 }

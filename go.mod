@@ -7,9 +7,10 @@ require (
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/joho/godotenv v1.4.0
-	github.com/lib/pq v1.10.4
 	github.com/stretchr/testify v1.7.0
 )
+
+require github.com/lib/pq v1.10.4 // indirect
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect

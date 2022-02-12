@@ -10,7 +10,7 @@ import (
 func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	stringID := context.Param("id")
 	id, err := strconv.Atoi(stringID)
-	if err != nil { // CONTEXT.JSON()...
+	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "WRONG ID FORMAT"})
 		return
 	}

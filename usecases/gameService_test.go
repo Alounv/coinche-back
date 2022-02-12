@@ -36,7 +36,10 @@ func TestGameService(test *testing.T) {
 	})
 
 	test.Run("can create game", func(test *testing.T) {
-		id := gameUsecases.CreateGame("GAME TWO", "P4")
+		id, err := gameUsecases.CreateGame("GAME TWO")
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(1, mockRepository.creationCalls)
 		assert.Equal(1, id)

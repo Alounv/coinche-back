@@ -8,8 +8,12 @@ import (
 
 func (gameAPIs *GameAPIs) CreateGame(context *gin.Context) {
 	name := context.Query("name")
-	creatorName := context.Query("creator")
 
-	id := gameAPIs.Usecases.CreateGame(name, creatorName)
+	id, err := gameAPIs.Usecases.CreateGame(name)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	context.JSON(http.StatusAccepted, id)
 }

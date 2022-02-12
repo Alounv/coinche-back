@@ -5,17 +5,17 @@ import (
 )
 
 type GameUsecasesInterface interface {
-	ListGames() []domain.Game
+	ListGames() ([]domain.Game, error)
 	GetGame(id int) (domain.Game, error)
-	CreateGame(name string, creatorName string) int
+	CreateGame(name string) int
 	JoinGame(id int, playerName string) (domain.Game, error)
 	LeaveGame(id int, playerName string) error
 }
 
 type GameRepositoryInterface interface {
-	ListGames() []domain.Game
+	ListGames() ([]domain.Game, error)
 	GetGame(id int) (domain.Game, error)
-	CreateGame(game domain.Game) int
+	CreateGame(game domain.Game) (int, error)
 	UpdatePlayers(id int, players []string, phase domain.Phase) error
 }
 
@@ -24,7 +24,7 @@ type GameUsecases struct {
 	Repo GameRepositoryInterface
 }
 
-func (s *GameUsecases) ListGames() []domain.Game {
+func (s *GameUsecases) ListGames() ([]domain.Game, error) {
 	return s.Repo.ListGames()
 }
 
@@ -32,8 +32,8 @@ func (s *GameUsecases) GetGame(id int) (domain.Game, error) {
 	return s.Repo.GetGame(id)
 }
 
-func (s *GameUsecases) CreateGame(name string, creatorName string) int {
-	game := domain.NewGame(name, creatorName)
+func (s *GameUsecases) CreateGame(name string) (int, error) {
+	game := domain.NewGame(name)
 	return s.Repo.CreateGame(game)
 }
 

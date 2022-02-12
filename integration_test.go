@@ -39,7 +39,11 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	s.db = testutils.CreateDb(s.connectionInfo, s.dbName)
 
-	gameRepository := gamerepo.NewGameRepositoryFromDb(s.db)
+	gameRepository, err := gamerepo.NewGameRepositoryFromDb(s.db)
+	if err != nil {
+		s.T().Fatal(err)
+	}
+
 	s.gameUsecases = &usecases.GameUsecases{Repo: gameRepository}
 
 	s.router = api.SetupRouter(s.gameUsecases)
@@ -67,6 +71,7 @@ func (s *IntegrationTestSuite) TestGetGame() {
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal("NEW GAME", got.Name)
 	assert.Equal(1, got.ID)
+	assert.Equal([]string{}, got.Players)
 	assert.IsType(time.Time{}, got.CreatedAt)
 }
 
@@ -129,6 +134,6 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.connection.Close()
 }
 
-func TestIntegrationSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
+func TestIntegrationSuite(test *testing.T) {
+	suite.Run(test, new(IntegrationTestSuite))
 }

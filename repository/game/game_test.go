@@ -20,13 +20,20 @@ func TestGameRepo(test *testing.T) {
 
 	db := testutils.CreateDb(connectionInfo, dbName)
 
-	repository := NewGameRepositoryFromDb(db)
+	repository, err := NewGameRepositoryFromDb(db)
+	if err != nil {
+		test.Fatal(err)
+	}
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
 		newPlayers := []string{"P1", "P2"}
 
-		newID := repository.CreateGame(domain.Game{Name: newName, Players: newPlayers})
+		newID, err := repository.CreateGame(domain.Game{Name: newName, Players: newPlayers})
+		if err != nil {
+			test.Fatal(err)
+		}
+
 		got, err := repository.GetGame(newID)
 		if err != nil {
 			test.Fatal(err)
@@ -51,12 +58,26 @@ func TestGameRepoWithInitialData(test *testing.T) {
 
 	db := testutils.CreateDb(connectionInfo, dbName)
 
-	repository := NewGameRepositoryWithData(db)
+	repository, err := NewGameRepositoryWithData(db)
+	if err != nil {
+		test.Fatal(err)
+	}
 
-	test.Run("get a game", func(test *testing.T) {
+	test.Run("get an empty game", func(test *testing.T) {
 		want := domain.Game{Name: "GAME ONE", ID: 1, Players: []string{}}
 
 		got, err := repository.GetGame(1)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal(want, got)
+	})
+
+	test.Run("get a game", func(test *testing.T) {
+		want := domain.Game{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}}
+
+		got, err := repository.GetGame(2)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -70,9 +91,13 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 		}
 
-		got := repository.ListGames()
+		got, err := repository.ListGames()
+		if err != nil {
+			test.Fatal(err)
+		}
 
-		assert.Equal(want, got)
+		assert.Equal(want[0], got[0])
+		assert.Equal(want[1], got[1])
 	})
 
 	test.Run("update a game", func(test *testing.T) {
@@ -96,13 +121,16 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 }
 
-func NewGameRepositoryWithData(db *sqlx.DB) *GameRepository {
-	repository := NewGameRepositoryFromDb(db)
+func NewGameRepositoryWithData(db *sqlx.DB) (*GameRepository, error) {
+	repository, err := NewGameRepositoryFromDb(db)
+	if err != nil {
+		return nil, err
+	}
 
-	repository.CreateGames([]domain.Game{
-		{Name: "GAME ONE", ID: 1},
+	err = repository.CreateGames([]domain.Game{
+		{Name: "GAME ONE", ID: 1, Players: []string{}},
 		{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
 	})
 
-	return repository
+	return repository, err
 }

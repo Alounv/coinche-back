@@ -25,10 +25,11 @@ type Game struct {
 }
 
 const (
-	ErrAlreadyInGame  = "ALREADY IN GAME"
-	ErrGameFull       = "GAME IS FULL"
-	ErrPlayerNotFound = "PLAYER NOT FOUND"
-	ErrNotTeaming     = "NOT IN TEAMING PHASE"
+	ErrAlreadyInGame   = "ALREADY IN GAME"
+	ErrEmptyPlayerName = "EMPTY PLAYER NAME"
+	ErrGameFull        = "GAME IS FULL"
+	ErrPlayerNotFound  = "PLAYER NOT FOUND"
+	ErrNotTeaming      = "NOT IN TEAMING PHASE"
 )
 
 func (game Game) IsFull() bool {
@@ -36,6 +37,10 @@ func (game Game) IsFull() bool {
 }
 
 func (game *Game) AddPlayer(playerName string) error {
+	if playerName == "" {
+		return errors.New(ErrEmptyPlayerName)
+	}
+
 	for _, name := range game.Players {
 		if name == playerName {
 			return errors.New(ErrAlreadyInGame)
@@ -45,7 +50,6 @@ func (game *Game) AddPlayer(playerName string) error {
 	if game.IsFull() {
 		return errors.New(ErrGameFull)
 	}
-
 	game.Players = append(game.Players, playerName)
 	if game.IsFull() && game.Phase == Preparation {
 		game.Phase = Teaming
@@ -80,10 +84,10 @@ func (game *Game) AssignTeam(playerName string, teamName string) error {
 	return nil
 }
 
-func NewGame(name string, creatorName string) Game {
+func NewGame(name string) Game {
 	return Game{
 		Name:    name,
-		Players: []string{creatorName},
+		Players: []string{},
 		Phase:   Preparation,
 	}
 }

@@ -10,13 +10,13 @@ type MockGameRepo struct {
 	creationCalls int
 }
 
-func (repo *MockGameRepo) ListGames() []domain.Game {
+func (repo *MockGameRepo) ListGames() ([]domain.Game, error) {
 	var games []domain.Game
 	for id, val := range repo.games {
 		val.ID = id
 		games = append(games, *val)
 	}
-	return games
+	return games, nil
 }
 
 func (repo *MockGameRepo) GetGame(id int) (domain.Game, error) {
@@ -27,10 +27,10 @@ func (repo *MockGameRepo) GetGame(id int) (domain.Game, error) {
 	return *game, nil
 }
 
-func (repo *MockGameRepo) CreateGame(game domain.Game) int {
+func (repo *MockGameRepo) CreateGame(game domain.Game) (int, error) {
 	newId := len(repo.games)
 	repo.creationCalls = repo.creationCalls + 1
-	return newId
+	return newId, nil
 }
 
 func (repo *MockGameRepo) UpdatePlayers(id int, players []string, phase domain.Phase) error {

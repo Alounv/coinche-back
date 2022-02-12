@@ -14,7 +14,7 @@ import (
 )
 
 func NewCreateGameRequest(test *testing.T, name string) *http.Request {
-	route := fmt.Sprintf("/games/create?name=%s", name)
+	route := fmt.Sprintf("/games/create?name=%s", url.QueryEscape(name))
 	return GetNewRequest(test, route, http.MethodPost)
 }
 
