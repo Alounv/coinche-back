@@ -98,6 +98,19 @@ func (game *Game) AssignTeam(playerName string, teamName string) error {
 	return nil
 }
 
+func (game *Game) ClearTeam(playerName string) error {
+	if game.Phase != Teaming {
+		return errors.New(ErrNotTeaming)
+	}
+
+	newPlayer := game.Players[playerName]
+	newPlayer.Team = ""
+
+	game.Players[playerName] = newPlayer
+
+	return nil
+}
+
 func NewGame(name string) Game {
 	return Game{
 		Name:    name,

@@ -9,22 +9,14 @@ import (
 func TestAddPlayer(test *testing.T) {
 	assert := assert.New(test)
 	testGame := Game{
-		ID:   1,
-		Name: "GameName",
-		Players: map[string]Player{
-			"P1": {},
-			"P2": {},
-		},
+		ID:      1,
+		Name:    "GameName",
+		Players: map[string]Player{"P1": {}, "P2": {}},
 	}
 	fullTestGame := Game{
-		ID:   2,
-		Name: "FullGameName",
-		Players: map[string]Player{
-			"P1": {},
-			"P2": {},
-			"P3": {},
-			"P4": {},
-		},
+		ID:      2,
+		Name:    "FullGameName",
+		Players: map[string]Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}},
 	}
 
 	test.Run("full game should be full", func(test *testing.T) {
@@ -41,11 +33,7 @@ func TestAddPlayer(test *testing.T) {
 	test.Run("should add player", func(test *testing.T) {
 		err := testGame.AddPlayer("P3")
 
-		assert.Equal(testGame.Players, map[string]Player{
-			"P1": {},
-			"P2": {},
-			"P3": {},
-		})
+		assert.Equal(testGame.Players, map[string]Player{"P1": {}, "P2": {}, "P3": {}})
 		assert.NoError(err)
 	})
 
@@ -58,11 +46,7 @@ func TestAddPlayer(test *testing.T) {
 	test.Run("should fail to add player already in game", func(test *testing.T) {
 		err := testGame.AddPlayer("P2")
 
-		assert.Equal(map[string]Player{
-			"P1": {},
-			"P2": {},
-			"P3": {},
-		}, testGame.Players)
+		assert.Equal(map[string]Player{"P1": {}, "P2": {}, "P3": {}}, testGame.Players)
 		assert.Equal(err.Error(), ErrAlreadyInGame)
 	})
 
@@ -76,25 +60,16 @@ func TestAddPlayer(test *testing.T) {
 func TestRemovePlayer(test *testing.T) {
 	assert := assert.New(test)
 	testGame := Game{
-		ID:   2,
-		Name: "FullGameName",
-		Players: map[string]Player{
-			"P1": {},
-			"P2": {},
-			"P3": {},
-			"P4": {},
-		},
+		ID:      2,
+		Name:    "FullGameName",
+		Players: map[string]Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}},
 	}
 
 	test.Run("should remove player", func(test *testing.T) {
 		err := testGame.RemovePlayer("P2")
 
 		assert.NoError(err)
-		assert.Equal(map[string]Player{
-			"P1": {},
-			"P3": {},
-			"P4": {},
-		}, testGame.Players)
+		assert.Equal(map[string]Player{"P1": {}, "P3": {}, "P4": {}}, testGame.Players)
 	})
 
 	test.Run("should fail to remove player not in game", func(test *testing.T) {
@@ -107,13 +82,9 @@ func TestRemovePlayer(test *testing.T) {
 func TestGamePhases(test *testing.T) {
 	assert := assert.New(test)
 	testGame := Game{
-		ID:   2,
-		Name: "GAME TWO",
-		Players: map[string]Player{
-			"P1": {},
-			"P2": {},
-			"P3": {},
-		},
+		ID:      2,
+		Name:    "GAME TWO",
+		Players: map[string]Player{"P1": {}, "P2": {}, "P3": {}},
 	}
 
 	test.Run("should be in preparation phase", func(test *testing.T) {
@@ -142,15 +113,10 @@ func TestGamePhases(test *testing.T) {
 func TestTeamingPhase(test *testing.T) {
 	assert := assert.New(test)
 	testGame := Game{
-		ID:   2,
-		Name: "GAME TWO",
-		Players: map[string]Player{
-			"P1": {},
-			"P2": {},
-			"P3": {},
-			"P4": {},
-		},
-		Phase: Teaming,
+		ID:      2,
+		Name:    "GAME TWO",
+		Players: map[string]Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}},
+		Phase:   Teaming,
 	}
 
 	test.Run("should be in teaming phase", func(test *testing.T) {
@@ -176,5 +142,12 @@ func TestTeamingPhase(test *testing.T) {
 		err := testGame.AssignTeam("P3", "Team1")
 
 		assert.Equal(err.Error(), ErrTeamFull)
+	})
+
+	test.Run("can leave a team", func(test *testing.T) {
+		err := testGame.ClearTeam("P2")
+
+		assert.NoError(err)
+		assert.Equal("", testGame.Players["P2"].Team)
 	})
 }

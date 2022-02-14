@@ -48,4 +48,7 @@ func TestGameService(test *testing.T) {
 		assert.Equal(1, mockRepository.creationCalls)
 		assert.Equal(1, id)
 	})
+
+	/*test.Run("can choose a team", func(test *testing.T) {
+	}*/
 }
