@@ -16,7 +16,7 @@ type GameRepositoryInterface interface {
 	ListGames() ([]domain.Game, error)
 	GetGame(id int) (domain.Game, error)
 	CreateGame(game domain.Game) (int, error)
-	UpdatePlayers(id int, players []string, phase domain.Phase) error
+	UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error
 }
 
 type GameUsecases struct {

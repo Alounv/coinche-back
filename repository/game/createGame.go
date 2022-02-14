@@ -20,13 +20,14 @@ func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 		return 0, err
 	}
 
-	for _, playerName := range game.Players {
+	for playerName, player := range game.Players {
 		_, err := tx.Exec(
 			`
-			INSERT INTO player (name, gameid) 
-			VALUES ($1, $2)
+			INSERT INTO player (name, team, gameid) 
+			VALUES ($1, $2, $3)
 			`,
 			playerName,
+			player.Team,
 			id,
 		)
 		if err != nil {

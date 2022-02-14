@@ -17,7 +17,12 @@ func TestGetGame(test *testing.T) {
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]*domain.Game{
 			1: {Name: "GAME ONE"},
-			2: {Name: "GAME TWO", Players: []string{"P1", "P2", "P3", "P4"}},
+			2: {Name: "GAME TWO", Players: map[string]domain.Player{
+				"P1": {},
+				"P2": {},
+				"P3": {},
+				"P4": {},
+			}},
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)

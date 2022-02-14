@@ -33,7 +33,7 @@ func (repo *MockGameRepo) CreateGame(game domain.Game) (int, error) {
 	return newId, nil
 }
 
-func (repo *MockGameRepo) UpdatePlayers(id int, players []string, phase domain.Phase) error {
+func (repo *MockGameRepo) UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error {
 	game, ok := repo.games[id]
 	if !ok {
 		return errors.New("GAME NOT FOUND")

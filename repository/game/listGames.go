@@ -24,16 +24,18 @@ func (s *GameRepository) ListGames() ([]domain.Game, error) {
 			return nil, err
 		}
 
-		rows, err := s.db.Query("SELECT name FROM player WHERE gameid=$1", game.ID)
+		rows, err := s.db.Query("SELECT name, team FROM player WHERE gameid=$1", game.ID)
 		if err != nil {
 			return nil, err
 		}
 
-		game.Players = []string{}
+		game.Players = map[string]domain.Player{}
+
 		for rows.Next() {
 			var playerName string
-			err = rows.Scan(&playerName)
-			game.Players = append(game.Players, playerName)
+			var teamName string
+			err = rows.Scan(&playerName, &teamName)
+			game.Players[playerName] = domain.Player{Team: teamName}
 			if err != nil {
 				return nil, err
 			}

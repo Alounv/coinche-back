@@ -4,10 +4,10 @@ import (
 	"coinche/domain"
 )
 
-func (s *GameRepository) UpdatePlayers(id int, players []string, phase domain.Phase) error {
+func (s *GameRepository) UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error {
 	tx := s.db.MustBegin()
 
-	var currentPlayers []string
+	var currentPlayers map[string]int = map[string]int{}
 
 	rows, err := tx.Query(`SELECT name FROM player WHERE gameid=$1`, id)
 	if err != nil {
@@ -21,15 +21,13 @@ func (s *GameRepository) UpdatePlayers(id int, players []string, phase domain.Ph
 			return err
 		}
 
-		currentPlayers = append(currentPlayers, playerName)
+		currentPlayers[playerName] = 0
 	}
 
-	for _, currentPlayerName := range currentPlayers {
-		shouldDelete := true
-		for _, playerName := range players {
-			if currentPlayerName == playerName {
-				shouldDelete = false
-			}
+	for currentPlayerName := range currentPlayers {
+		shouldDelete := false
+		if _, ok := players[currentPlayerName]; !ok {
+			shouldDelete = true
 		}
 
 		if shouldDelete {
@@ -47,21 +45,20 @@ func (s *GameRepository) UpdatePlayers(id int, players []string, phase domain.Ph
 		}
 	}
 
-	for _, playerName := range players {
-		shouldCreate := true
-		for _, currentPlayerName := range currentPlayers {
-			if currentPlayerName == playerName {
-				shouldCreate = false
-			}
+	for playerName, player := range players {
+		shouldCreate := false
+		if _, ok := currentPlayers[playerName]; !ok {
+			shouldCreate = true
 		}
 
 		if shouldCreate {
 			_, err := s.db.Exec(
 				`
-				INSERT INTO player (name, gameid) 
-				VALUES ($1, $2)
+				INSERT INTO player (name, team, gameid) 
+				VALUES ($1, $2, $3)
 				`,
 				playerName,
+				player.Team,
 				id,
 			)
 			if err != nil {

@@ -71,7 +71,7 @@ func (s *IntegrationTestSuite) TestGetGame() {
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal("NEW GAME", got.Name)
 	assert.Equal(1, got.ID)
-	assert.Equal([]string{}, got.Players)
+	assert.Equal(map[string]domain.Player{}, got.Players)
 	assert.IsType(time.Time{}, got.CreatedAt)
 }
 
@@ -105,7 +105,7 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	s.router.ServeHTTP(response, testutils.NewGetGameRequest(test, 1))
 	got := testutils.DecodeToGame(response.Body, test)
 
-	assert.Equal([]string{"player"}, got.Players)
+	assert.Equal(map[string]domain.Player{"player": {}}, got.Players)
 }
 
 func (s *IntegrationTestSuite) TestLeaveUnstartedGame() {
@@ -125,7 +125,7 @@ func (s *IntegrationTestSuite) TestLeaveUnstartedGame() {
 	s.router.ServeHTTP(response, testutils.NewGetGameRequest(test, 1))
 	got := testutils.DecodeToGame(response.Body, test)
 
-	assert.Equal([]string{}, got.Players)
+	assert.Equal(map[string]domain.Player{}, got.Players)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {

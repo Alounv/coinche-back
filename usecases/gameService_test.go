@@ -12,7 +12,11 @@ func TestGameService(test *testing.T) {
 
 	mockRepository := MockGameRepo{
 		games: map[int]*domain.Game{
-			0: {Name: "GAME ONE", Players: []string{"P1", "P2", "P3"}},
+			0: {Name: "GAME ONE", Players: map[string]domain.Player{
+				"P1": {},
+				"P2": {},
+				"P3": {},
+			}},
 		},
 	}
 	gameUsecases := NewGameUsecases(&mockRepository)

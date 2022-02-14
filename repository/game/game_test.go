@@ -27,7 +27,7 @@ func TestGameRepo(test *testing.T) {
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
-		newPlayers := []string{"P1", "P2"}
+		newPlayers := map[string]domain.Player{"P1": {}, "P2": {}}
 
 		newID, err := repository.CreateGame(domain.Game{Name: newName, Players: newPlayers})
 		if err != nil {
@@ -64,7 +64,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	}
 
 	test.Run("get an empty game", func(test *testing.T) {
-		want := domain.Game{Name: "GAME ONE", ID: 1, Players: []string{}}
+		want := domain.Game{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}}
 
 		got, err := repository.GetGame(1)
 		if err != nil {
@@ -75,7 +75,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 
 	test.Run("get a game", func(test *testing.T) {
-		want := domain.Game{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}}
+		want := domain.Game{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}}
 
 		got, err := repository.GetGame(2)
 		if err != nil {
@@ -87,8 +87,8 @@ func TestGameRepoWithInitialData(test *testing.T) {
 
 	test.Run("list all games", func(test *testing.T) {
 		want := []domain.Game{
-			{Name: "GAME ONE", ID: 1, Players: []string{}},
-			{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
+			{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}},
+			{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}},
 		}
 
 		got, err := repository.ListGames()
@@ -101,7 +101,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 
 	test.Run("update a game", func(test *testing.T) {
-		players := []string{"P1", "P2", "P3", "P4"}
+		players := map[string]domain.Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}}
 
 		err := repository.UpdatePlayers(2, players, domain.Pause)
 		if err != nil {
@@ -128,8 +128,8 @@ func NewGameRepositoryWithData(db *sqlx.DB) (*GameRepository, error) {
 	}
 
 	err = repository.CreateGames([]domain.Game{
-		{Name: "GAME ONE", ID: 1, Players: []string{}},
-		{Name: "GAME TWO", ID: 2, Players: []string{"P1", "P2"}},
+		{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}},
+		{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}},
 	})
 
 	return repository, err

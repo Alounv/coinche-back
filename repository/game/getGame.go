@@ -18,21 +18,22 @@ func (s *GameRepository) GetGame(id int) (domain.Game, error) {
 		return domain.Game{}, err
 	}
 
-	rows, err := tx.Query(`SELECT name FROM player WHERE gameid=$1`, id)
+	rows, err := tx.Query(`SELECT name, team FROM player WHERE gameid=$1`, id)
 	if err != nil {
 		return domain.Game{}, err
 	}
 
-	game.Players = []string{}
+	game.Players = map[string]domain.Player{}
 
 	for rows.Next() {
 		var playerName string
-		err := rows.Scan(&playerName)
+		var teamName string
+		err := rows.Scan(&playerName, &teamName)
 		if err != nil {
 			return domain.Game{}, err
 		}
 
-		game.Players = append(game.Players, playerName)
+		game.Players[playerName] = domain.Player{Team: teamName}
 	}
 
 	return game, tx.Commit()

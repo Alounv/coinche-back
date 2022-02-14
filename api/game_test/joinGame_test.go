@@ -16,13 +16,13 @@ func TestFailingSocketHandler(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]*domain.Game{
-			1: {Name: "GAME ONE", Phase: domain.Preparation},
-			2: {Name: "GAME TWO", Phase: domain.Preparation},
+			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
+			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
 
-	server, connection := testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P1")
+	server, connection := testutils.NewGameWebSocketServer(test, gameUsecases, 3, "P1")
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
 		got, _ := gameapi.ReceiveMessage(connection)
@@ -51,8 +51,8 @@ func TestSocketHandler(test *testing.T) {
 
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]*domain.Game{
-			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation},
-			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation},
+			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
+			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
@@ -70,7 +70,9 @@ func TestSocketHandler(test *testing.T) {
 	var c5 *websocket.Conn
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
-		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: []string{"P1"}})
+		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: map[string]domain.Player{
+			"P1": {},
+		}})
 
 		s1, c1 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P1")
 
@@ -93,7 +95,7 @@ func TestSocketHandler(test *testing.T) {
 		}
 
 		assert.Equal("GAME ONE", got.Name)
-		assert.Equal([]string{"P1", "P2", "P3", "P4"}, got.Players)
+		assert.Equal(map[string]domain.Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}}, got.Players)
 		assert.Equal(domain.Teaming, got.Phase)
 	})
 
@@ -106,7 +108,7 @@ func TestSocketHandler(test *testing.T) {
 		}
 
 		assert.Equal("GAME ONE", got.Name)
-		assert.Equal([]string{"P1", "P2", "P3", "P4"}, got.Players)
+		assert.Equal(map[string]domain.Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}}, got.Players)
 		assert.Equal(domain.Teaming, got.Phase)
 	})
 

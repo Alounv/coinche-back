@@ -19,6 +19,7 @@ var playerSchema = `
 	CREATE TABLE player (
 		id serial PRIMARY KEY NOT NULL,
 		name text NOT NULL,
+		team text,
 		gameid integer NOT NULL REFERENCES game(id),
 		createdAt timestamp NOT NULL DEFAULT now()
 	)`

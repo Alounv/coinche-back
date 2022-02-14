@@ -20,13 +20,12 @@ type Game struct {
 	ID        int
 	Name      string
 	CreatedAt time.Time
-	Players   []string
-	Teams     map[string]Team
+	Players   map[string]Player
 	Phase     Phase
 }
 
-type Team struct {
-	Players []string
+type Player struct {
+	Team string
 }
 
 const (
@@ -47,16 +46,15 @@ func (game *Game) AddPlayer(playerName string) error {
 		return errors.New(ErrEmptyPlayerName)
 	}
 
-	for _, name := range game.Players {
-		if name == playerName {
-			return errors.New(ErrAlreadyInGame)
-		}
+	if _, ok := game.Players[playerName]; ok {
+		return errors.New(ErrAlreadyInGame)
 	}
 
 	if game.IsFull() {
 		return errors.New(ErrGameFull)
 	}
-	game.Players = append(game.Players, playerName)
+
+	game.Players[playerName] = Player{}
 	if game.IsFull() && game.Phase == Preparation {
 		game.Phase = Teaming
 	}
@@ -64,18 +62,12 @@ func (game *Game) AddPlayer(playerName string) error {
 }
 
 func (game *Game) RemovePlayer(playerName string) error {
-	newPlayers := []string{}
-	for _, name := range game.Players {
-		if name != playerName {
-			newPlayers = append(newPlayers, name)
-		}
-	}
-
-	if len(newPlayers) == len(game.Players) {
+	if _, ok := game.Players[playerName]; !ok {
 		return errors.New(ErrPlayerNotFound)
 	}
 
-	game.Players = newPlayers
+	delete(game.Players, playerName)
+
 	if !game.IsFull() && game.Phase != Preparation {
 		game.Phase = Pause
 	}
@@ -87,21 +79,21 @@ func (game *Game) AssignTeam(playerName string, teamName string) error {
 		return errors.New(ErrNotTeaming)
 	}
 
-	if team, ok := game.Teams[teamName]; ok {
-		if len(team.Players) == 2 {
-			return errors.New(ErrTeamFull)
+	teamSize := 0
+	for _, player := range game.Players {
+		if player.Team == teamName {
+			teamSize++
 		}
-
-		team.Players = append(team.Players, playerName)
-
-		game.Teams[teamName] = team
-
-		return nil
 	}
 
-	game.Teams[teamName] = Team{
-		Players: []string{playerName},
+	if teamSize >= 2 {
+		return errors.New(ErrTeamFull)
 	}
+
+	newPlayer := game.Players[playerName]
+	newPlayer.Team = teamName
+
+	game.Players[playerName] = newPlayer
 
 	return nil
 }
@@ -109,7 +101,7 @@ func (game *Game) AssignTeam(playerName string, teamName string) error {
 func NewGame(name string) Game {
 	return Game{
 		Name:    name,
-		Players: []string{},
+		Players: map[string]Player{},
 		Phase:   Preparation,
 	}
 }
