@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -63,20 +64,54 @@ func HTTPGameSocketHandler(
 		if err != nil {
 			break
 		}
-		if message == "leave" {
-			err = usecases.LeaveGame(id, playerName)
-			if err != nil {
-				fmt.Println("Could not leave this game: ", err)
+
+		array := strings.Split(message, ": ")
+		head := array[0]
+		content := strings.Join(array[1:], "/")
+
+		switch head {
+		case "leave":
+			{
+				err = usecases.LeaveGame(id, playerName)
+				if err != nil {
+					fmt.Println("Could not leave this game: ", err)
+					break
+				}
+				err = SendMessage(connection, "Has left the game")
+				if err != nil {
+					panic(err)
+				}
+				connection.Close()
+				return
+			}
+		case "joinTeam":
+			{
+				err = usecases.JoinTeam(id, playerName, content)
+				if err != nil {
+					fmt.Println("Could not join this team: ", err)
+					break
+				}
+				game, err := usecases.GetGame(id)
+				if err != nil {
+					fmt.Println("Could not get updated game: ", err)
+					break
+				}
+				err = sendGame(connection, game)
+				if err != nil {
+					panic(err)
+				}
 				break
 			}
-			err = SendMessage(connection, "Has left the game")
-			connection.Close()
-		} else {
-			err = SendMessage(connection, message)
+		default:
+			{
+				err = SendMessage(connection, "Message not understood by the server")
+				if err != nil {
+					break
+				}
+				break
+			}
 		}
-		if err != nil {
-			break
-		}
+
 	}
 }
 

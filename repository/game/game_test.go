@@ -116,6 +116,21 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(domain.Pause, game.Phase)
 	})
 
+	test.Run("update a player", func(test *testing.T) {
+		player := domain.Player{Team: "A Team"}
+
+		err := repository.UpdatePlayer(2, "P2", player)
+		if err != nil {
+			panic(err)
+		}
+		game, err := repository.GetGame(2)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal("A Team", game.Players["P2"].Team)
+	})
+
 	test.Cleanup(func() {
 		testutils.DropDb(connectionInfo, dbName, db)
 	})

@@ -89,6 +89,14 @@ func TestSocketHandler(test *testing.T) {
 		s3, c3 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P3")
 		s4, c4 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P4")
 
+		_, err := gameapi.ReceiveGame(c2)
+		if err != nil {
+			test.Fatal(err)
+		}
+		_, err = gameapi.ReceiveGame(c3)
+		if err != nil {
+			test.Fatal(err)
+		}
 		got, err := gameapi.ReceiveGame(c4)
 		if err != nil {
 			test.Fatal(err)
@@ -112,6 +120,32 @@ func TestSocketHandler(test *testing.T) {
 		assert.Equal(domain.Teaming, got.Phase)
 	})
 
+	test.Run("Join a team", func(test *testing.T) {
+		err := gameapi.SendMessage(c1, "joinTeam: AAA")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		_, err = gameapi.ReceiveGame(c1)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		err = gameapi.SendMessage(c2, "joinTeam: AAA")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		got, err := gameapi.ReceiveGame(c2)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal("GAME ONE", got.Name)
+		assert.Equal("AAA", got.Players["P1"].Team)
+		assert.Equal("AAA", got.Players["P2"].Team)
+	})
+
 	test.Run("Can send a message", func(test *testing.T) {
 		err := gameapi.SendMessage(c1, "hello")
 		if err != nil {
@@ -122,7 +156,7 @@ func TestSocketHandler(test *testing.T) {
 			test.Fatal(err)
 		}
 
-		assert.Equal("hello", reply)
+		assert.Equal("Message not understood by the server", reply)
 	})
 
 	test.Run("Can leave the game", func(test *testing.T) {
