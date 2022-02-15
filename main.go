@@ -22,7 +22,7 @@ func main() {
 	}
 	gameUsecases := usecases.NewGameUsecases(gameRepository)
 
-	router := api.SetupRouter(gameUsecases)
+	router, _ := api.SetupRouter(gameUsecases)
 
 	fmt.Println("Listening on ", addr)
 	err = router.Run(addr)

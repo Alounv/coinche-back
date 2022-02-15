@@ -29,6 +29,7 @@ type IntegrationTestSuite struct {
 	gameUsecases   *usecases.GameUsecases
 	server         *httptest.Server
 	connection     *websocket.Conn
+	hub            *api.Hub
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
@@ -45,7 +46,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	s.gameUsecases = &usecases.GameUsecases{Repo: gameRepository}
 
-	s.router = api.SetupRouter(s.gameUsecases)
+	s.router, s.hub = api.SetupRouter(s.gameUsecases)
 }
 
 func (s *IntegrationTestSuite) TestCreateGame() {
@@ -96,7 +97,7 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	s.server, s.connection = api.NewGameWebSocketServer(test, s.gameUsecases, 1, "player")
+	s.server, s.connection = api.NewGameWebSocketServer(test, s.gameUsecases, 1, "player", s.hub)
 	receivedGame, _ := api.ReceiveGame(s.connection)
 
 	assert.IsType(domain.Game{}, receivedGame)

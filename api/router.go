@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(gameUsecases *usecases.GameUsecases) *gin.Engine {
+func SetupRouter(gameUsecases *usecases.GameUsecases) (*gin.Engine, *Hub) {
 	gameAPIs := &GameAPIs{Usecases: gameUsecases}
 
 	router := gin.Default()
@@ -15,16 +15,15 @@ func SetupRouter(gameUsecases *usecases.GameUsecases) *gin.Engine {
 		panic(err)
 	}
 
-	hub := newHub()
+	hub := NewHub()
 	go hub.run()
 
 	router.GET("/games/:id", gameAPIs.GetGame)
 	router.POST("/games/create", gameAPIs.CreateGame)
 	router.GET("/games/all", gameAPIs.ListGames)
-	router.GET("/games/:id/join", gameAPIs.JoinGame)
-	router.GET("/games/:id/join2", func(c *gin.Context) {
-		gameAPIs.JoinGame2(c, hub)
+	router.GET("/games/:id/join", func(c *gin.Context) {
+		gameAPIs.JoinGame(c, hub)
 	})
 
-	return router
+	return router, hub
 }

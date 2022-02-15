@@ -20,7 +20,9 @@ func TestFailingSocketHandler(test *testing.T) {
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
 
-	server, connection := NewGameWebSocketServer(test, gameUsecases, 3, "P1")
+	hub := NewHub()
+	go hub.run()
+	server, connection := NewGameWebSocketServer(test, gameUsecases, 3, "P1", hub)
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
 		got, _ := ReceiveMessage(connection)
@@ -54,25 +56,37 @@ func TestSocketHandler(test *testing.T) {
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
-
+	var c1 *websocket.Conn
 	var s1 *httptest.Server
+
+	var c2 *websocket.Conn
 	var s2 *httptest.Server
+
+	var c3 *websocket.Conn
 	var s3 *httptest.Server
+
+	var c4 *websocket.Conn
 	var s4 *httptest.Server
 
-	var c1 *websocket.Conn
-	var c2 *websocket.Conn
-	var c3 *websocket.Conn
-	var c4 *websocket.Conn
+	var s5 *httptest.Server
+	var c5 *websocket.Conn
+
+	hub := NewHub()
+	go hub.run()
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
 		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: map[string]domain.Player{
 			"P1": {},
 		}})
 
-		s1, c1 = NewGameWebSocketServer(test, gameUsecases, 1, "P1")
+		s1, c1 = NewGameWebSocketServer(test, gameUsecases, 1, "P1", hub)
 
-		got, err := ReceiveGame(c1)
+		message, err := receive(c1)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		got, err := DecodeGame(message)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -81,19 +95,27 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Receive the teaming phase when full", func(test *testing.T) {
-		s2, c2 = NewGameWebSocketServer(test, gameUsecases, 1, "P2")
-		s3, c3 = NewGameWebSocketServer(test, gameUsecases, 1, "P3")
-		s4, c4 = NewGameWebSocketServer(test, gameUsecases, 1, "P4")
+		s2, c2 = NewGameWebSocketServer(test, gameUsecases, 1, "P2", hub)
+		s3, c3 = NewGameWebSocketServer(test, gameUsecases, 1, "P3", hub)
+		s4, c4 = NewGameWebSocketServer(test, gameUsecases, 1, "P4", hub)
 
-		_, err := ReceiveGame(c2)
+		_, _ = receive(c1)
+		_, _ = receive(c1)
+		message, err := receive(c1)
 		if err != nil {
 			test.Fatal(err)
 		}
-		_, err = ReceiveGame(c3)
-		if err != nil {
-			test.Fatal(err)
-		}
-		got, err := ReceiveGame(c4)
+
+		_, _ = receive(c2)
+		_, _ = receive(c2)
+		_, _ = receive(c2)
+
+		_, _ = receive(c3)
+		_, _ = receive(c3)
+
+		_, _ = receive(c4)
+
+		got, err := DecodeGame(message)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -103,13 +125,48 @@ func TestSocketHandler(test *testing.T) {
 		assert.Equal(domain.Teaming, got.Phase)
 	})
 
-	test.Run("Join a team", func(test *testing.T) {
-		err := SendMessage(c1, "joinTeam: AAA")
+	test.Run("Try to join when already in game", func(test *testing.T) {
+		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P4", hub)
+
+		got, err := ReceiveMessage(c5)
 		if err != nil {
 			test.Fatal(err)
 		}
 
-		_, err = ReceiveGame(c1)
+		assert.Equal("Could not join this game: ALREADY IN GAME", got)
+	})
+
+	test.Run("Try to join a full game", func(test *testing.T) {
+		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P5", hub)
+
+		message, err := receive(c5)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		got, err := DecodeMessage(message)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal("Could not join this game: GAME IS FULL", got)
+	})
+
+	test.Run("Can send a message", func(test *testing.T) {
+		err := SendMessage(c1, "hello")
+		if err != nil {
+			test.Fatal(err)
+		}
+		reply, err := ReceiveMessage(c1)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal("Message not understood by the server", reply)
+	})
+
+	test.Run("Join a team", func(test *testing.T) {
+		err := SendMessage(c1, "joinTeam: AAA")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -119,7 +176,9 @@ func TestSocketHandler(test *testing.T) {
 			test.Fatal(err)
 		}
 
-		got, err := ReceiveGame(c2)
+		_, _ = receive(c1)
+
+		got, err := ReceiveGame(c1)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -165,11 +224,20 @@ func TestSocketHandler(test *testing.T) {
 	test.Cleanup(func() {
 		s1.Close()
 		c1.Close()
+
 		s2.Close()
 		c2.Close()
+
 		s3.Close()
 		c3.Close()
+
 		s4.Close()
 		c4.Close()
+
+		s5.Close()
+		c5.Close()
+
+		s5.Close()
+		c5.Close()
 	})
 }

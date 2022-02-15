@@ -52,24 +52,10 @@ func NewGameWebSocketServer(
 	gameUsecases *usecases.GameUsecases,
 	ID int,
 	playerName string,
+	hub *Hub,
 ) (*httptest.Server, *websocket.Conn) {
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		HTTPGameSocketHandler(w, r, gameUsecases, ID, playerName)
-	}
-	socketHandler := http.HandlerFunc(funcForHandlerFunc)
-
-	return newServer(test, socketHandler)
-}
-
-func NewGameWebSocketServer2(
-	test *testing.T,
-	gameUsecases *usecases.GameUsecases,
-	ID int,
-	playerName string,
-	hub *hub,
-) (*httptest.Server, *websocket.Conn) {
-	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		HTTPGameSocketHandler2(w, r, gameUsecases, ID, playerName, hub)
+		HTTPGameSocketHandler(w, r, gameUsecases, ID, playerName, hub)
 	}
 	socketHandler := http.HandlerFunc(funcForHandlerFunc)
 

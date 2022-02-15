@@ -12,7 +12,7 @@ import (
 )
 
 type player struct {
-	hub        *hub
+	hub        *Hub
 	connection *websocket.Conn
 	send       chan []byte
 }
@@ -33,7 +33,7 @@ type subscription struct {
 	gameID int
 }
 
-type hub struct {
+type Hub struct {
 	games      map[int]map[*player]bool
 	broadcast  chan message
 	single     chan private
@@ -41,8 +41,8 @@ type hub struct {
 	unregister chan subscription
 }
 
-func newHub() *hub {
-	return &hub{
+func NewHub() *Hub {
+	return &Hub{
 		broadcast:  make(chan message),
 		single:     make(chan private),
 		register:   make(chan subscription),
@@ -51,7 +51,7 @@ func newHub() *hub {
 	}
 }
 
-func (h *hub) run() {
+func (h *Hub) run() {
 	for {
 		select {
 
@@ -122,13 +122,13 @@ func (h *hub) run() {
 	}
 }
 
-func HTTPGameSocketHandler2(
+func HTTPGameSocketHandler(
 	writer http.ResponseWriter,
 	request *http.Request,
 	usecases *usecases.GameUsecases,
 	id int,
 	playerName string,
-	hub *hub,
+	hub *Hub,
 ) {
 	connection, err := wsupgrader.Upgrade(writer, request, nil)
 	if err != nil {
@@ -214,7 +214,7 @@ func HTTPGameSocketHandler2(
 	}
 }
 
-func broadcastGame(game domain.Game, hub *hub) error {
+func broadcastGame(game domain.Game, hub *Hub) error {
 	data, err := json.Marshal(game)
 	if err != nil {
 		return err
@@ -237,16 +237,6 @@ func broadcastGame(game domain.Game, hub *hub) error {
 	hub.single <- m
 	return nil
 }*/
-
-func sendGame(connection *websocket.Conn, game domain.Game) error {
-	message, err := json.Marshal(game)
-	if err != nil {
-		return err
-	}
-
-	err = send(connection, message)
-	return err
-}
 
 func SendMessage(connection *websocket.Conn, msg string) error {
 	message, err := json.Marshal(msg)
