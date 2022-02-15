@@ -1,10 +1,8 @@
-package gameapi
+package api
 
 import (
-	gameapi "coinche/api/game"
 	"coinche/domain"
 	"coinche/usecases"
-	testutils "coinche/utilities/test"
 	"net/http/httptest"
 	"testing"
 
@@ -22,21 +20,21 @@ func TestFailingSocketHandler(test *testing.T) {
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
 
-	server, connection := testutils.NewGameWebSocketServer(test, gameUsecases, 3, "P1")
+	server, connection := NewGameWebSocketServer(test, gameUsecases, 3, "P1")
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
-		got, _ := gameapi.ReceiveMessage(connection)
+		got, _ := ReceiveMessage(connection)
 		want := "Could not join this game: GAME NOT FOUND"
 
 		assert.Equal(want, got)
 	})
 
 	test.Run("Close the connection when failing to join", func(test *testing.T) {
-		err := gameapi.SendMessage(connection, "hello")
+		err := SendMessage(connection, "hello")
 		if err != nil {
 			test.Fatal(err)
 		}
-		_, err = gameapi.ReceiveMessage(connection)
+		_, err = ReceiveMessage(connection)
 		assert.NotNil(err)
 	})
 
@@ -74,9 +72,9 @@ func TestSocketHandler(test *testing.T) {
 			"P1": {},
 		}})
 
-		s1, c1 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P1")
+		s1, c1 = NewGameWebSocketServer(test, gameUsecases, 1, "P1")
 
-		got, err := gameapi.ReceiveGame(c1)
+		got, err := ReceiveGame(c1)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -85,19 +83,19 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Receive the teaming phase when full", func(test *testing.T) {
-		s2, c2 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P2")
-		s3, c3 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P3")
-		s4, c4 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P4")
+		s2, c2 = NewGameWebSocketServer(test, gameUsecases, 1, "P2")
+		s3, c3 = NewGameWebSocketServer(test, gameUsecases, 1, "P3")
+		s4, c4 = NewGameWebSocketServer(test, gameUsecases, 1, "P4")
 
-		_, err := gameapi.ReceiveGame(c2)
+		_, err := ReceiveGame(c2)
 		if err != nil {
 			test.Fatal(err)
 		}
-		_, err = gameapi.ReceiveGame(c3)
+		_, err = ReceiveGame(c3)
 		if err != nil {
 			test.Fatal(err)
 		}
-		got, err := gameapi.ReceiveGame(c4)
+		got, err := ReceiveGame(c4)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -108,9 +106,9 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Try to join when already in game", func(test *testing.T) {
-		s5, c5 = testutils.NewGameWebSocketServer(test, gameUsecases, 1, "P4")
+		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P4")
 
-		got, err := gameapi.ReceiveGame(c5)
+		got, err := ReceiveGame(c5)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -121,22 +119,22 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Join a team", func(test *testing.T) {
-		err := gameapi.SendMessage(c1, "joinTeam: AAA")
+		err := SendMessage(c1, "joinTeam: AAA")
 		if err != nil {
 			test.Fatal(err)
 		}
 
-		_, err = gameapi.ReceiveGame(c1)
+		_, err = ReceiveGame(c1)
 		if err != nil {
 			test.Fatal(err)
 		}
 
-		err = gameapi.SendMessage(c2, "joinTeam: AAA")
+		err = SendMessage(c2, "joinTeam: AAA")
 		if err != nil {
 			test.Fatal(err)
 		}
 
-		got, err := gameapi.ReceiveGame(c2)
+		got, err := ReceiveGame(c2)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -147,11 +145,11 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Can send a message", func(test *testing.T) {
-		err := gameapi.SendMessage(c1, "hello")
+		err := SendMessage(c1, "hello")
 		if err != nil {
 			test.Fatal(err)
 		}
-		reply, err := gameapi.ReceiveMessage(c1)
+		reply, err := ReceiveMessage(c1)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -160,11 +158,11 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Can leave the game", func(test *testing.T) {
-		err := gameapi.SendMessage(c1, "leave")
+		err := SendMessage(c1, "leave")
 		if err != nil {
 			test.Fatal(err)
 		}
-		reply, err := gameapi.ReceiveMessage(c1)
+		reply, err := ReceiveMessage(c1)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -174,7 +172,7 @@ func TestSocketHandler(test *testing.T) {
 
 	test.Run("Can close the connection", func(test *testing.T) {
 		c1.Close()
-		err := gameapi.SendMessage(c1, "hello")
+		err := SendMessage(c1, "hello")
 
 		assert.NotNil(err)
 	})

@@ -40,7 +40,7 @@ func CreateDb(connectionInfo string, dbName string) *sqlx.DB {
 	userDb := sqlx.MustOpen("pgx", connectionInfo)
 	_, err := userDb.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
-		fmt.Print("Database already existing, drop before creation", err)
+		fmt.Println("Database already existing, drop before creation", err)
 		userDb.MustExec("DROP DATABASE " + dbName)
 		userDb.MustExec("CREATE DATABASE " + dbName)
 	}

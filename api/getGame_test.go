@@ -1,7 +1,6 @@
-package gameapi
+package api
 
 import (
-	"coinche/api"
 	"coinche/domain"
 	"coinche/usecases"
 	testutils "coinche/utilities/test"
@@ -26,7 +25,7 @@ func TestGetGame(test *testing.T) {
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
-	router := api.SetupRouter(gameUsecases)
+	router := SetupRouter(gameUsecases)
 
 	test.Run("get a game 1", func(test *testing.T) {
 		want := domain.Game(domain.Game{Name: "GAME ONE"})

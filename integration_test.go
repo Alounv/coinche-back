@@ -2,7 +2,6 @@ package main
 
 import (
 	"coinche/api"
-	gameapi "coinche/api/game"
 	"coinche/domain"
 	gamerepo "coinche/repository/game"
 	"coinche/usecases"
@@ -97,8 +96,8 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	s.server, s.connection = testutils.NewGameWebSocketServer(s.T(), s.gameUsecases, 1, "player")
-	receivedGame, _ := gameapi.ReceiveGame(s.connection)
+	s.server, s.connection = api.NewGameWebSocketServer(test, s.gameUsecases, 1, "player")
+	receivedGame, _ := api.ReceiveGame(s.connection)
 
 	assert.IsType(domain.Game{}, receivedGame)
 
@@ -113,12 +112,12 @@ func (s *IntegrationTestSuite) TestLeaveUnstartedGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	err := gameapi.SendMessage(s.connection, "leave")
+	err := api.SendMessage(s.connection, "leave")
 	if err != nil {
 		test.Fatal(err)
 	}
 
-	message, _ := gameapi.ReceiveMessage(s.connection)
+	message, _ := api.ReceiveMessage(s.connection)
 
 	assert.Equal("Has left the game", message)
 

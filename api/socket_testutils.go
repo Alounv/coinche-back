@@ -1,7 +1,6 @@
-package testutils
+package api
 
 import (
-	gameapi "coinche/api/game"
 	"coinche/usecases"
 	"net/http"
 	"net/http/httptest"
@@ -55,7 +54,22 @@ func NewGameWebSocketServer(
 	playerName string,
 ) (*httptest.Server, *websocket.Conn) {
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		gameapi.HTTPGameSocketHandler(w, r, gameUsecases, ID, playerName)
+		HTTPGameSocketHandler(w, r, gameUsecases, ID, playerName)
+	}
+	socketHandler := http.HandlerFunc(funcForHandlerFunc)
+
+	return newServer(test, socketHandler)
+}
+
+func NewGameWebSocketServer2(
+	test *testing.T,
+	gameUsecases *usecases.GameUsecases,
+	ID int,
+	playerName string,
+	hub *hub,
+) (*httptest.Server, *websocket.Conn) {
+	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
+		HTTPGameSocketHandler2(w, r, gameUsecases, ID, playerName, hub)
 	}
 	socketHandler := http.HandlerFunc(funcForHandlerFunc)
 
