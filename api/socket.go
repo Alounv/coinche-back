@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -21,6 +22,12 @@ type message struct {
 	gameID int
 }
 
+type private struct {
+	player *player
+	data   []byte
+	gameID int
+}
+
 type subscription struct {
 	player *player
 	gameID int
@@ -29,6 +36,7 @@ type subscription struct {
 type hub struct {
 	games      map[int]map[*player]bool
 	broadcast  chan message
+	single     chan private
 	register   chan subscription
 	unregister chan subscription
 }
@@ -36,6 +44,7 @@ type hub struct {
 func newHub() *hub {
 	return &hub{
 		broadcast:  make(chan message),
+		single:     make(chan private),
 		register:   make(chan subscription),
 		unregister: make(chan subscription),
 		games:      make(map[int]map[*player]bool),
@@ -83,6 +92,32 @@ func (h *hub) run() {
 					}
 				}
 			}
+
+		case private := <-h.single:
+
+			players := h.games[private.gameID]
+			player := private.player
+			if _, ok := players[player]; !ok {
+				message, _ := json.Marshal("Player not in game")
+				err := send(private.player.connection, message)
+				if err != nil {
+					fmt.Println("Error sending message to player:", err)
+				}
+			}
+
+			select {
+			case player.send <- private.data:
+				err := send(player.connection, private.data)
+				if err != nil {
+					fmt.Println("Error sending message to player:", err)
+				}
+			default:
+				close(player.send)
+				delete(players, player)
+				if len(players) == 0 {
+					delete(h.games, private.gameID)
+				}
+			}
 		}
 	}
 }
@@ -100,23 +135,82 @@ func HTTPGameSocketHandler2(
 		panic(err)
 	}
 
-	p := &player{hub: hub, connection: connection, send: make(chan []byte, 256)}
-	p.hub.register <- subscription{player: p, gameID: id}
-
 	game, err := usecases.JoinGame(id, playerName)
 	if err != nil {
-		if err.Error() != domain.ErrAlreadyInGame {
-			err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
-			if err != nil {
-				panic(err)
-			}
-			connection.Close()
+		fmt.Println("Error joining game:", err)
+		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
+		if err != nil {
+			panic(err)
 		}
+		connection.Close()
+		return
 	}
+
+	p := &player{hub: hub, connection: connection, send: make(chan []byte, 256)}
+	p.hub.register <- subscription{player: p, gameID: id}
 
 	err = broadcastGame(game, p.hub)
 	if err != nil {
 		panic(err)
+	}
+
+	for {
+		message, err := ReceiveMessage(connection)
+		if err != nil {
+			break
+		}
+
+		array := strings.Split(message, ": ")
+		head := array[0]
+		content := strings.Join(array[1:], "/")
+
+		switch head {
+		case "leave":
+			{
+				err = usecases.LeaveGame(id, playerName)
+				if err != nil {
+					fmt.Println("Could not leave this game: ", err)
+					break
+				}
+				err = SendMessage(connection, "Has left the game")
+				if err != nil {
+					panic(err)
+				}
+				err = broadcastGame(game, p.hub)
+				if err != nil {
+					panic(err)
+				}
+				connection.Close()
+				return
+			}
+		case "joinTeam":
+			{
+				err = usecases.JoinTeam(id, playerName, content)
+				if err != nil {
+					fmt.Println("Could not join this team: ", err)
+					break
+				}
+				game, err := usecases.GetGame(id)
+				if err != nil {
+					fmt.Println("Could not get updated game: ", err)
+					break
+				}
+				err = broadcastGame(game, p.hub)
+				if err != nil {
+					panic(err)
+				}
+				break
+			}
+		default:
+			{
+				err = SendMessage(connection, "Message not understood by the server")
+				if err != nil {
+					break
+				}
+				break
+			}
+		}
+
 	}
 }
 
@@ -131,6 +225,18 @@ func broadcastGame(game domain.Game, hub *hub) error {
 	hub.broadcast <- m
 	return nil
 }
+
+/*func sendPrivateMessage(message string, toPlayer *player, gameID int, hub *hub) error {
+	data, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+
+	m := private{data: data, gameID: gameID, player: toPlayer}
+
+	hub.single <- m
+	return nil
+}*/
 
 func sendGame(connection *websocket.Conn, game domain.Game) error {
 	message, err := json.Marshal(game)
@@ -163,6 +269,12 @@ func DecodeGame(message []byte) (domain.Game, error) {
 	return game, err
 }
 
+func DecodeMessage(message []byte) (string, error) {
+	var reply string
+	err := json.Unmarshal(message, &reply)
+	return reply, err
+}
+
 func ReceiveGame(connection *websocket.Conn) (domain.Game, error) {
 	message, err := receive(connection)
 	if err != nil {
@@ -174,13 +286,12 @@ func ReceiveGame(connection *websocket.Conn) (domain.Game, error) {
 }
 
 func ReceiveMessage(connection *websocket.Conn) (string, error) {
-	var reply string
 	message, err := receive(connection)
 	if err != nil {
 		return "", err
 	}
 
-	err = json.Unmarshal(message, &reply)
+	reply, err := DecodeMessage(message)
 	return reply, err
 }
 

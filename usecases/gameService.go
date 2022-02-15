@@ -41,11 +41,11 @@ func (s *GameUsecases) CreateGame(name string) (int, error) {
 func (s *GameUsecases) JoinGame(id int, playerName string) (domain.Game, error) {
 	game, err := s.Repo.GetGame(id)
 	if err != nil {
-		return game, err
+		return domain.Game{}, err
 	}
 	err = game.AddPlayer(playerName)
 	if err != nil {
-		return game, err
+		return domain.Game{}, err
 	}
 	err = s.Repo.UpdatePlayers(game.ID, game.Players, game.Phase)
 	return game, err

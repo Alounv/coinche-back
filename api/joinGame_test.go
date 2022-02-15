@@ -59,13 +59,11 @@ func TestSocketHandler(test *testing.T) {
 	var s2 *httptest.Server
 	var s3 *httptest.Server
 	var s4 *httptest.Server
-	var s5 *httptest.Server
 
 	var c1 *websocket.Conn
 	var c2 *websocket.Conn
 	var c3 *websocket.Conn
 	var c4 *websocket.Conn
-	var c5 *websocket.Conn
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
 		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: map[string]domain.Player{
@@ -96,19 +94,6 @@ func TestSocketHandler(test *testing.T) {
 			test.Fatal(err)
 		}
 		got, err := ReceiveGame(c4)
-		if err != nil {
-			test.Fatal(err)
-		}
-
-		assert.Equal("GAME ONE", got.Name)
-		assert.Equal(map[string]domain.Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}}, got.Players)
-		assert.Equal(domain.Teaming, got.Phase)
-	})
-
-	test.Run("Try to join when already in game", func(test *testing.T) {
-		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P4")
-
-		got, err := ReceiveGame(c5)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -186,7 +171,5 @@ func TestSocketHandler(test *testing.T) {
 		c3.Close()
 		s4.Close()
 		c4.Close()
-		s5.Close()
-		c5.Close()
 	})
 }
