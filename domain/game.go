@@ -41,6 +41,34 @@ func (game Game) IsFull() bool {
 	return len(game.Players) == 4
 }
 
+func (game Game) CanStart() bool {
+	team1 := ""
+	team1Size := 0
+
+	team2 := ""
+	team2Size := 0
+
+	for _, player := range game.Players {
+		if player.Team == "" {
+			continue
+		} else if team1 == "" {
+			team1 = player.Team
+			team1Size++
+		} else if team1 == player.Team {
+			team1Size++
+		} else if team2 == "" {
+			team2 = player.Team
+			team2Size++
+		} else if team2 == player.Team {
+			team2Size++
+		} else {
+			return false
+		}
+	}
+
+	return team1Size == 2 && team2Size == 2
+}
+
 func (game *Game) AddPlayer(playerName string) error {
 	if playerName == "" {
 		return errors.New(ErrEmptyPlayerName)

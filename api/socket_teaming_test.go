@@ -80,6 +80,17 @@ func CloseConnections(
 	c4.Close()
 }
 
+func EmptyMessages(connections []*websocket.Conn, count int) {
+	for _, c := range connections {
+		for i := 0; i < count; i++ {
+			_, err := receive(c)
+			if err != nil {
+				return
+			}
+		}
+	}
+}
+
 func TestSocketTeaming(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
@@ -110,14 +121,7 @@ func TestSocketTeaming(test *testing.T) {
 			test.Fatal(err)
 		}
 
-		_, _ = receive(c2)
-		_, _ = receive(c2)
-
-		_, _ = receive(c3)
-		_, _ = receive(c3)
-
-		_, _ = receive(c4)
-		_, _ = receive(c4)
+		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
 
 		assert.Equal("GAME ONE", got.Name)
 		assert.Equal("AAA", got.Players["P1"].Team)
@@ -141,6 +145,30 @@ func TestSocketTeaming(test *testing.T) {
 		}
 
 		assert.Equal("Could not join this team: TEAM IS FULL", got)
+	})
+
+	test.Run("Ready to start when two teams ready", func(test *testing.T) {
+		err := SendMessage(c3, "joinTeam: BBB")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		err = SendMessage(c4, "joinTeam: BBB")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		_, _ = receive(c1)
+
+		got, err := ReceiveGame(c1)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
+
+		assert.Equal("GAME ONE", got.Name)
+		assert.Equal(true, got.CanStart())
 	})
 
 	test.Cleanup(func() {
