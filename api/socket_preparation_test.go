@@ -165,42 +165,6 @@ func TestSocketHandler(test *testing.T) {
 		assert.Equal("Message not understood by the server", reply)
 	})
 
-	test.Run("Join a team", func(test *testing.T) {
-		err := SendMessage(c1, "joinTeam: AAA")
-		if err != nil {
-			test.Fatal(err)
-		}
-
-		err = SendMessage(c2, "joinTeam: AAA")
-		if err != nil {
-			test.Fatal(err)
-		}
-
-		_, _ = receive(c1)
-
-		got, err := ReceiveGame(c1)
-		if err != nil {
-			test.Fatal(err)
-		}
-
-		assert.Equal("GAME ONE", got.Name)
-		assert.Equal("AAA", got.Players["P1"].Team)
-		assert.Equal("AAA", got.Players["P2"].Team)
-	})
-
-	test.Run("Can send a message", func(test *testing.T) {
-		err := SendMessage(c1, "hello")
-		if err != nil {
-			test.Fatal(err)
-		}
-		reply, err := ReceiveMessage(c1)
-		if err != nil {
-			test.Fatal(err)
-		}
-
-		assert.Equal("Message not understood by the server", reply)
-	})
-
 	test.Run("Can leave the game", func(test *testing.T) {
 		err := SendMessage(c1, "leave")
 		if err != nil {
@@ -233,9 +197,6 @@ func TestSocketHandler(test *testing.T) {
 
 		s4.Close()
 		c4.Close()
-
-		s5.Close()
-		c5.Close()
 
 		s5.Close()
 		c5.Close()

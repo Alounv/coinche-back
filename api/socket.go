@@ -187,12 +187,20 @@ func HTTPGameSocketHandler(
 			{
 				err = usecases.JoinTeam(id, playerName, content)
 				if err != nil {
-					fmt.Println("Could not join this team: ", err)
+					errorMessage := fmt.Sprint("Could not join this team: ", err)
+					err = SendMessage(connection, errorMessage)
+					if err != nil {
+						panic(err)
+					}
 					break
 				}
 				game, err := usecases.GetGame(id)
 				if err != nil {
-					fmt.Println("Could not get updated game: ", err)
+					errorMessage := fmt.Sprint("Could not get updated game: ", err)
+					err := SendMessage(connection, errorMessage)
+					if err != nil {
+						panic(err)
+					}
 					break
 				}
 				err = broadcastGame(game, p.hub)
