@@ -47,6 +47,21 @@ func NewHub() *Hub {
 	}
 }
 
+func sendToPlayer(connection *websocket.Conn, data []byte) {
+	err := send(connection, data)
+	if err != nil {
+		fmt.Println("Error sending message to player:", err)
+	}
+}
+
+func deletePlayerAndGameIfNeeded(games map[int]map[*player]bool, players map[*player]bool, player *player, gameID int) {
+	close(player.send)
+	delete(players, player)
+	if len(players) == 0 {
+		delete(games, gameID)
+	}
+}
+
 func register(h *Hub, subscription subscription) {
 	players := h.games[subscription.gameID]
 	if players == nil {
@@ -60,11 +75,7 @@ func unregister(h *Hub, subscription subscription) {
 	players := h.games[subscription.gameID]
 	if players != nil {
 		if _, ok := players[subscription.player]; ok {
-			delete(players, subscription.player)
-			close(subscription.player.send)
-			if len(players) == 0 {
-				delete(h.games, subscription.gameID)
-			}
+			deletePlayerAndGameIfNeeded(h.games, players, subscription.player, subscription.gameID)
 		}
 	}
 }
@@ -74,16 +85,9 @@ func broadcast(h *Hub, message message) {
 	for player := range players {
 		select {
 		case player.send <- message.data:
-			err := send(player.connection, message.data)
-			if err != nil {
-				fmt.Println("Error sending message to player:", err)
-			}
+			sendToPlayer(player.connection, message.data)
 		default:
-			close(player.send)
-			delete(players, player)
-			if len(players) == 0 {
-				delete(h.games, message.gameID)
-			}
+			deletePlayerAndGameIfNeeded(h.games, players, player, message.gameID)
 		}
 	}
 }
@@ -92,25 +96,15 @@ func single(h *Hub, private private) {
 	players := h.games[private.gameID]
 	player := private.player
 	if _, ok := players[player]; !ok {
-		message, _ := json.Marshal("Player not in game")
-		err := send(private.player.connection, message)
-		if err != nil {
-			fmt.Println("Error sending message to player:", err)
-		}
+		data, _ := json.Marshal("Player not in game")
+		sendToPlayer(private.player.connection, data)
 	}
 
 	select {
 	case player.send <- private.data:
-		err := send(player.connection, private.data)
-		if err != nil {
-			fmt.Println("Error sending message to player:", err)
-		}
+		sendToPlayer(player.connection, private.data)
 	default:
-		close(player.send)
-		delete(players, player)
-		if len(players) == 0 {
-			delete(h.games, private.gameID)
-		}
+		deletePlayerAndGameIfNeeded(h.games, players, player, private.gameID)
 	}
 }
 

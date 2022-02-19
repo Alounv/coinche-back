@@ -67,8 +67,6 @@ func (game Game) CanStart() error {
 			team2Size++
 		} else if team2 == player.Team {
 			team2Size++
-		} else {
-			return errors.New(ErrTeamsNotEqual)
 		}
 	}
 
