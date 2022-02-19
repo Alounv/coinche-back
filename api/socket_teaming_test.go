@@ -3,6 +3,7 @@ package api
 import (
 	"coinche/domain"
 	"coinche/usecases"
+	"coinche/utilities"
 	"net/http/httptest"
 	"testing"
 
@@ -105,21 +106,15 @@ func TestSocketTeaming(test *testing.T) {
 
 	test.Run("Join a team", func(test *testing.T) {
 		err := SendMessage(c1, "joinTeam: AAA")
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		err = SendMessage(c2, "joinTeam: AAA")
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		_, _ = receive(c1)
 
 		got, err := ReceiveGame(c1)
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
 
@@ -130,40 +125,28 @@ func TestSocketTeaming(test *testing.T) {
 
 	test.Run("Should fail when joining a team already full", func(test *testing.T) {
 		err := SendMessage(c3, "joinTeam: AAA")
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		message, err := receive(c3)
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		got, err := DecodeMessage(message)
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		assert.Equal("Could not join this team: TEAM IS FULL", got)
 	})
 
 	test.Run("Ready to start when two teams ready", func(test *testing.T) {
 		err := SendMessage(c3, "joinTeam: BBB")
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		err = SendMessage(c4, "joinTeam: BBB")
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		_, _ = receive(c1)
 
 		got, err := ReceiveGame(c1)
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
 
@@ -173,14 +156,10 @@ func TestSocketTeaming(test *testing.T) {
 
 	test.Run("Can start the game", func(test *testing.T) {
 		err := SendMessage(c3, "start")
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		got, err := ReceiveGame(c1)
-		if err != nil {
-			test.Fatal(err)
-		}
+		utilities.FatalIfErr(err, test)
 
 		assert.Equal(domain.Bidding, got.Phase)
 	})

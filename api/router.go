@@ -2,6 +2,7 @@ package api
 
 import (
 	"coinche/usecases"
+	"coinche/utilities"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,9 +12,7 @@ func SetupRouter(gameUsecases *usecases.GameUsecases) (*gin.Engine, *Hub) {
 
 	router := gin.Default()
 	err := router.SetTrustedProxies(nil)
-	if err != nil {
-		panic(err)
-	}
+	utilities.PanicIfErr(err)
 
 	hub := NewHub()
 	go hub.run()

@@ -2,6 +2,7 @@ package api
 
 import (
 	"coinche/usecases"
+	"coinche/utilities"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -14,9 +15,7 @@ func httpToWS(test *testing.T, u string) string {
 	test.Helper()
 
 	wsURL, err := url.Parse(u)
-	if err != nil {
-		test.Fatal(err)
-	}
+	utilities.FatalIfErr(err, test)
 
 	switch wsURL.Scheme {
 	case "http":
@@ -30,9 +29,7 @@ func httpToWS(test *testing.T, u string) string {
 
 func newConnection(test *testing.T, wsURL string) *websocket.Conn {
 	connection, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-	if err != nil {
-		test.Fatal(err)
-	}
+	utilities.FatalIfErr(err, test)
 	return connection
 }
 

@@ -1,4 +1,4 @@
-package testutils
+package utilities
 
 import (
 	"bytes"
@@ -30,9 +30,7 @@ func NewJoinGameRequest(test *testing.T, id int, playerName string) *http.Reques
 
 func GetNewRequest(test *testing.T, route string, method string) *http.Request {
 	request, err := http.NewRequest(method, route, nil)
-	if err != nil {
-		test.Fatal(err)
-	}
+	FatalIfErr(err, test)
 	return request
 }
 
@@ -74,4 +72,10 @@ func DecodeToGame(buf *bytes.Buffer, test *testing.T) domain.Game {
 		test.Fatalf("Unable to parse response from gameAPIs %q into %q, '%v'", buf, "Game", err)
 	}
 	return got
+}
+
+func FatalIfErr(err error, test *testing.T) {
+	if err != nil {
+		test.Fatal(err)
+	}
 }
