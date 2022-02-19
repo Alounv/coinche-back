@@ -7,7 +7,7 @@ import (
 func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 	tx := s.db.MustBegin()
 
-	var id int
+	var gameID int
 	err := tx.QueryRow(
 		`
 		INSERT INTO game (name) 
@@ -15,7 +15,7 @@ func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 		RETURNING id
 		`,
 		game.Name,
-	).Scan(&id)
+	).Scan(&gameID)
 	if err != nil {
 		return 0, err
 	}
@@ -28,12 +28,12 @@ func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 			`,
 			playerName,
 			player.Team,
-			id,
+			gameID,
 		)
 		if err != nil {
 			return 0, err
 		}
 	}
 
-	return id, tx.Commit()
+	return gameID, tx.Commit()
 }

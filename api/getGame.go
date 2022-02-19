@@ -9,12 +9,12 @@ import (
 
 func (gameAPIs *GameAPIs) GetGame(context *gin.Context) {
 	stringID := context.Param("id")
-	id, err := strconv.Atoi(stringID)
+	gameID, err := strconv.Atoi(stringID)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "WRONG ID FORMAT"})
 		return
 	}
-	game, err := gameAPIs.Usecases.GetGame(id)
+	game, err := gameAPIs.Usecases.GetGame(gameID)
 	if err != nil {
 		context.JSON(http.StatusNotFound, gin.H{"error": "GAME NOT FOUND"})
 		return

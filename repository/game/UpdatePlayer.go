@@ -4,7 +4,7 @@ import (
 	"coinche/domain"
 )
 
-func (s *GameRepository) UpdatePlayer(id int, playerName string, player domain.Player) error {
+func (s *GameRepository) UpdatePlayer(gameID int, playerName string, player domain.Player) error {
 	_, err := s.db.Exec(
 		`
 		INSERT INTO player (name, team, gameid) 
@@ -12,7 +12,7 @@ func (s *GameRepository) UpdatePlayer(id int, playerName string, player domain.P
 		`,
 		playerName,
 		player.Team,
-		id,
+		gameID,
 	)
 	if err != nil {
 		return err

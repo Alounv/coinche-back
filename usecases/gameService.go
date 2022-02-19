@@ -6,19 +6,19 @@ import (
 
 type GameUsecasesInterface interface {
 	ListGames() ([]domain.Game, error)
-	GetGame(id int) (domain.Game, error)
+	GetGame(gameID int) (domain.Game, error)
 	CreateGame(name string) int
-	JoinGame(id int, playerName string) (domain.Game, error)
-	LeaveGame(id int, playerName string) error
+	JoinGame(gameID int, playerName string) (domain.Game, error)
+	LeaveGame(gameID int, playerName string) error
 }
 
 type GameRepositoryInterface interface {
 	ListGames() ([]domain.Game, error)
-	GetGame(id int) (domain.Game, error)
+	GetGame(gameID int) (domain.Game, error)
 	CreateGame(game domain.Game) (int, error)
-	UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error
-	UpdatePlayer(id int, playerName string, players domain.Player) error
-	UpdateGame(id int, phase domain.Phase) error
+	UpdatePlayers(gameID int, players map[string]domain.Player, phase domain.Phase) error
+	UpdatePlayer(gameID int, playerName string, players domain.Player) error
+	UpdateGame(gameID int, phase domain.Phase) error
 }
 
 type GameUsecases struct {
@@ -30,8 +30,8 @@ func (s *GameUsecases) ListGames() ([]domain.Game, error) {
 	return s.Repo.ListGames()
 }
 
-func (s *GameUsecases) GetGame(id int) (domain.Game, error) {
-	return s.Repo.GetGame(id)
+func (s *GameUsecases) GetGame(gameID int) (domain.Game, error) {
+	return s.Repo.GetGame(gameID)
 }
 
 func (s *GameUsecases) CreateGame(name string) (int, error) {
@@ -39,8 +39,8 @@ func (s *GameUsecases) CreateGame(name string) (int, error) {
 	return s.Repo.CreateGame(game)
 }
 
-func (s *GameUsecases) JoinGame(id int, playerName string) (domain.Game, error) {
-	game, err := s.Repo.GetGame(id)
+func (s *GameUsecases) JoinGame(gameID int, playerName string) (domain.Game, error) {
+	game, err := s.Repo.GetGame(gameID)
 	if err != nil {
 		return domain.Game{}, err
 	}
@@ -52,8 +52,8 @@ func (s *GameUsecases) JoinGame(id int, playerName string) (domain.Game, error) 
 	return game, err
 }
 
-func (s *GameUsecases) LeaveGame(id int, playerName string) error {
-	game, err := s.Repo.GetGame(id)
+func (s *GameUsecases) LeaveGame(gameID int, playerName string) error {
+	game, err := s.Repo.GetGame(gameID)
 	if err != nil {
 		return err
 	}
@@ -65,8 +65,8 @@ func (s *GameUsecases) LeaveGame(id int, playerName string) error {
 	return err
 }
 
-func (s *GameUsecases) JoinTeam(id int, playerName string, teamName string) error {
-	game, err := s.Repo.GetGame(id)
+func (s *GameUsecases) JoinTeam(gameID int, playerName string, teamName string) error {
+	game, err := s.Repo.GetGame(gameID)
 	if err != nil {
 		return err
 	}
@@ -78,8 +78,8 @@ func (s *GameUsecases) JoinTeam(id int, playerName string, teamName string) erro
 	return err
 }
 
-func (s *GameUsecases) LeaveTeam(id int, playerName string) error {
-	game, err := s.Repo.GetGame(id)
+func (s *GameUsecases) LeaveTeam(gameID int, playerName string) error {
+	game, err := s.Repo.GetGame(gameID)
 	if err != nil {
 		return err
 	}
@@ -91,8 +91,8 @@ func (s *GameUsecases) LeaveTeam(id int, playerName string) error {
 	return err
 }
 
-func (s *GameUsecases) StartGame(id int) error {
-	game, err := s.Repo.GetGame(id)
+func (s *GameUsecases) StartGame(gameID int) error {
+	game, err := s.Repo.GetGame(gameID)
 	if err != nil {
 		return err
 	}

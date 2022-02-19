@@ -4,11 +4,11 @@ import (
 	"coinche/domain"
 )
 
-func (s *GameRepository) GetGame(id int) (domain.Game, error) {
+func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 	tx := s.db.MustBegin()
 
 	var game domain.Game
-	err := tx.QueryRow(`SELECT * FROM game WHERE id=$1`, id).Scan(
+	err := tx.QueryRow(`SELECT * FROM game WHERE id=$1`, gameID).Scan(
 		&game.ID,
 		&game.Name,
 		&game.CreatedAt,
@@ -18,7 +18,7 @@ func (s *GameRepository) GetGame(id int) (domain.Game, error) {
 		return domain.Game{}, err
 	}
 
-	rows, err := tx.Query(`SELECT name, team FROM player WHERE gameid=$1`, id)
+	rows, err := tx.Query(`SELECT name, team FROM player WHERE gameid=$1`, gameID)
 	if err != nil {
 		return domain.Game{}, err
 	}

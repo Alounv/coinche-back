@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, id int, playerName string) domain.Game {
-	game, err := usecases.JoinGame(id, playerName)
+func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, gameID int, playerName string) domain.Game {
+	game, err := usecases.JoinGame(gameID, playerName)
 	if err != nil {
 		fmt.Println("Error joining game:", err)
 		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
@@ -23,9 +23,9 @@ func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, id in
 	return game
 }
 
-func subscribeAndBroadcast(id int, connection *websocket.Conn, game domain.Game, hub *Hub) *player {
+func subscribeAndBroadcast(gameID int, connection *websocket.Conn, game domain.Game, hub *Hub) *player {
 	p := &player{hub: hub, connection: connection, send: make(chan []byte, 256)}
-	p.hub.register <- subscription{player: p, gameID: id}
+	p.hub.register <- subscription{player: p, gameID: gameID}
 
 	broadcastGameOrPanic(game, p.hub)
 

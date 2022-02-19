@@ -12,15 +12,15 @@ type MockGameRepo struct {
 
 func (repo *MockGameRepo) ListGames() ([]domain.Game, error) {
 	var games []domain.Game
-	for id, val := range repo.games {
-		val.ID = id
+	for gameID, val := range repo.games {
+		val.ID = gameID
 		games = append(games, *val)
 	}
 	return games, nil
 }
 
-func (repo *MockGameRepo) GetGame(id int) (domain.Game, error) {
-	game, ok := repo.games[id]
+func (repo *MockGameRepo) GetGame(gameID int) (domain.Game, error) {
+	game, ok := repo.games[gameID]
 	if !ok {
 		return domain.Game{}, errors.New("GAME NOT FOUND")
 	}
@@ -28,13 +28,13 @@ func (repo *MockGameRepo) GetGame(id int) (domain.Game, error) {
 }
 
 func (repo *MockGameRepo) CreateGame(game domain.Game) (int, error) {
-	newId := len(repo.games)
+	gameID := len(repo.games)
 	repo.creationCalls = repo.creationCalls + 1
-	return newId, nil
+	return gameID, nil
 }
 
-func (repo *MockGameRepo) UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error {
-	game, ok := repo.games[id]
+func (repo *MockGameRepo) UpdatePlayers(gameID int, players map[string]domain.Player, phase domain.Phase) error {
+	game, ok := repo.games[gameID]
 	if !ok {
 		return errors.New("GAME NOT FOUND")
 	}
@@ -45,8 +45,8 @@ func (repo *MockGameRepo) UpdatePlayers(id int, players map[string]domain.Player
 	return nil
 }
 
-func (repo *MockGameRepo) UpdatePlayer(id int, playerName string, player domain.Player) error {
-	game, ok := repo.games[id]
+func (repo *MockGameRepo) UpdatePlayer(gameID int, playerName string, player domain.Player) error {
+	game, ok := repo.games[gameID]
 	if !ok {
 		return errors.New("GAME NOT FOUND")
 	}
@@ -54,8 +54,8 @@ func (repo *MockGameRepo) UpdatePlayer(id int, playerName string, player domain.
 	return nil
 }
 
-func (repo *MockGameRepo) UpdateGame(id int, phase domain.Phase) error {
-	game, ok := repo.games[id]
+func (repo *MockGameRepo) UpdateGame(gameID int, phase domain.Phase) error {
+	game, ok := repo.games[gameID]
 	if !ok {
 		return errors.New("GAME NOT FOUND")
 	}

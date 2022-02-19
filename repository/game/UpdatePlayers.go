@@ -76,20 +76,20 @@ func createPlayers(currentPlayers map[string]int, players map[string]domain.Play
 	return nil
 }
 
-func (s *GameRepository) UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error {
+func (s *GameRepository) UpdatePlayers(gameID int, players map[string]domain.Player, phase domain.Phase) error {
 	tx := s.db.MustBegin()
 
-	currentPlayers, err := getCurrentPlayers(tx, id)
+	currentPlayers, err := getCurrentPlayers(tx, gameID)
 	if err != nil {
 		return err
 	}
 
-	err = deletePlayers(currentPlayers, players, id, tx)
+	err = deletePlayers(currentPlayers, players, gameID, tx)
 	if err != nil {
 		return err
 	}
 
-	err = createPlayers(currentPlayers, players, id, tx)
+	err = createPlayers(currentPlayers, players, gameID, tx)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (s *GameRepository) UpdatePlayers(id int, players map[string]domain.Player,
 		WHERE id = $2
 		`,
 		phase,
-		id,
+		gameID,
 	)
 
 	if err != nil {

@@ -16,7 +16,7 @@ var wsupgrader = websocket.Upgrader{
 
 func (gameAPIs *GameAPIs) JoinGame(context *gin.Context, hub *Hub) {
 	stringID := context.Param("id")
-	id, err := strconv.Atoi(stringID)
+	gameID, err := strconv.Atoi(stringID)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid ID"})
 		return
@@ -26,5 +26,5 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context, hub *Hub) {
 
 	connection, err := wsupgrader.Upgrade(context.Writer, context.Request, nil)
 	utilities.PanicIfErr(err)
-	PlayerSocketHandler(connection, gameAPIs.Usecases, id, playerName, hub)
+	PlayerSocketHandler(connection, gameAPIs.Usecases, gameID, playerName, hub)
 }

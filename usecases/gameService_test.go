@@ -41,11 +41,11 @@ func TestGameService(test *testing.T) {
 	})
 
 	test.Run("can create game", func(test *testing.T) {
-		id, err := gameUsecases.CreateGame("GAME TWO")
+		gameID, err := gameUsecases.CreateGame("GAME TWO")
 		utilities.FatalIfErr(err, test)
 
 		assert.Equal(1, mockRepository.creationCalls)
-		assert.Equal(1, id)
+		assert.Equal(1, gameID)
 	})
 
 	test.Run("can choose a team", func(test *testing.T) {

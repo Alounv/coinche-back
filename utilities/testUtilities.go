@@ -18,8 +18,8 @@ func NewCreateGameRequest(test *testing.T, name string) *http.Request {
 	return GetNewRequest(test, route, http.MethodPost)
 }
 
-func NewGetGameRequest(test *testing.T, id int) *http.Request {
-	route := fmt.Sprintf("/games/%d", id)
+func NewGetGameRequest(test *testing.T, gameID int) *http.Request {
+	route := fmt.Sprintf("/games/%d", gameID)
 	return GetNewRequest(test, route, http.MethodGet)
 }
 
