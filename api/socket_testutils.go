@@ -1,7 +1,6 @@
 package api
 
 import (
-	"coinche/usecases"
 	"coinche/utilities"
 	"net/http"
 	"net/http/httptest"
@@ -46,7 +45,6 @@ func newServer(test *testing.T, handler http.Handler) (*httptest.Server, *websoc
 
 func NewGameWebSocketServer(
 	test *testing.T,
-	gameUsecases *usecases.GameUsecases,
 	ID int,
 	playerName string,
 	hub *Hub,
@@ -54,7 +52,7 @@ func NewGameWebSocketServer(
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
 		connection, err := wsupgrader.Upgrade(w, r, nil)
 		utilities.FatalIfErr(err, test)
-		PlayerSocketHandler(connection, gameUsecases, ID, playerName, hub)
+		PlayerSocketHandler(connection, ID, playerName, hub)
 	}
 	socketHandler := http.HandlerFunc(funcForHandlerFunc)
 

@@ -14,7 +14,7 @@ func SetupRouter(gameUsecases *usecases.GameUsecases) (*gin.Engine, *Hub) {
 	err := router.SetTrustedProxies(nil)
 	utilities.PanicIfErr(err)
 
-	hub := NewHub()
+	hub := NewHub(gameUsecases)
 	go hub.run()
 
 	router.GET("/games/:id", gameAPIs.GetGame)

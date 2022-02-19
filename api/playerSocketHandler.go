@@ -33,15 +33,15 @@ func subscribeAndBroadcast(gameID int, connection *websocket.Conn, game domain.G
 }
 
 type socketHandler struct {
-	gameID     int
-	playerName string
-	connection *websocket.Conn
-	usecases   *usecases.GameUsecases
-	player     *player
+	gameID       int
+	playerName   string
+	connection   *websocket.Conn
+	gameUsecases *usecases.GameUsecases
+	player       *player
 }
 
 func (s *socketHandler) leave(game domain.Game) {
-	err := s.usecases.LeaveGame(s.gameID, s.playerName)
+	err := s.gameUsecases.LeaveGame(s.gameID, s.playerName)
 	if err != nil {
 		fmt.Println("Could not leave this game: ", err)
 		return
@@ -54,14 +54,14 @@ func (s *socketHandler) leave(game domain.Game) {
 }
 
 func (s *socketHandler) joinTeam(content string) {
-	err := s.usecases.JoinTeam(s.gameID, s.playerName, content)
+	err := s.gameUsecases.JoinTeam(s.gameID, s.playerName, content)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not join this team: ", err)
 		err = SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
-	game, err := s.usecases.GetGame(s.gameID)
+	game, err := s.gameUsecases.GetGame(s.gameID)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not get updated game: ", err)
 		err := SendMessage(s.connection, errorMessage)
@@ -72,14 +72,14 @@ func (s *socketHandler) joinTeam(content string) {
 }
 
 func (s socketHandler) startGame(content string) {
-	err := s.usecases.StartGame(s.gameID)
+	err := s.gameUsecases.StartGame(s.gameID)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not start the game: ", err)
 		err = SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
-	game, err := s.usecases.GetGame(s.gameID)
+	game, err := s.gameUsecases.GetGame(s.gameID)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not get updated game: ", err)
 		err := SendMessage(s.connection, errorMessage)
@@ -91,12 +91,11 @@ func (s socketHandler) startGame(content string) {
 
 func PlayerSocketHandler(
 	connection *websocket.Conn,
-	usecases *usecases.GameUsecases,
 	gameID int,
 	playerName string,
 	hub *Hub,
 ) {
-	game := joinGame(connection, usecases, gameID, playerName)
+	game := joinGame(connection, hub.gameUsecases, gameID, playerName)
 	player := subscribeAndBroadcast(gameID, connection, game, hub)
 
 	for {
@@ -110,11 +109,11 @@ func PlayerSocketHandler(
 		content := strings.Join(array[1:], "/")
 
 		socketHandler := socketHandler{
-			gameID:     gameID,
-			playerName: playerName,
-			connection: connection,
-			usecases:   usecases,
-			player:     player,
+			gameID:       gameID,
+			playerName:   playerName,
+			connection:   connection,
+			gameUsecases: hub.gameUsecases,
+			player:       player,
 		}
 
 		switch head {

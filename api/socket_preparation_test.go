@@ -21,9 +21,9 @@ func TestFailingSocketHandler(test *testing.T) {
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
 
-	hub := NewHub()
+	hub := NewHub(gameUsecases)
 	go hub.run()
-	server, connection := NewGameWebSocketServer(test, gameUsecases, 3, "P1", hub)
+	server, connection := NewGameWebSocketServer(test, 3, "P1", hub)
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
 		reply := ReceiveMessageOrFatal(connection, test)
@@ -70,7 +70,7 @@ func TestSocketHandler(test *testing.T) {
 	var s5 *httptest.Server
 	var c5 *websocket.Conn
 
-	hub := NewHub()
+	hub := NewHub(gameUsecases)
 	go hub.run()
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
@@ -78,7 +78,7 @@ func TestSocketHandler(test *testing.T) {
 			"P1": {},
 		}})
 
-		s1, c1 = NewGameWebSocketServer(test, gameUsecases, 1, "P1", hub)
+		s1, c1 = NewGameWebSocketServer(test, 1, "P1", hub)
 
 		got := ReceiveGameOrFatal(c1, test)
 
@@ -86,9 +86,9 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Receive the teaming phase when full", func(test *testing.T) {
-		s2, c2 = NewGameWebSocketServer(test, gameUsecases, 1, "P2", hub)
-		s3, c3 = NewGameWebSocketServer(test, gameUsecases, 1, "P3", hub)
-		s4, c4 = NewGameWebSocketServer(test, gameUsecases, 1, "P4", hub)
+		s2, c2 = NewGameWebSocketServer(test, 1, "P2", hub)
+		s3, c3 = NewGameWebSocketServer(test, 1, "P3", hub)
+		s4, c4 = NewGameWebSocketServer(test, 1, "P4", hub)
 
 		_, _ = receive(c1)
 		_, _ = receive(c1)
@@ -110,7 +110,7 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Try to join when already in game", func(test *testing.T) {
-		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P4", hub)
+		s5, c5 = NewGameWebSocketServer(test, 1, "P4", hub)
 
 		reply := ReceiveMessageOrFatal(c5, test)
 
@@ -118,7 +118,7 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Try to join a full game", func(test *testing.T) {
-		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P5", hub)
+		s5, c5 = NewGameWebSocketServer(test, 1, "P5", hub)
 
 		reply := ReceiveMessageOrFatal(c5, test)
 

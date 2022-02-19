@@ -96,7 +96,7 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	assert := assert.New(test)
 	response := httptest.NewRecorder()
 
-	s.server, s.connection = api.NewGameWebSocketServer(test, s.gameUsecases, 1, "player", s.hub)
+	s.server, s.connection = api.NewGameWebSocketServer(test, 1, "player", s.hub)
 	receivedGame := api.ReceiveGameOrFatal(s.connection, test)
 
 	assert.IsType(domain.Game{}, receivedGame)

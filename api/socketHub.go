@@ -1,6 +1,7 @@
 package api
 
 import (
+	"coinche/usecases"
 	"encoding/json"
 	"fmt"
 
@@ -30,20 +31,22 @@ type subscription struct {
 }
 
 type Hub struct {
-	games      map[int]map[*player]bool
-	broadcast  chan message
-	single     chan private
-	register   chan subscription
-	unregister chan subscription
+	games        map[int]map[*player]bool
+	broadcast    chan message
+	single       chan private
+	register     chan subscription
+	unregister   chan subscription
+	gameUsecases *usecases.GameUsecases
 }
 
-func NewHub() *Hub {
+func NewHub(gameUsecases *usecases.GameUsecases) *Hub {
 	return &Hub{
-		broadcast:  make(chan message),
-		single:     make(chan private),
-		register:   make(chan subscription),
-		unregister: make(chan subscription),
-		games:      make(map[int]map[*player]bool),
+		broadcast:    make(chan message),
+		single:       make(chan private),
+		register:     make(chan subscription),
+		unregister:   make(chan subscription),
+		games:        make(map[int]map[*player]bool),
+		gameUsecases: gameUsecases,
 	}
 }
 

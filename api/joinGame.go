@@ -26,5 +26,5 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context, hub *Hub) {
 
 	connection, err := wsupgrader.Upgrade(context.Writer, context.Request, nil)
 	utilities.PanicIfErr(err)
-	PlayerSocketHandler(connection, gameAPIs.Usecases, gameID, playerName, hub)
+	PlayerSocketHandler(connection, gameID, playerName, hub)
 }
