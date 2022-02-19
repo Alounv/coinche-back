@@ -52,7 +52,9 @@ func NewGameWebSocketServer(
 	hub *Hub,
 ) (*httptest.Server, *websocket.Conn) {
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
-		HTTPGameSocketHandler(w, r, gameUsecases, ID, playerName, hub)
+		connection, err := wsupgrader.Upgrade(w, r, nil)
+		utilities.FatalIfErr(err, test)
+		PlayerSocketHandler(connection, gameUsecases, ID, playerName, hub)
 	}
 	socketHandler := http.HandlerFunc(funcForHandlerFunc)
 

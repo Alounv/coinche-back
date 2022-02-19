@@ -2,28 +2,32 @@ package gamerepo
 
 import (
 	"coinche/domain"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (s *GameRepository) UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error {
-	tx := s.db.MustBegin()
-
+func getCurrentPlayers(tx *sqlx.Tx, gameID int) (map[string]int, error) {
 	var currentPlayers map[string]int = map[string]int{}
 
-	rows, err := tx.Query(`SELECT name FROM player WHERE gameid=$1`, id)
+	rows, err := tx.Query(`SELECT name FROM player WHERE gameid=$1`, gameID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for rows.Next() {
 		var playerName string
 		err := rows.Scan(&playerName)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		currentPlayers[playerName] = 0
 	}
 
+	return currentPlayers, nil
+}
+
+func deletePlayers(currentPlayers map[string]int, players map[string]domain.Player, gameID int, tx *sqlx.Tx) error {
 	for currentPlayerName := range currentPlayers {
 		shouldDelete := false
 		if _, ok := players[currentPlayerName]; !ok {
@@ -31,20 +35,23 @@ func (s *GameRepository) UpdatePlayers(id int, players map[string]domain.Player,
 		}
 
 		if shouldDelete {
-			_, err := s.db.Exec(
+			_, err := tx.Exec(
 				`
 				DELETE FROM player
 				WHERE name = $1 AND gameid = $2
 				`,
 				currentPlayerName,
-				id,
+				gameID,
 			)
 			if err != nil {
 				return err
 			}
 		}
 	}
+	return nil
+}
 
+func createPlayers(currentPlayers map[string]int, players map[string]domain.Player, gameID int, tx *sqlx.Tx) error {
 	for playerName, player := range players {
 		shouldCreate := false
 		if _, ok := currentPlayers[playerName]; !ok {
@@ -52,19 +59,39 @@ func (s *GameRepository) UpdatePlayers(id int, players map[string]domain.Player,
 		}
 
 		if shouldCreate {
-			_, err := s.db.Exec(
+			_, err := tx.Exec(
 				`
 				INSERT INTO player (name, team, gameid) 
 				VALUES ($1, $2, $3)
 				`,
 				playerName,
 				player.Team,
-				id,
+				gameID,
 			)
 			if err != nil {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func (s *GameRepository) UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error {
+	tx := s.db.MustBegin()
+
+	currentPlayers, err := getCurrentPlayers(tx, id)
+	if err != nil {
+		return err
+	}
+
+	err = deletePlayers(currentPlayers, players, id, tx)
+	if err != nil {
+		return err
+	}
+
+	err = createPlayers(currentPlayers, players, id, tx)
+	if err != nil {
+		return err
 	}
 
 	_, err = tx.Exec(

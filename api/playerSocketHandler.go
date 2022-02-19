@@ -5,7 +5,6 @@ import (
 	"coinche/usecases"
 	"coinche/utilities"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -90,21 +89,15 @@ func (s socketHandler) startGame(content string) {
 	broadcastGameOrPanic(game, s.player.hub)
 }
 
-func HTTPGameSocketHandler(
-	writer http.ResponseWriter,
-	request *http.Request,
+func PlayerSocketHandler(
+	connection *websocket.Conn,
 	usecases *usecases.GameUsecases,
-	id int,
+	gameID int,
 	playerName string,
 	hub *Hub,
 ) {
-	connection, _ := wsupgrader.Upgrade(writer, request, nil)
-	if connection == nil {
-		return
-	}
-
-	game := joinGame(connection, usecases, id, playerName)
-	player := subscribeAndBroadcast(id, connection, game, hub)
+	game := joinGame(connection, usecases, gameID, playerName)
+	player := subscribeAndBroadcast(gameID, connection, game, hub)
 
 	for {
 		message, err := ReceiveMessage(connection)
@@ -117,7 +110,7 @@ func HTTPGameSocketHandler(
 		content := strings.Join(array[1:], "/")
 
 		socketHandler := socketHandler{
-			gameID:     id,
+			gameID:     gameID,
 			playerName: playerName,
 			connection: connection,
 			usecases:   usecases,
