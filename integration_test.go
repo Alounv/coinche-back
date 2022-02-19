@@ -97,7 +97,7 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 	response := httptest.NewRecorder()
 
 	s.server, s.connection = api.NewGameWebSocketServer(test, s.gameUsecases, 1, "player", s.hub)
-	receivedGame, _ := api.ReceiveGame(s.connection)
+	receivedGame := api.ReceiveGameOrFatal(s.connection, test)
 
 	assert.IsType(domain.Game{}, receivedGame)
 
@@ -115,7 +115,7 @@ func (s *IntegrationTestSuite) TestLeaveUnstartedGame() {
 	err := api.SendMessage(s.connection, "leave")
 	utilities.FatalIfErr(err, test)
 
-	message, _ := api.ReceiveMessage(s.connection)
+	message := api.ReceiveMessageOrFatal(s.connection, test)
 
 	assert.Equal("Has left the game", message)
 

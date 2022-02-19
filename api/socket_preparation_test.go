@@ -26,10 +26,10 @@ func TestFailingSocketHandler(test *testing.T) {
 	server, connection := NewGameWebSocketServer(test, gameUsecases, 3, "P1", hub)
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
-		got, _ := ReceiveMessage(connection)
+		reply := ReceiveMessageOrFatal(connection, test)
 		want := "Could not join this game: GAME NOT FOUND"
 
-		assert.Equal(want, got)
+		assert.Equal(want, reply)
 	})
 
 	test.Run("Close the connection when failing to join", func(test *testing.T) {
@@ -80,11 +80,7 @@ func TestSocketHandler(test *testing.T) {
 
 		s1, c1 = NewGameWebSocketServer(test, gameUsecases, 1, "P1", hub)
 
-		message, err := receive(c1)
-		utilities.FatalIfErr(err, test)
-
-		got, err := DecodeGame(message)
-		utilities.FatalIfErr(err, test)
+		got := ReceiveGameOrFatal(c1, test)
 
 		assert.Equal(want, got)
 	})
@@ -96,8 +92,6 @@ func TestSocketHandler(test *testing.T) {
 
 		_, _ = receive(c1)
 		_, _ = receive(c1)
-		message, err := receive(c1)
-		utilities.FatalIfErr(err, test)
 
 		_, _ = receive(c2)
 		_, _ = receive(c2)
@@ -108,8 +102,7 @@ func TestSocketHandler(test *testing.T) {
 
 		_, _ = receive(c4)
 
-		got, err := DecodeGame(message)
-		utilities.FatalIfErr(err, test)
+		got := ReceiveGameOrFatal(c1, test)
 
 		assert.Equal("GAME ONE", got.Name)
 		assert.Equal(map[string]domain.Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}}, got.Players)
@@ -119,29 +112,23 @@ func TestSocketHandler(test *testing.T) {
 	test.Run("Try to join when already in game", func(test *testing.T) {
 		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P4", hub)
 
-		got, err := ReceiveMessage(c5)
-		utilities.FatalIfErr(err, test)
+		reply := ReceiveMessageOrFatal(c5, test)
 
-		assert.Equal("Could not join this game: ALREADY IN GAME", got)
+		assert.Equal("Could not join this game: ALREADY IN GAME", reply)
 	})
 
 	test.Run("Try to join a full game", func(test *testing.T) {
 		s5, c5 = NewGameWebSocketServer(test, gameUsecases, 1, "P5", hub)
 
-		message, err := receive(c5)
-		utilities.FatalIfErr(err, test)
+		reply := ReceiveMessageOrFatal(c5, test)
 
-		got, err := DecodeMessage(message)
-		utilities.FatalIfErr(err, test)
-
-		assert.Equal("Could not join this game: GAME IS FULL", got)
+		assert.Equal("Could not join this game: GAME IS FULL", reply)
 	})
 
 	test.Run("Can send a message", func(test *testing.T) {
 		err := SendMessage(c1, "hello")
 		utilities.FatalIfErr(err, test)
-		reply, err := ReceiveMessage(c1)
-		utilities.FatalIfErr(err, test)
+		reply := ReceiveMessageOrFatal(c1, test)
 
 		assert.Equal("Message not understood by the server", reply)
 	})
@@ -149,8 +136,7 @@ func TestSocketHandler(test *testing.T) {
 	test.Run("Can leave the game", func(test *testing.T) {
 		err := SendMessage(c1, "leave")
 		utilities.FatalIfErr(err, test)
-		reply, err := ReceiveMessage(c1)
-		utilities.FatalIfErr(err, test)
+		reply := ReceiveMessageOrFatal(c1, test)
 
 		assert.Equal("Has left the game", reply)
 	})

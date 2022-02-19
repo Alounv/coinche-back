@@ -4,6 +4,7 @@ import (
 	"coinche/domain"
 	"coinche/utilities"
 	"encoding/json"
+	"testing"
 
 	"github.com/gorilla/websocket"
 )
@@ -40,26 +41,25 @@ func SendMessage(connection *websocket.Conn, msg string) error {
 	return err
 }
 
-func DecodeGame(message []byte) (domain.Game, error) {
+func decodeGame(message []byte) (domain.Game, error) {
 	var game domain.Game
 	err := json.Unmarshal(message, &game)
 	return game, err
 }
 
-func DecodeMessage(message []byte) (string, error) {
+func decodeMessage(message []byte) (string, error) {
 	var reply string
 	err := json.Unmarshal(message, &reply)
 	return reply, err
 }
 
-func ReceiveGame(connection *websocket.Conn) (domain.Game, error) {
+func ReceiveGameOrFatal(connection *websocket.Conn, test *testing.T) domain.Game {
 	message, err := receive(connection)
-	if err != nil {
-		return domain.Game{}, err
-	}
+	utilities.FatalIfErr(err, test)
 
-	game, err := DecodeGame(message)
-	return game, err
+	game, err := decodeGame(message)
+	utilities.FatalIfErr(err, test)
+	return game
 }
 
 func ReceiveMessage(connection *websocket.Conn) (string, error) {
@@ -68,6 +68,12 @@ func ReceiveMessage(connection *websocket.Conn) (string, error) {
 		return "", err
 	}
 
-	reply, err := DecodeMessage(message)
+	reply, err := decodeMessage(message)
 	return reply, err
+}
+
+func ReceiveMessageOrFatal(connection *websocket.Conn, test *testing.T) string {
+	reply, err := ReceiveMessage(connection)
+	utilities.FatalIfErr(err, test)
+	return reply
 }

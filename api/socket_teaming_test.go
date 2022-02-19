@@ -113,8 +113,7 @@ func TestSocketTeaming(test *testing.T) {
 
 		_, _ = receive(c1)
 
-		got, err := ReceiveGame(c1)
-		utilities.FatalIfErr(err, test)
+		got := ReceiveGameOrFatal(c1, test)
 
 		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
 
@@ -127,13 +126,9 @@ func TestSocketTeaming(test *testing.T) {
 		err := SendMessage(c3, "joinTeam: AAA")
 		utilities.FatalIfErr(err, test)
 
-		message, err := receive(c3)
-		utilities.FatalIfErr(err, test)
+		reply := ReceiveMessageOrFatal(c3, test)
 
-		got, err := DecodeMessage(message)
-		utilities.FatalIfErr(err, test)
-
-		assert.Equal("Could not join this team: TEAM IS FULL", got)
+		assert.Equal("Could not join this team: TEAM IS FULL", reply)
 	})
 
 	test.Run("Ready to start when two teams ready", func(test *testing.T) {
@@ -145,8 +140,7 @@ func TestSocketTeaming(test *testing.T) {
 
 		_, _ = receive(c1)
 
-		got, err := ReceiveGame(c1)
-		utilities.FatalIfErr(err, test)
+		got := ReceiveGameOrFatal(c1, test)
 
 		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
 
@@ -158,8 +152,7 @@ func TestSocketTeaming(test *testing.T) {
 		err := SendMessage(c3, "start")
 		utilities.FatalIfErr(err, test)
 
-		got, err := ReceiveGame(c1)
-		utilities.FatalIfErr(err, test)
+		got := ReceiveGameOrFatal(c1, test)
 
 		assert.Equal(domain.Bidding, got.Phase)
 	})
