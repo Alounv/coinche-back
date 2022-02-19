@@ -57,17 +57,31 @@ func (game Game) CanStart() error {
 	for _, player := range game.Players {
 		if player.Team == "" {
 			continue
-		} else if team1 == "" {
+		}
+
+		if team1 == "" {
 			team1 = player.Team
 			team1Size++
-		} else if team1 == player.Team {
+			continue
+		}
+
+		if team1 == player.Team {
 			team1Size++
-		} else if team2 == "" {
+			continue
+		}
+
+		if team2 == "" {
 			team2 = player.Team
 			team2Size++
-		} else if team2 == player.Team {
-			team2Size++
+			continue
 		}
+
+		if team2 == player.Team {
+			team2Size++
+			continue
+		}
+
+		return errors.New(ErrTeamsNotEqual)
 	}
 
 	if team1Size == 2 && team2Size == 2 {
