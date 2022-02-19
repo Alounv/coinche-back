@@ -2,7 +2,7 @@ package main
 
 import (
 	"coinche/api"
-	gamerepo "coinche/repository/game"
+	repository "coinche/repository"
 	"coinche/usecases"
 	"coinche/utilities"
 	"fmt"
@@ -16,7 +16,7 @@ func main() {
 	addr := os.Getenv("PORT")
 
 	dsn := connectionInfo + " dbname=" + dbName
-	gameRepository, err := gamerepo.NewGameRepository(dsn)
+	gameRepository, err := repository.NewGameRepository(dsn)
 	utilities.PanicIfErr(err)
 	gameUsecases := usecases.NewGameUsecases(gameRepository)
 

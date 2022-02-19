@@ -1,4 +1,4 @@
-package gamerepo
+package repository
 
 import (
 	"coinche/usecases"

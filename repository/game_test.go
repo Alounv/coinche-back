@@ -1,4 +1,4 @@
-package gamerepo
+package repository
 
 import (
 	"coinche/domain"
@@ -14,7 +14,7 @@ import (
 func TestGameRepo(test *testing.T) {
 	assert := assert.New(test)
 	dbName := "testgamerepodb"
-	utilities.LoadEnv("../../.env")
+	utilities.LoadEnv("../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
 	db := utilities.CreateDb(connectionInfo, dbName)
@@ -46,7 +46,7 @@ func TestGameRepo(test *testing.T) {
 func TestGameRepoWithInitialData(test *testing.T) {
 	assert := assert.New(test)
 	dbName := "testgamerepowithinitialdatadb"
-	utilities.LoadEnv("../../.env")
+	utilities.LoadEnv("../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
 	db := utilities.CreateDb(connectionInfo, dbName)

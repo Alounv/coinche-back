@@ -3,7 +3,7 @@ package main
 import (
 	"coinche/api"
 	"coinche/domain"
-	gamerepo "coinche/repository/game"
+	repository "coinche/repository"
 	"coinche/usecases"
 	"coinche/utilities"
 	"net/http"
@@ -38,7 +38,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	s.db = utilities.CreateDb(s.connectionInfo, s.dbName)
 
-	gameRepository, err := gamerepo.NewGameRepositoryFromDb(s.db)
+	gameRepository, err := repository.NewGameRepositoryFromDb(s.db)
 	if err != nil {
 		s.T().Fatal(err)
 	}
