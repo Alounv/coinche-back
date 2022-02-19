@@ -47,73 +47,88 @@ func NewHub() *Hub {
 	}
 }
 
+func register(h *Hub, subscription subscription) {
+	players := h.games[subscription.gameID]
+	if players == nil {
+		players = make(map[*player]bool)
+		h.games[subscription.gameID] = players
+	}
+	h.games[subscription.gameID][subscription.player] = true
+}
+
+func unregister(h *Hub, subscription subscription) {
+	players := h.games[subscription.gameID]
+	if players != nil {
+		if _, ok := players[subscription.player]; ok {
+			delete(players, subscription.player)
+			close(subscription.player.send)
+			if len(players) == 0 {
+				delete(h.games, subscription.gameID)
+			}
+		}
+	}
+}
+
+func broadcast(h *Hub, message message) {
+	players := h.games[message.gameID]
+	for player := range players {
+		select {
+		case player.send <- message.data:
+			err := send(player.connection, message.data)
+			if err != nil {
+				fmt.Println("Error sending message to player:", err)
+			}
+		default:
+			close(player.send)
+			delete(players, player)
+			if len(players) == 0 {
+				delete(h.games, message.gameID)
+			}
+		}
+	}
+}
+
+func single(h *Hub, private private) {
+	players := h.games[private.gameID]
+	player := private.player
+	if _, ok := players[player]; !ok {
+		message, _ := json.Marshal("Player not in game")
+		err := send(private.player.connection, message)
+		if err != nil {
+			fmt.Println("Error sending message to player:", err)
+		}
+	}
+
+	select {
+	case player.send <- private.data:
+		err := send(player.connection, private.data)
+		if err != nil {
+			fmt.Println("Error sending message to player:", err)
+		}
+	default:
+		close(player.send)
+		delete(players, player)
+		if len(players) == 0 {
+			delete(h.games, private.gameID)
+		}
+	}
+}
+
 func (h *Hub) run() {
 	for {
 		select {
 
 		case subscription := <-h.register:
-			players := h.games[subscription.gameID]
-			if players == nil {
-				players = make(map[*player]bool)
-				h.games[subscription.gameID] = players
-			}
-			h.games[subscription.gameID][subscription.player] = true
+			register(h, subscription)
 
 		case subscription := <-h.unregister:
-			players := h.games[subscription.gameID]
-			if players != nil {
-				if _, ok := players[subscription.player]; ok {
-					delete(players, subscription.player)
-					close(subscription.player.send)
-					if len(players) == 0 {
-						delete(h.games, subscription.gameID)
-					}
-				}
-			}
+			unregister(h, subscription)
 
 		case message := <-h.broadcast:
-			players := h.games[message.gameID]
-			for player := range players {
-				select {
-				case player.send <- message.data:
-					err := send(player.connection, message.data)
-					if err != nil {
-						fmt.Println("Error sending message to player:", err)
-					}
-				default:
-					close(player.send)
-					delete(players, player)
-					if len(players) == 0 {
-						delete(h.games, message.gameID)
-					}
-				}
-			}
+			broadcast(h, message)
 
 		case private := <-h.single:
-
-			players := h.games[private.gameID]
-			player := private.player
-			if _, ok := players[player]; !ok {
-				message, _ := json.Marshal("Player not in game")
-				err := send(private.player.connection, message)
-				if err != nil {
-					fmt.Println("Error sending message to player:", err)
-				}
-			}
-
-			select {
-			case player.send <- private.data:
-				err := send(player.connection, private.data)
-				if err != nil {
-					fmt.Println("Error sending message to player:", err)
-				}
-			default:
-				close(player.send)
-				delete(players, player)
-				if len(players) == 0 {
-					delete(h.games, private.gameID)
-				}
-			}
+			single(h, private)
 		}
 	}
 }
