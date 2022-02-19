@@ -209,6 +209,32 @@ func HTTPGameSocketHandler(
 				}
 				break
 			}
+		case "start":
+			{
+				err = usecases.StartGame(id)
+				if err != nil {
+					errorMessage := fmt.Sprint("Could not start the game: ", err)
+					err = SendMessage(connection, errorMessage)
+					if err != nil {
+						panic(err)
+					}
+					break
+				}
+				game, err := usecases.GetGame(id)
+				if err != nil {
+					errorMessage := fmt.Sprint("Could not get updated game: ", err)
+					err := SendMessage(connection, errorMessage)
+					if err != nil {
+						panic(err)
+					}
+					break
+				}
+				err = broadcastGame(game, p.hub)
+				if err != nil {
+					panic(err)
+				}
+				break
+			}
 		default:
 			{
 				err = SendMessage(connection, "Message not understood by the server")

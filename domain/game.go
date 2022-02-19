@@ -35,13 +35,19 @@ const (
 	ErrPlayerNotFound  = "PLAYER NOT FOUND"
 	ErrNotTeaming      = "NOT IN TEAMING PHASE"
 	ErrTeamFull        = "TEAM IS FULL"
+	ErrStartGame       = "GAME CANNOT START"
+	ErrTeamsNotEqual   = "TEAMS ARE NOT EQUAL"
 )
 
 func (game Game) IsFull() bool {
 	return len(game.Players) == 4
 }
 
-func (game Game) CanStart() bool {
+func (game Game) CanStart() error {
+	if game.Phase != Teaming {
+		return errors.New(ErrNotTeaming)
+	}
+
 	team1 := ""
 	team1Size := 0
 
@@ -62,11 +68,15 @@ func (game Game) CanStart() bool {
 		} else if team2 == player.Team {
 			team2Size++
 		} else {
-			return false
+			return errors.New(ErrTeamsNotEqual)
 		}
 	}
 
-	return team1Size == 2 && team2Size == 2
+	if team1Size == 2 && team2Size == 2 {
+		return nil
+	}
+
+	return errors.New(ErrTeamsNotEqual)
 }
 
 func (game *Game) AddPlayer(playerName string) error {
@@ -136,6 +146,16 @@ func (game *Game) ClearTeam(playerName string) error {
 
 	game.Players[playerName] = newPlayer
 
+	return nil
+}
+
+func (game *Game) Start() error {
+	err := game.CanStart()
+	if err != nil {
+		return err
+	}
+
+	game.Phase = Bidding
 	return nil
 }
 

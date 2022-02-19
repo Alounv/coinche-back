@@ -162,7 +162,7 @@ func TestCanStart(test *testing.T) {
 			Players: map[string]Player{"P1": {"A"}, "P2": {"A"}, "P3": {"B"}, "P4": {"B"}},
 			Phase:   Teaming,
 		}
-		assert.Equal(true, testGame.CanStart())
+		assert.NoError(testGame.CanStart())
 	})
 
 	test.Run("should not be ready with on team of one", func(test *testing.T) {
@@ -172,7 +172,7 @@ func TestCanStart(test *testing.T) {
 			Players: map[string]Player{"P1": {"A"}, "P2": {"A"}, "P3": {}, "P4": {"B"}},
 			Phase:   Teaming,
 		}
-		assert.Equal(false, testGame.CanStart())
+		assert.Error(testGame.CanStart())
 	})
 
 	test.Run("should not be ready with on team of three", func(test *testing.T) {
@@ -182,6 +182,24 @@ func TestCanStart(test *testing.T) {
 			Players: map[string]Player{"P1": {"A"}, "P2": {"A"}, "P3": {"A"}, "P4": {"B"}},
 			Phase:   Teaming,
 		}
-		assert.Equal(false, testGame.CanStart())
+		assert.Error(testGame.CanStart())
+	})
+}
+
+func TestStart(test *testing.T) {
+	assert := assert.New(test)
+
+	test.Run("should start when the game can start", func(test *testing.T) {
+		testGame := Game{
+			ID:      2,
+			Name:    "GAME TWO",
+			Players: map[string]Player{"P1": {"A"}, "P2": {"A"}, "P3": {"B"}, "P4": {"B"}},
+			Phase:   Teaming,
+		}
+
+		err := testGame.Start()
+
+		assert.NoError(err)
+		assert.Equal(Bidding, testGame.Phase)
 	})
 }

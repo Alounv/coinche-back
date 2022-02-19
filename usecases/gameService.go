@@ -18,6 +18,7 @@ type GameRepositoryInterface interface {
 	CreateGame(game domain.Game) (int, error)
 	UpdatePlayers(id int, players map[string]domain.Player, phase domain.Phase) error
 	UpdatePlayer(id int, playerName string, players domain.Player) error
+	UpdateGame(id int, phase domain.Phase) error
 }
 
 type GameUsecases struct {
@@ -87,6 +88,19 @@ func (s *GameUsecases) LeaveTeam(id int, playerName string) error {
 		return err
 	}
 	err = s.Repo.UpdatePlayer(game.ID, playerName, game.Players[playerName])
+	return err
+}
+
+func (s *GameUsecases) StartGame(id int) error {
+	game, err := s.Repo.GetGame(id)
+	if err != nil {
+		return err
+	}
+	err = game.Start()
+	if err != nil {
+		return err
+	}
+	err = s.Repo.UpdateGame(game.ID, game.Phase)
 	return err
 }
 

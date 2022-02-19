@@ -49,6 +49,15 @@ func TestGameService(test *testing.T) {
 		assert.Equal(1, id)
 	})
 
-	/*test.Run("can choose a team", func(test *testing.T) {
-	}*/
+	test.Run("can choose a team", func(test *testing.T) {
+		err := gameUsecases.JoinTeam(0, "P1", "A Team")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		game, err := gameUsecases.GetGame(0)
+
+		assert.NoError(err)
+		assert.Equal("A Team", game.Players["P1"].Team)
+	})
 }

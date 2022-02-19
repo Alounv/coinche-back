@@ -168,7 +168,21 @@ func TestSocketTeaming(test *testing.T) {
 		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
 
 		assert.Equal("GAME ONE", got.Name)
-		assert.Equal(true, got.CanStart())
+		assert.NoError(got.CanStart())
+	})
+
+	test.Run("Can start the game", func(test *testing.T) {
+		err := SendMessage(c3, "start")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		got, err := ReceiveGame(c1)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal(domain.Bidding, got.Phase)
 	})
 
 	test.Cleanup(func() {

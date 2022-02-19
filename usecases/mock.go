@@ -54,6 +54,15 @@ func (repo *MockGameRepo) UpdatePlayer(id int, playerName string, player domain.
 	return nil
 }
 
+func (repo *MockGameRepo) UpdateGame(id int, phase domain.Phase) error {
+	game, ok := repo.games[id]
+	if !ok {
+		return errors.New("GAME NOT FOUND")
+	}
+	game.Phase = phase
+	return nil
+}
+
 func NewMockGameRepo(games map[int]*domain.Game) MockGameRepo {
 	return MockGameRepo{
 		games:         games,
