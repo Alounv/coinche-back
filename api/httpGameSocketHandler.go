@@ -11,31 +11,26 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func setup(writer http.ResponseWriter,
-	request *http.Request,
-	usecases *usecases.GameUsecases,
-	id int,
-	playerName string,
-	hub *Hub) (*websocket.Conn, *player, domain.Game) {
-	connection, err := wsupgrader.Upgrade(writer, request, nil)
-	utilities.PanicIfErr(err)
-
+func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, id int, playerName string) domain.Game {
 	game, err := usecases.JoinGame(id, playerName)
 	if err != nil {
 		fmt.Println("Error joining game:", err)
 		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
 		utilities.PanicIfErr(err)
 		connection.Close()
-		return nil, nil, domain.Game{}
+		return domain.Game{}
 	}
 
+	return game
+}
+
+func subscribeAndBroadcast(id int, connection *websocket.Conn, game domain.Game, hub *Hub) *player {
 	p := &player{hub: hub, connection: connection, send: make(chan []byte, 256)}
 	p.hub.register <- subscription{player: p, gameID: id}
 
 	broadcastGameOrPanic(game, p.hub)
-	utilities.PanicIfErr(err)
 
-	return connection, p, game
+	return p
 }
 
 type socketHandler struct {
@@ -103,10 +98,13 @@ func HTTPGameSocketHandler(
 	playerName string,
 	hub *Hub,
 ) {
-	connection, player, game := setup(writer, request, usecases, id, playerName, hub)
+	connection, _ := wsupgrader.Upgrade(writer, request, nil)
 	if connection == nil {
 		return
 	}
+
+	game := joinGame(connection, usecases, id, playerName)
+	player := subscribeAndBroadcast(id, connection, game, hub)
 
 	for {
 		message, err := ReceiveMessage(connection)
