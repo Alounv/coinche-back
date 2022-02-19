@@ -38,53 +38,61 @@ func setup(writer http.ResponseWriter,
 	return connection, p, game
 }
 
-func leave(id int, playerName string, connection *websocket.Conn, usecases *usecases.GameUsecases, game domain.Game, player *player) {
-	err := usecases.LeaveGame(id, playerName)
+type socketHandler struct {
+	gameID     int
+	playerName string
+	connection *websocket.Conn
+	usecases   *usecases.GameUsecases
+	player     *player
+}
+
+func (s *socketHandler) leave(game domain.Game) {
+	err := s.usecases.LeaveGame(s.gameID, s.playerName)
 	if err != nil {
 		fmt.Println("Could not leave this game: ", err)
 		return
 	}
-	err = SendMessage(connection, "Has left the game")
+	err = SendMessage(s.connection, "Has left the game")
 	utilities.PanicIfErr(err)
-	broadcastGameOrPanic(game, player.hub)
+	broadcastGameOrPanic(game, s.player.hub)
 
-	connection.Close()
+	s.connection.Close()
 }
 
-func joinTeam(id int, playerName string, connection *websocket.Conn, usecases *usecases.GameUsecases, game domain.Game, player *player, content string) {
-	err := usecases.JoinTeam(id, playerName, content)
+func (s *socketHandler) joinTeam(content string) {
+	err := s.usecases.JoinTeam(s.gameID, s.playerName, content)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not join this team: ", err)
-		err = SendMessage(connection, errorMessage)
+		err = SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
-	game, err = usecases.GetGame(id)
+	game, err := s.usecases.GetGame(s.gameID)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not get updated game: ", err)
-		err := SendMessage(connection, errorMessage)
+		err := SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
-	broadcastGameOrPanic(game, player.hub)
+	broadcastGameOrPanic(game, s.player.hub)
 }
 
-func startGame(id int, playerName string, connection *websocket.Conn, usecases *usecases.GameUsecases, game domain.Game, player *player, content string) {
-	err := usecases.StartGame(id)
+func (s socketHandler) startGame(content string) {
+	err := s.usecases.StartGame(s.gameID)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not start the game: ", err)
-		err = SendMessage(connection, errorMessage)
+		err = SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
-	game, err = usecases.GetGame(id)
+	game, err := s.usecases.GetGame(s.gameID)
 	if err != nil {
 		errorMessage := fmt.Sprint("Could not get updated game: ", err)
-		err := SendMessage(connection, errorMessage)
+		err := SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
-	broadcastGameOrPanic(game, player.hub)
+	broadcastGameOrPanic(game, s.player.hub)
 }
 
 func HTTPGameSocketHandler(
@@ -110,20 +118,28 @@ func HTTPGameSocketHandler(
 		head := array[0]
 		content := strings.Join(array[1:], "/")
 
+		socketHandler := socketHandler{
+			gameID:     id,
+			playerName: playerName,
+			connection: connection,
+			usecases:   usecases,
+			player:     player,
+		}
+
 		switch head {
 		case "leave":
 			{
-				leave(id, playerName, connection, usecases, game, player)
+				socketHandler.leave(game)
 				break
 			}
 		case "joinTeam":
 			{
-				joinTeam(id, playerName, connection, usecases, game, player, content)
+				socketHandler.joinTeam(content)
 				break
 			}
 		case "start":
 			{
-				startGame(id, playerName, connection, usecases, game, player, content)
+				socketHandler.startGame(content)
 				break
 			}
 		default:
