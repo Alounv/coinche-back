@@ -76,9 +76,7 @@ func createPlayers(currentPlayers map[string]int, players map[string]domain.Play
 	return nil
 }
 
-func (s *GameRepository) UpdatePlayers(gameID int, players map[string]domain.Player, phase domain.Phase) error {
-	tx := s.db.MustBegin()
-
+func updatePlayers(gameID int, players map[string]domain.Player, tx *sqlx.Tx) error {
 	currentPlayers, err := getCurrentPlayers(tx, gameID)
 	if err != nil {
 		return err
@@ -94,7 +92,11 @@ func (s *GameRepository) UpdatePlayers(gameID int, players map[string]domain.Pla
 		return err
 	}
 
-	_, err = tx.Exec(
+	return nil
+}
+
+func updatePhase(phase domain.Phase, gameID int, tx *sqlx.Tx) error {
+	_, err := tx.Exec(
 		`
 		UPDATE game
 		SET phase = $1
@@ -103,7 +105,21 @@ func (s *GameRepository) UpdatePlayers(gameID int, players map[string]domain.Pla
 		phase,
 		gameID,
 	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
+func (s *GameRepository) UpdatePlayers(gameID int, players map[string]domain.Player, phase domain.Phase) error {
+	tx := s.db.MustBegin()
+
+	err := updatePlayers(gameID, players, tx)
+	if err != nil {
+		return err
+	}
+
+	err = updatePhase(phase, gameID, tx)
 	if err != nil {
 		return err
 	}
