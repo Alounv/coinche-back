@@ -23,8 +23,8 @@ func NewGetGameRequest(test *testing.T, gameID int) *http.Request {
 	return GetNewRequest(test, route, http.MethodGet)
 }
 
-func NewJoinGameRequest(test *testing.T, id int, playerName string) *http.Request {
-	route := fmt.Sprintf("/games/%d/join?playerName=%s", id, url.QueryEscape(playerName))
+func NewJoinGameRequest(test *testing.T, gameID int, playerName string) *http.Request {
+	route := fmt.Sprintf("/games/%d/join?playerName=%s", gameID, url.QueryEscape(playerName))
 	return GetNewRequest(test, route, http.MethodGet)
 }
 
