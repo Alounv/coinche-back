@@ -16,16 +16,61 @@ const (
 	Pause       Phase = 5
 )
 
+type Value int
+
+const (
+	Eight    Value = 80
+	Nine     Value = 90
+	Ten      Value = 100
+	Eleven   Value = 110
+	Twelve   Value = 120
+	Thirteen Value = 130
+	Fourteen Value = 140
+	Fifteen  Value = 150
+	Capot    Value = 160
+)
+
+type Color string
+
+const (
+	Club     Color = "club"
+	Diamond  Color = "diamond"
+	Heart    Color = "heart"
+	Spade    Color = "spade"
+	NoTrump  Color = "noTrump"
+	AllTrump Color = "allTrump"
+)
+
+type Bid struct {
+	Player string
+	Color  Color
+}
+
 type Game struct {
 	ID        int
 	Name      string
 	CreatedAt time.Time
 	Players   map[string]Player
 	Phase     Phase
+	Bids      map[Value]Bid
 }
 
 type Player struct {
-	Team string
+	Team  string
+	Order int
+}
+
+func (player Player) CanPlay() bool {
+	return player.Order == 0
+}
+
+func NewGame(name string) Game {
+	return Game{
+		Name:    name,
+		Players: map[string]Player{},
+		Phase:   Preparation,
+		Bids:    map[Value]Bid{},
+	}
 }
 
 const (
@@ -34,9 +79,12 @@ const (
 	ErrGameFull        = "GAME IS FULL"
 	ErrPlayerNotFound  = "PLAYER NOT FOUND"
 	ErrNotTeaming      = "NOT IN TEAMING PHASE"
+	ErrNotBidding      = "NOT IN BIDDING PHASE"
 	ErrTeamFull        = "TEAM IS FULL"
 	ErrStartGame       = "GAME CANNOT START"
 	ErrTeamsNotEqual   = "TEAMS ARE NOT EQUAL"
+	ErrBidTooSmall     = "BID IS TOO SMALL"
+	ErrNotYourTurn     = "NOT YOUR TURN"
 )
 
 func (game Game) IsFull() bool {
@@ -168,13 +216,89 @@ func (game *Game) Start() error {
 	}
 
 	game.Phase = Bidding
+
+	shouldInitiateOrder := false
+	for _, player := range game.Players {
+		if player.Order == 0 {
+			shouldInitiateOrder = true
+		}
+		break
+	}
+
+	if shouldInitiateOrder {
+		game.initiateOrder()
+	} else {
+		game.rotateOrder()
+	}
+
 	return nil
 }
 
-func NewGame(name string) Game {
-	return Game{
-		Name:    name,
-		Players: map[string]Player{},
-		Phase:   Preparation,
+func (game *Game) PlaceBid(player string, value Value, color Color) error {
+	if game.Phase != Bidding {
+		return errors.New(ErrNotBidding)
 	}
+
+	var maxValue Value
+	for maxValue = range game.Bids {
+		break
+	}
+
+	if value <= maxValue {
+		return errors.New(ErrBidTooSmall)
+	}
+
+	err := game.checkPlayerTurn(player)
+	if err != nil {
+		return err
+	}
+
+	game.Bids[value] = Bid{
+		Player: player,
+		Color:  color,
+	}
+
+	game.rotateOrder()
+
+	return nil
+}
+
+func (game *Game) rotateOrder() {
+	for name, player := range game.Players {
+		if player.Order == 4 {
+			player.Order = 1
+		} else {
+			player.Order++
+		}
+
+		game.Players[name] = player
+	}
+}
+
+func (game *Game) initiateOrder() {
+	team1 := ""
+	team2 := ""
+	for name, player := range game.Players {
+
+		if team1 == "" {
+			team1 = player.Team
+			player.Order = 1
+		} else if team1 == player.Team {
+			player.Order = 3
+		} else if team2 == "" {
+			team2 = player.Team
+			player.Order = 2
+		} else {
+			player.Order = 4
+		}
+
+		game.Players[name] = player
+	}
+}
+
+func (game *Game) checkPlayerTurn(playerName string) error {
+	if game.Players[playerName].Order != 0 {
+		return errors.New(ErrNotYourTurn)
+	}
+	return nil
 }
