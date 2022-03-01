@@ -214,10 +214,15 @@ func TestStart(test *testing.T) {
 
 	test.Run("should rotate order when order exists", func(test *testing.T) {
 		testGame := Game{
-			ID:      2,
-			Name:    "GAME TWO",
-			Players: map[string]Player{"P1": {Team: "A", Order: 1}, "P2": {Team: "A", Order: 3}, "P3": {Team: "B", Order: 2}, "P4": {Team: "B", Order: 4}},
-			Phase:   Teaming,
+			ID:   2,
+			Name: "GAME TWO",
+			Players: map[string]Player{
+				"P1": {Team: "odd", InitialOrder: 1},
+				"P2": {Team: "even", InitialOrder: 2},
+				"P3": {Team: "odd", InitialOrder: 3},
+				"P4": {Team: "even", InitialOrder: 4},
+			},
+			Phase: Teaming,
 		}
 
 		testGame.Phase = Teaming
@@ -225,21 +230,26 @@ func TestStart(test *testing.T) {
 
 		assert.NoError(err)
 		assert.Equal(Bidding, testGame.Phase)
-		assert.Equal(2, testGame.Players["P1"].Order)
-		assert.Equal(3, testGame.Players["P3"].Order)
-		assert.Equal(4, testGame.Players["P2"].Order)
-		assert.Equal(1, testGame.Players["P4"].Order)
+		assert.Equal(4, testGame.Players["P1"].Order)
+		assert.Equal(1, testGame.Players["P2"].Order)
+		assert.Equal(2, testGame.Players["P3"].Order)
+		assert.Equal(3, testGame.Players["P4"].Order)
 	})
 }
 
 func TestBetting(test *testing.T) {
 	assert := assert.New(test)
 	testGame := Game{
-		ID:      2,
-		Name:    "GAME TWO",
-		Players: map[string]Player{"P1": {Team: "A"}, "P2": {Team: "A"}, "P3": {Team: "B"}, "P4": {Team: "B"}},
-		Phase:   Bidding,
-		Bids:    map[Value]Bid{},
+		ID:   2,
+		Name: "GAME TWO",
+		Players: map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4},
+		},
+		Phase: Bidding,
+		Bids:  map[Value]Bid{},
 	}
 	test.Run("should fail if not in bidding", func(test *testing.T) {
 		teamingGame := Game{
@@ -252,6 +262,13 @@ func TestBetting(test *testing.T) {
 		assert.Equal(ErrNotBidding, err.Error())
 	})
 
+	test.Run("should fail to coinche if no previous bid", func(test *testing.T) {
+		err := testGame.Coinche("P1")
+
+		assert.Error(err)
+		assert.Equal(ErrNoBidYet, err.Error())
+	})
+
 	test.Run("should place a bid", func(test *testing.T) {
 		want := Bid{Player: "P1", Color: Spade}
 		err := testGame.PlaceBid("P1", Eight, Spade)
@@ -260,26 +277,128 @@ func TestBetting(test *testing.T) {
 		assert.Equal(want, testGame.Bids[Eight])
 	})
 
+	test.Run("should place another bid", func(test *testing.T) {
+		want := Bid{Player: "P2", Color: Club}
+		err := testGame.PlaceBid("P2", Nine, Club)
+
+		assert.NoError(err)
+		assert.Equal(want, testGame.Bids[Nine])
+	})
+
 	test.Run("should fail if placing a bid smaller or equal to previous bid", func(test *testing.T) {
-		err := testGame.PlaceBid("P2", Eight, Club)
+		err := testGame.PlaceBid("P3", Eight, Club)
 
 		assert.Error(err)
 		assert.Equal(ErrBidTooSmall, err.Error())
 	})
 
 	test.Run("should fail if the player is not the right one", func(test *testing.T) {
-		err := testGame.PlaceBid("P4", Nine, Club)
+		err := testGame.PlaceBid("P1", Ten, Club)
 
 		assert.Error(err)
 		assert.Equal(ErrNotYourTurn, err.Error())
 	})
 
-	test.Run("last team player should not be able to coinche", func(test *testing.T) {
-		err := testGame.PlaceBid("P4", Nine, Club)
+	test.Run("order should rotate correctly", func(test *testing.T) {
+		err := testGame.Pass("P3")
+		assert.NoError(err)
+
+		err = testGame.Pass("P4")
+		assert.NoError(err)
+
+		err = testGame.Pass("P1")
+		assert.NoError(err)
+	})
+
+	test.Run("should fail if the player bid on its own color", func(test *testing.T) {
+		err := testGame.PlaceBid("P2", Eleven, Club)
+
+		assert.Error(err)
+		assert.Equal(ErrBiddingItsOwnColor, err.Error())
+	})
+
+	test.Run("same team player should not be able to coinche", func(test *testing.T) {
+		err := testGame.PlaceBid("P2", Eleven, Heart)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		err = testGame.Coinche("P2")
+
+		assert.Error(err)
+		assert.Equal(ErrNotYourTurn, err.Error())
+
+		err = testGame.Coinche("P4")
 
 		assert.Error(err)
 		assert.Equal(ErrNotYourTurn, err.Error())
 	})
 
-	// COINCHE / SURCOINCHE / CONTRECOINCHE
+	test.Run("should be able to coinche several times", func(t *testing.T) {
+		err := testGame.Coinche("P1")
+		assert.NoError(err)
+
+		err = testGame.Coinche("P4")
+		assert.NoError(err)
+	})
+
+	test.Run("should start playing after two passes after coinche", func(t *testing.T) {
+		err := testGame.Pass("P1")
+		assert.NoError(err)
+
+		err = testGame.Pass("P3")
+		assert.NoError(err)
+
+		assert.Equal(Playing, testGame.Phase)
+	})
+
+	test.Run("should start playing after 3 coinches", func(t *testing.T) {
+		testGame := Game{
+			ID:   2,
+			Name: "GAME TWO",
+			Players: map[string]Player{
+				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
+				"P2": {Team: "even", Order: 2, InitialOrder: 2},
+				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
+				"P4": {Team: "even", Order: 4, InitialOrder: 4},
+			},
+			Phase: Bidding,
+			Bids: map[Value]Bid{
+				Eight: {Player: "P4", Color: Spade, Coinche: 2},
+			},
+		}
+
+		err := testGame.Coinche("P1")
+
+		assert.NoError(err)
+		assert.Equal(Playing, testGame.Phase)
+	})
+
+	test.Run("should start playing after 4 passes", func(t *testing.T) {
+		testGame := Game{
+			ID:   2,
+			Name: "GAME TWO",
+			Players: map[string]Player{
+				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
+				"P2": {Team: "even", Order: 2, InitialOrder: 2},
+				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
+				"P4": {Team: "even", Order: 4, InitialOrder: 4},
+			},
+			Phase: Bidding,
+			Bids: map[Value]Bid{
+				Eight: {Player: "P4", Color: Spade},
+			},
+		}
+
+		err := testGame.Pass("P1")
+		assert.NoError(err)
+		err = testGame.Pass("P2")
+		assert.NoError(err)
+		err = testGame.Pass("P3")
+		assert.NoError(err)
+		err = testGame.Pass("P4")
+		assert.NoError(err)
+
+		assert.Equal(Playing, testGame.Phase)
+	})
 }

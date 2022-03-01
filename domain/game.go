@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -77,18 +78,20 @@ func NewGame(name string) Game {
 }
 
 const (
-	ErrAlreadyInGame   = "ALREADY IN GAME"
-	ErrEmptyPlayerName = "EMPTY PLAYER NAME"
-	ErrGameFull        = "GAME IS FULL"
-	ErrPlayerNotFound  = "PLAYER NOT FOUND"
-	ErrNotTeaming      = "NOT IN TEAMING PHASE"
-	ErrNotBidding      = "NOT IN BIDDING PHASE"
-	ErrTeamFull        = "TEAM IS FULL"
-	ErrStartGame       = "GAME CANNOT START"
-	ErrTeamsNotEqual   = "TEAMS ARE NOT EQUAL"
-	ErrBidTooSmall     = "BID IS TOO SMALL"
-	ErrNotYourTurn     = "NOT YOUR TURN"
-	ErrHasBeenCoinched = "HAS BEEN COINCHED"
+	ErrAlreadyInGame      = "ALREADY IN GAME"
+	ErrEmptyPlayerName    = "EMPTY PLAYER NAME"
+	ErrGameFull           = "GAME IS FULL"
+	ErrPlayerNotFound     = "PLAYER NOT FOUND"
+	ErrNotTeaming         = "NOT IN TEAMING PHASE"
+	ErrNotBidding         = "NOT IN BIDDING PHASE"
+	ErrTeamFull           = "TEAM IS FULL"
+	ErrStartGame          = "GAME CANNOT START"
+	ErrTeamsNotEqual      = "TEAMS ARE NOT EQUAL"
+	ErrBidTooSmall        = "BID IS TOO SMALL"
+	ErrNotYourTurn        = "NOT YOUR TURN"
+	ErrHasBeenCoinched    = "HAS BEEN COINCHED"
+	ErrBiddingItsOwnColor = "BIDDING ITS OWN COLOR"
+	ErrNoBidYet           = "NO BID YET"
 )
 
 func (game Game) IsFull() bool {
@@ -223,16 +226,18 @@ func (game *Game) Start() error {
 
 	shouldInitiateOrder := false
 	for _, player := range game.Players {
-		if player.Order == 0 {
+		if player.InitialOrder == 0 {
 			shouldInitiateOrder = true
 		}
 		break
 	}
 
+	fmt.Println("should initiate order", shouldInitiateOrder)
+
 	if shouldInitiateOrder {
 		game.initiateOrder()
 	} else {
-		game.rotateOrder()
+		game.rotateInitialOrder()
 	}
 
 	return nil
@@ -244,10 +249,13 @@ func (game *Game) PlaceBid(player string, value Value, color Color) error {
 	}
 
 	var maxValue Value
-	var lastBid Bid
-	for maxValue, lastBid = range game.Bids {
-		break
+	for value := range game.Bids {
+		if value > maxValue {
+			maxValue = value
+		}
 	}
+
+	lastBid := game.Bids[maxValue]
 
 	if value <= maxValue {
 		return errors.New(ErrBidTooSmall)
@@ -260,6 +268,10 @@ func (game *Game) PlaceBid(player string, value Value, color Color) error {
 
 	if lastBid.Coinche > 0 {
 		return errors.New(ErrHasBeenCoinched)
+	}
+
+	if lastBid.Pass > 2 && lastBid.Color == color {
+		return errors.New(ErrBiddingItsOwnColor)
 	}
 
 	game.Bids[value] = Bid{
@@ -284,10 +296,13 @@ func (game *Game) Pass(player string) error {
 	}
 
 	var maxValue Value
-	var lastBid Bid
-	for maxValue, lastBid = range game.Bids {
-		break
+	for value := range game.Bids {
+		if value > maxValue {
+			maxValue = value
+		}
 	}
+
+	lastBid := game.Bids[maxValue]
 
 	game.Bids[maxValue] = Bid{
 		Player:  lastBid.Player,
@@ -325,10 +340,17 @@ func (game *Game) Coinche(player string) error {
 	}
 
 	var maxValue Value
-	var lastBid Bid
-	for maxValue, lastBid = range game.Bids {
-		break
+	for value := range game.Bids {
+		if value > maxValue {
+			maxValue = value
+		}
 	}
+
+	if maxValue == 0 {
+		return errors.New(ErrNoBidYet)
+	}
+
+	lastBid := game.Bids[maxValue]
 
 	game.Bids[maxValue] = Bid{
 		Player:  lastBid.Player,
@@ -348,14 +370,28 @@ func (game *Game) Coinche(player string) error {
 
 func (game *Game) rotateOrder() {
 	for name, player := range game.Players {
-		if player.Order == 4 {
-			player.Order = 1
+		if player.Order == 1 {
+			player.Order = 4
 		} else {
-			player.Order++
+			player.Order--
 		}
 
 		game.Players[name] = player
 	}
+}
+
+func (game *Game) rotateInitialOrder() {
+	for name, player := range game.Players {
+		if player.InitialOrder == 1 {
+			player.InitialOrder = 4
+		} else {
+			player.InitialOrder--
+		}
+
+		game.Players[name] = player
+	}
+
+	game.resetOrderAsInitialOrder()
 }
 
 func (game *Game) initiateOrder() {
@@ -384,7 +420,7 @@ func (game *Game) initiateOrder() {
 }
 
 func (game *Game) checkPlayerTurn(playerName string) error {
-	if game.Players[playerName].Order != 0 {
+	if game.Players[playerName].Order != 1 {
 		return errors.New(ErrNotYourTurn)
 	}
 	return nil
@@ -392,7 +428,7 @@ func (game *Game) checkPlayerTurn(playerName string) error {
 
 func (game *Game) checkTeamTurn(playerName string) error {
 	order := game.Players[playerName].Order
-	if order != 0 && order != 2 {
+	if order != 1 && order != 3 {
 		return errors.New(ErrNotYourTurn)
 	}
 	return nil
@@ -401,6 +437,10 @@ func (game *Game) checkTeamTurn(playerName string) error {
 func (game *Game) startPlaying() {
 	game.Phase = Playing
 
+	game.resetOrderAsInitialOrder()
+}
+
+func (game *Game) resetOrderAsInitialOrder() {
 	for name, player := range game.Players {
 		game.Players[name] = Player{
 			Team:         player.Team,
