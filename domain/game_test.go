@@ -273,4 +273,13 @@ func TestBetting(test *testing.T) {
 		assert.Error(err)
 		assert.Equal(ErrNotYourTurn, err.Error())
 	})
+
+	test.Run("last team player should not be able to coinche", func(test *testing.T) {
+		err := testGame.PlaceBid("P4", Nine, Club)
+
+		assert.Error(err)
+		assert.Equal(ErrNotYourTurn, err.Error())
+	})
+
+	// COINCHE / SURCOINCHE / CONTRECOINCHE
 }

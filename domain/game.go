@@ -42,8 +42,10 @@ const (
 )
 
 type Bid struct {
-	Player string
-	Color  Color
+	Player  string
+	Color   Color
+	Coinche int
+	Pass    int
 }
 
 type Game struct {
@@ -56,8 +58,9 @@ type Game struct {
 }
 
 type Player struct {
-	Team  string
-	Order int
+	Team         string
+	Order        int
+	InitialOrder int
 }
 
 func (player Player) CanPlay() bool {
@@ -85,6 +88,7 @@ const (
 	ErrTeamsNotEqual   = "TEAMS ARE NOT EQUAL"
 	ErrBidTooSmall     = "BID IS TOO SMALL"
 	ErrNotYourTurn     = "NOT YOUR TURN"
+	ErrHasBeenCoinched = "HAS BEEN COINCHED"
 )
 
 func (game Game) IsFull() bool {
@@ -240,7 +244,8 @@ func (game *Game) PlaceBid(player string, value Value, color Color) error {
 	}
 
 	var maxValue Value
-	for maxValue = range game.Bids {
+	var lastBid Bid
+	for maxValue, lastBid = range game.Bids {
 		break
 	}
 
@@ -253,9 +258,87 @@ func (game *Game) PlaceBid(player string, value Value, color Color) error {
 		return err
 	}
 
+	if lastBid.Coinche > 0 {
+		return errors.New(ErrHasBeenCoinched)
+	}
+
 	game.Bids[value] = Bid{
-		Player: player,
-		Color:  color,
+		Player:  player,
+		Color:   color,
+		Coinche: 0,
+	}
+
+	game.rotateOrder()
+
+	return nil
+}
+
+func (game *Game) Pass(player string) error {
+	if game.Phase != Bidding {
+		return errors.New(ErrNotBidding)
+	}
+
+	err := game.checkPlayerTurn(player)
+	if err != nil {
+		return err
+	}
+
+	var maxValue Value
+	var lastBid Bid
+	for maxValue, lastBid = range game.Bids {
+		break
+	}
+
+	game.Bids[maxValue] = Bid{
+		Player:  lastBid.Player,
+		Color:   lastBid.Color,
+		Coinche: lastBid.Coinche,
+		Pass:    lastBid.Pass + 1,
+	}
+
+	if lastBid.Coinche > 0 {
+		if lastBid.Pass+1 > 1 {
+			game.startPlaying()
+		}
+
+		game.rotateOrder()
+		game.rotateOrder()
+	} else {
+		if lastBid.Pass+1 > 3 {
+			game.startPlaying()
+		}
+
+		game.rotateOrder()
+	}
+
+	return nil
+}
+
+func (game *Game) Coinche(player string) error {
+	if game.Phase != Bidding {
+		return errors.New(ErrNotBidding)
+	}
+
+	err := game.checkTeamTurn(player)
+	if err != nil {
+		return err
+	}
+
+	var maxValue Value
+	var lastBid Bid
+	for maxValue, lastBid = range game.Bids {
+		break
+	}
+
+	game.Bids[maxValue] = Bid{
+		Player:  lastBid.Player,
+		Color:   lastBid.Color,
+		Coinche: lastBid.Coinche + 1,
+		Pass:    0,
+	}
+
+	if lastBid.Coinche+1 > 2 {
+		game.startPlaying()
 	}
 
 	game.rotateOrder()
@@ -283,13 +366,17 @@ func (game *Game) initiateOrder() {
 		if team1 == "" {
 			team1 = player.Team
 			player.Order = 1
+			player.InitialOrder = 1
 		} else if team1 == player.Team {
 			player.Order = 3
+			player.InitialOrder = 3
 		} else if team2 == "" {
 			team2 = player.Team
 			player.Order = 2
+			player.InitialOrder = 2
 		} else {
 			player.Order = 4
+			player.InitialOrder = 4
 		}
 
 		game.Players[name] = player
@@ -301,4 +388,24 @@ func (game *Game) checkPlayerTurn(playerName string) error {
 		return errors.New(ErrNotYourTurn)
 	}
 	return nil
+}
+
+func (game *Game) checkTeamTurn(playerName string) error {
+	order := game.Players[playerName].Order
+	if order != 0 && order != 2 {
+		return errors.New(ErrNotYourTurn)
+	}
+	return nil
+}
+
+func (game *Game) startPlaying() {
+	game.Phase = Playing
+
+	for name, player := range game.Players {
+		game.Players[name] = Player{
+			Team:         player.Team,
+			Order:        player.InitialOrder,
+			InitialOrder: player.InitialOrder,
+		}
+	}
 }
