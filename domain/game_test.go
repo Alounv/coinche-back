@@ -335,6 +335,21 @@ func TestBetting(test *testing.T) {
 	})
 
 	test.Run("should be able to coinche several times", func(t *testing.T) {
+		testGame := Game{
+			ID:   2,
+			Name: "GAME TWO",
+			Players: map[string]Player{
+				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
+				"P2": {Team: "even", Order: 2, InitialOrder: 2},
+				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
+				"P4": {Team: "even", Order: 4, InitialOrder: 4},
+			},
+			Phase: Bidding,
+			Bids: map[Value]Bid{
+				Eight: {Player: "P4", Color: Spade},
+			},
+		}
+
 		err := testGame.Coinche("P1")
 		assert.NoError(err)
 
@@ -343,6 +358,21 @@ func TestBetting(test *testing.T) {
 	})
 
 	test.Run("should start playing after two passes after coinche", func(t *testing.T) {
+		testGame := Game{
+			ID:   2,
+			Name: "GAME TWO",
+			Players: map[string]Player{
+				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
+				"P2": {Team: "even", Order: 2, InitialOrder: 2},
+				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
+				"P4": {Team: "even", Order: 4, InitialOrder: 4},
+			},
+			Phase: Bidding,
+			Bids: map[Value]Bid{
+				Eight: {Player: "P4", Color: Spade, Coinche: 2},
+			},
+		}
+
 		err := testGame.Pass("P1")
 		assert.NoError(err)
 
