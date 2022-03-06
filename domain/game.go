@@ -168,8 +168,12 @@ type turn struct {
 func (turn *turn) setWinner(trump Color) {
 	var winner string
 	var strongerValue Strength
+	var firstCard cardID
 	for _, play := range turn.plays {
-		cardValue := getCardValue(play.card, trump)
+		if firstCard == "" {
+			firstCard = play.card
+		}
+		cardValue := getCardValue(play.card, trump, firstCard)
 		if cardValue > strongerValue {
 			strongerValue = cardValue
 			winner = play.playerName
@@ -179,13 +183,16 @@ func (turn *turn) setWinner(trump Color) {
 	turn.winner = winner
 }
 
-func getCardValue(card cardID, trump Color) Strength {
+func getCardValue(card cardID, trump Color, firstCard cardID) Strength {
 	color := cards[card].color
+	colorAsked := cards[firstCard].color
 
 	if trump == color || trump == AllTrump {
 		return cards[card].TrumpStrength
-	} else {
+	} else if color == colorAsked {
 		return cards[card].strength
+	} else {
+		return 0
 	}
 }
 
