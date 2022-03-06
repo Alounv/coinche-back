@@ -3,7 +3,7 @@ package api
 import (
 	"coinche/domain"
 	"coinche/usecases"
-	"coinche/utilities"
+	testUtilities "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -27,7 +27,7 @@ func TestListGames(test *testing.T) {
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
-		got := utilities.DecodeToGames(response.Body, test)
+		got := testUtilities.DecodeToGames(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
 		assert.Contains(got, domain.Game{ID: 1, Name: "GAME ONE"})

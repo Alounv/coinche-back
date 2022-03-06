@@ -3,6 +3,7 @@ package api
 import (
 	"coinche/domain"
 	"coinche/utilities"
+	testUtilities "coinche/utilities/test"
 	"encoding/json"
 	"testing"
 
@@ -55,10 +56,10 @@ func decodeMessage(message []byte) (string, error) {
 
 func ReceiveGameOrFatal(connection *websocket.Conn, test *testing.T) domain.Game {
 	message, err := receive(connection)
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 
 	game, err := decodeGame(message)
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 	return game
 }
 
@@ -74,6 +75,6 @@ func ReceiveMessage(connection *websocket.Conn) (string, error) {
 
 func ReceiveMessageOrFatal(connection *websocket.Conn, test *testing.T) string {
 	reply, err := ReceiveMessage(connection)
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 	return reply
 }

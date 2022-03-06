@@ -3,6 +3,7 @@ package repository
 import (
 	"coinche/domain"
 	"coinche/utilities"
+	testUtilities "coinche/utilities/test"
 	"os"
 	"testing"
 	"time"
@@ -17,20 +18,20 @@ func TestGameRepo(test *testing.T) {
 	utilities.LoadEnv("../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
-	db := utilities.CreateDb(connectionInfo, dbName)
+	db := testUtilities.CreateDb(connectionInfo, dbName)
 
 	repository, err := NewGameRepositoryFromDb(db)
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
 		newPlayers := map[string]domain.Player{"P1": {}, "P2": {}}
 
 		newID, err := repository.CreateGame(domain.Game{Name: newName, Players: newPlayers})
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		got, err := repository.GetGame(newID)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		assert.Equal(newName, got.Name)
 		assert.Equal(newPlayers, got.Players)
@@ -39,7 +40,7 @@ func TestGameRepo(test *testing.T) {
 	})
 
 	test.Cleanup(func() {
-		utilities.DropDb(connectionInfo, dbName, db)
+		testUtilities.DropDb(connectionInfo, dbName, db)
 	})
 }
 
@@ -49,16 +50,16 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	utilities.LoadEnv("../.env")
 	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
-	db := utilities.CreateDb(connectionInfo, dbName)
+	db := testUtilities.CreateDb(connectionInfo, dbName)
 
 	repository, err := NewGameRepositoryWithData(db)
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 
 	test.Run("get an empty game", func(test *testing.T) {
 		want := domain.Game{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}}
 
 		got, err := repository.GetGame(1)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		assert.Equal(want, got)
 	})
@@ -67,7 +68,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		want := domain.Game{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}}
 
 		got, err := repository.GetGame(2)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		assert.Equal(want, got)
 	})
@@ -79,7 +80,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		}
 
 		got, err := repository.ListGames()
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		assert.Equal(want[0], got[0])
 		assert.Equal(want[1], got[1])
@@ -91,7 +92,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		err := repository.UpdatePlayers(2, players, domain.Pause)
 		utilities.PanicIfErr(err)
 		game, err := repository.GetGame(2)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		assert.Equal(players, game.Players)
 		assert.Equal(domain.Pause, game.Phase)
@@ -101,26 +102,26 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		player := domain.Player{Team: "A Team"}
 
 		err := repository.UpdatePlayer(2, "P2", player)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		game, err := repository.GetGame(2)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		assert.Equal("A Team", game.Players["P2"].Team)
 	})
 
 	test.Run("update a game", func(test *testing.T) {
 		err := repository.UpdateGame(2, domain.Bidding)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		game, err := repository.GetGame(2)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 
 		assert.Equal(domain.Bidding, game.Phase)
 	})
 
 	test.Cleanup(func() {
-		utilities.DropDb(connectionInfo, dbName, db)
+		testUtilities.DropDb(connectionInfo, dbName, db)
 	})
 }
 

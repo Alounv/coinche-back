@@ -3,7 +3,7 @@ package api
 import (
 	"coinche/domain"
 	"coinche/usecases"
-	"coinche/utilities"
+	testUtilities "coinche/utilities/test"
 	"net/http/httptest"
 	"testing"
 
@@ -34,7 +34,7 @@ func TestFailingSocketHandler(test *testing.T) {
 
 	test.Run("Close the connection when failing to join", func(test *testing.T) {
 		err := SendMessage(connection, "hello")
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 		_, err = ReceiveMessage(connection)
 		assert.NotNil(err)
 	})
@@ -127,7 +127,7 @@ func TestSocketHandler(test *testing.T) {
 
 	test.Run("Can send a message", func(test *testing.T) {
 		err := SendMessage(c1, "hello")
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 		reply := ReceiveMessageOrFatal(c1, test)
 
 		assert.Equal("Message not understood by the server", reply)
@@ -135,7 +135,7 @@ func TestSocketHandler(test *testing.T) {
 
 	test.Run("Can leave the game", func(test *testing.T) {
 		err := SendMessage(c1, "leave")
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 		reply := ReceiveMessageOrFatal(c1, test)
 
 		assert.Equal("Has left the game", reply)

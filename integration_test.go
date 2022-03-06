@@ -6,6 +6,7 @@ import (
 	repository "coinche/repository"
 	"coinche/usecases"
 	"coinche/utilities"
+	testUtilities "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -36,7 +37,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.connectionInfo = os.Getenv("SQLX_POSTGRES_INFO")
 	s.dbName = "testdb"
 
-	s.db = utilities.CreateDb(s.connectionInfo, s.dbName)
+	s.db = testUtilities.CreateDb(s.connectionInfo, s.dbName)
 
 	gameRepository, err := repository.NewGameRepositoryFromDb(s.db)
 	if err != nil {
@@ -52,7 +53,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	test := s.T()
 	assert := assert.New(test)
 
-	s.router.ServeHTTP(httptest.NewRecorder(), utilities.NewCreateGameRequest(test, "NEW GAME"))
+	s.router.ServeHTTP(httptest.NewRecorder(), testUtilities.NewCreateGameRequest(test, "NEW GAME"))
 
 	response := httptest.NewRecorder()
 	assert.Equal(http.StatusOK, response.Code)
@@ -63,9 +64,9 @@ func (s *IntegrationTestSuite) TestGetGame() {
 	assert := assert.New(test)
 
 	response := httptest.NewRecorder()
-	s.router.ServeHTTP(response, utilities.NewGetGameRequest(test, 1))
+	s.router.ServeHTTP(response, testUtilities.NewGetGameRequest(test, 1))
 
-	got := utilities.DecodeToGame(response.Body, test)
+	got := testUtilities.DecodeToGame(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal("NEW GAME", got.Name)
@@ -82,7 +83,7 @@ func (s *IntegrationTestSuite) TestListGames() {
 
 	s.router.ServeHTTP(response, request)
 
-	got := utilities.DecodeToGames(response.Body, test)
+	got := testUtilities.DecodeToGames(response.Body, test)
 
 	assert.Equal(http.StatusOK, response.Code)
 	assert.Equal(1, len(got))
@@ -101,8 +102,8 @@ func (s *IntegrationTestSuite) TestJoinGame() {
 
 	assert.IsType(domain.Game{}, receivedGame)
 
-	s.router.ServeHTTP(response, utilities.NewGetGameRequest(test, 1))
-	got := utilities.DecodeToGame(response.Body, test)
+	s.router.ServeHTTP(response, testUtilities.NewGetGameRequest(test, 1))
+	got := testUtilities.DecodeToGame(response.Body, test)
 
 	assert.Equal(map[string]domain.Player{"player": {}}, got.Players)
 }
@@ -113,20 +114,20 @@ func (s *IntegrationTestSuite) TestLeaveUnstartedGame() {
 	response := httptest.NewRecorder()
 
 	err := api.SendMessage(s.connection, "leave")
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 
 	message := api.ReceiveMessageOrFatal(s.connection, test)
 
 	assert.Equal("Has left the game", message)
 
-	s.router.ServeHTTP(response, utilities.NewGetGameRequest(test, 1))
-	got := utilities.DecodeToGame(response.Body, test)
+	s.router.ServeHTTP(response, testUtilities.NewGetGameRequest(test, 1))
+	got := testUtilities.DecodeToGame(response.Body, test)
 
 	assert.Equal(map[string]domain.Player{}, got.Players)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	utilities.DropDb(s.connectionInfo, s.dbName, s.db)
+	testUtilities.DropDb(s.connectionInfo, s.dbName, s.db)
 	s.server.Close()
 	s.connection.Close()
 }

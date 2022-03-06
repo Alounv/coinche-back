@@ -96,7 +96,7 @@ func (s *GameUsecases) StartGame(gameID int) error {
 	if err != nil {
 		return err
 	}
-	err = game.Start()
+	err = game.StartBidding()
 	if err != nil {
 		return err
 	}

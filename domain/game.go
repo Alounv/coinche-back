@@ -2,7 +2,7 @@ package domain
 
 import (
 	"errors"
-	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -17,18 +17,39 @@ const (
 	Pause       Phase = 5
 )
 
-type Value int
+type BidValue int
 
 const (
-	Eight    Value = 80
-	Nine     Value = 90
-	Ten      Value = 100
-	Eleven   Value = 110
-	Twelve   Value = 120
-	Thirteen Value = 130
-	Fourteen Value = 140
-	Fifteen  Value = 150
-	Capot    Value = 160
+	Eighty           BidValue = 80
+	Ninety           BidValue = 90
+	Hundred          BidValue = 100
+	HundredAndTen    BidValue = 110
+	HundredAndTwenty BidValue = 120
+	HundredAndThirty BidValue = 130
+	HundredAndFourty BidValue = 140
+	HundredAndFifty  BidValue = 150
+	Capot            BidValue = 160
+)
+
+type Strength int
+
+const (
+	Seven  Strength = 1
+	Eight  Strength = 2
+	Nine   Strength = 3
+	Jack   Strength = 4
+	Queen  Strength = 5
+	King   Strength = 6
+	Ten    Strength = 7
+	As     Strength = 8
+	TSeven Strength = 11
+	TEight Strength = 12
+	TQueen Strength = 13
+	TKing  Strength = 14
+	TTen   Strength = 15
+	TAs    Strength = 16
+	TNine  Strength = 17
+	TJack  Strength = 18
 )
 
 type Color string
@@ -42,11 +63,93 @@ const (
 	AllTrump Color = "allTrump"
 )
 
+type card struct {
+	color         Color
+	strength      Strength
+	TrumpStrength Strength
+}
+
+var cards = map[int]card{
+	0:  {Club, Seven, TSeven},
+	1:  {Club, Eight, TEight},
+	2:  {Club, Nine, TNine},
+	3:  {Club, Ten, TTen},
+	4:  {Club, Jack, TJack},
+	5:  {Club, Queen, TQueen},
+	6:  {Club, King, TKing},
+	7:  {Club, As, TAs},
+	8:  {Diamond, Seven, TSeven},
+	9:  {Diamond, Eight, TEight},
+	10: {Diamond, Nine, TNine},
+	11: {Diamond, Ten, TTen},
+	12: {Diamond, Jack, TJack},
+	13: {Diamond, Queen, TQueen},
+	14: {Diamond, King, TKing},
+	15: {Diamond, As, TAs},
+	16: {Heart, Seven, TSeven},
+	17: {Heart, Eight, TEight},
+	18: {Heart, Nine, TNine},
+	19: {Heart, Ten, TTen},
+	20: {Heart, Jack, TJack},
+	21: {Heart, Queen, TQueen},
+	22: {Heart, King, TKing},
+	23: {Heart, As, TAs},
+	24: {Spade, Seven, TSeven},
+	25: {Spade, Eight, TEight},
+	26: {Spade, Nine, TNine},
+	27: {Spade, Ten, TTen},
+	28: {Spade, Jack, TJack},
+	29: {Spade, Queen, TQueen},
+	30: {Spade, King, TKing},
+	31: {Spade, As, TAs},
+}
+
+func shuffle() []int {
+	a := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(a), func(i, j int) { a[i], a[j] = a[j], a[i] })
+	return a
+}
+
 type Bid struct {
 	Player  string
 	Color   Color
 	Coinche int
 	Pass    int
+}
+
+type play struct {
+	playerName string
+	card       int
+}
+
+type turn struct {
+	plays  []play
+	winner string
+}
+
+func (turn *turn) setWinner(trump Color) {
+	var winner string
+	var strongerValue Strength
+	for _, play := range turn.plays {
+		cardValue := getCardValue(play.card, trump)
+		if cardValue > strongerValue {
+			strongerValue = cardValue
+			winner = play.playerName
+		}
+	}
+
+	turn.winner = winner
+}
+
+func getCardValue(card int, trump Color) Strength {
+	color := cards[card].color
+
+	if trump == color || trump == AllTrump {
+		return cards[card].TrumpStrength
+	} else {
+		return cards[card].strength
+	}
 }
 
 type Game struct {
@@ -55,13 +158,17 @@ type Game struct {
 	CreatedAt time.Time
 	Players   map[string]Player
 	Phase     Phase
-	Bids      map[Value]Bid
+	Bids      map[BidValue]Bid
+	trump     Color
+	deck      []int
+	turns     []turn
 }
 
 type Player struct {
 	Team         string
 	Order        int
 	InitialOrder int
+	Hand         []int
 }
 
 func (player Player) CanPlay() bool {
@@ -73,349 +180,8 @@ func NewGame(name string) Game {
 		Name:    name,
 		Players: map[string]Player{},
 		Phase:   Preparation,
-		Bids:    map[Value]Bid{},
-	}
-}
-
-const (
-	ErrAlreadyInGame      = "ALREADY IN GAME"
-	ErrEmptyPlayerName    = "EMPTY PLAYER NAME"
-	ErrGameFull           = "GAME IS FULL"
-	ErrPlayerNotFound     = "PLAYER NOT FOUND"
-	ErrNotTeaming         = "NOT IN TEAMING PHASE"
-	ErrNotBidding         = "NOT IN BIDDING PHASE"
-	ErrTeamFull           = "TEAM IS FULL"
-	ErrStartGame          = "GAME CANNOT START"
-	ErrTeamsNotEqual      = "TEAMS ARE NOT EQUAL"
-	ErrBidTooSmall        = "BID IS TOO SMALL"
-	ErrNotYourTurn        = "NOT YOUR TURN"
-	ErrHasBeenCoinched    = "HAS BEEN COINCHED"
-	ErrBiddingItsOwnColor = "BIDDING ITS OWN COLOR"
-	ErrNoBidYet           = "NO BID YET"
-)
-
-func (game Game) IsFull() bool {
-	return len(game.Players) == 4
-}
-
-func (game Game) CanStart() error {
-	if game.Phase != Teaming {
-		return errors.New(ErrNotTeaming)
-	}
-
-	team1 := ""
-	team1Size := 0
-
-	team2 := ""
-	team2Size := 0
-
-	for _, player := range game.Players {
-		if player.Team == "" {
-			continue
-		}
-
-		if team1 == "" {
-			team1 = player.Team
-			team1Size++
-			continue
-		}
-
-		if team1 == player.Team {
-			team1Size++
-			continue
-		}
-
-		if team2 == "" {
-			team2 = player.Team
-			team2Size++
-			continue
-		}
-
-		if team2 == player.Team {
-			team2Size++
-			continue
-		}
-
-		return errors.New(ErrTeamsNotEqual)
-	}
-
-	if team1Size == 2 && team2Size == 2 {
-		return nil
-	}
-
-	return errors.New(ErrTeamsNotEqual)
-}
-
-func (game *Game) AddPlayer(playerName string) error {
-	if playerName == "" {
-		return errors.New(ErrEmptyPlayerName)
-	}
-
-	if _, ok := game.Players[playerName]; ok {
-		return errors.New(ErrAlreadyInGame)
-	}
-
-	if game.IsFull() {
-		return errors.New(ErrGameFull)
-	}
-
-	game.Players[playerName] = Player{}
-	if game.IsFull() && game.Phase == Preparation {
-		game.Phase = Teaming
-	}
-	return nil
-}
-
-func (game *Game) RemovePlayer(playerName string) error {
-	if _, ok := game.Players[playerName]; !ok {
-		return errors.New(ErrPlayerNotFound)
-	}
-
-	delete(game.Players, playerName)
-
-	if !game.IsFull() && game.Phase != Preparation {
-		game.Phase = Pause
-	}
-	return nil
-}
-
-func (game *Game) AssignTeam(playerName string, teamName string) error {
-	if game.Phase != Teaming {
-		return errors.New(ErrNotTeaming)
-	}
-
-	teamSize := 0
-	for _, player := range game.Players {
-		if player.Team == teamName {
-			teamSize++
-		}
-	}
-
-	if teamSize >= 2 {
-		return errors.New(ErrTeamFull)
-	}
-
-	newPlayer := game.Players[playerName]
-	newPlayer.Team = teamName
-
-	game.Players[playerName] = newPlayer
-
-	return nil
-}
-
-func (game *Game) ClearTeam(playerName string) error {
-	if game.Phase != Teaming {
-		return errors.New(ErrNotTeaming)
-	}
-
-	newPlayer := game.Players[playerName]
-	newPlayer.Team = ""
-
-	game.Players[playerName] = newPlayer
-
-	return nil
-}
-
-func (game *Game) Start() error {
-	err := game.CanStart()
-	if err != nil {
-		return err
-	}
-
-	game.Phase = Bidding
-
-	shouldInitiateOrder := false
-	for _, player := range game.Players {
-		if player.InitialOrder == 0 {
-			shouldInitiateOrder = true
-		}
-		break
-	}
-
-	fmt.Println("should initiate order", shouldInitiateOrder)
-
-	if shouldInitiateOrder {
-		game.initiateOrder()
-	} else {
-		game.rotateInitialOrder()
-	}
-
-	return nil
-}
-
-func (game *Game) PlaceBid(player string, value Value, color Color) error {
-	if game.Phase != Bidding {
-		return errors.New(ErrNotBidding)
-	}
-
-	var maxValue Value
-	for value := range game.Bids {
-		if value > maxValue {
-			maxValue = value
-		}
-	}
-
-	lastBid := game.Bids[maxValue]
-
-	if value <= maxValue {
-		return errors.New(ErrBidTooSmall)
-	}
-
-	err := game.checkPlayerTurn(player)
-	if err != nil {
-		return err
-	}
-
-	if lastBid.Coinche > 0 {
-		return errors.New(ErrHasBeenCoinched)
-	}
-
-	if lastBid.Pass > 2 && lastBid.Color == color {
-		return errors.New(ErrBiddingItsOwnColor)
-	}
-
-	game.Bids[value] = Bid{
-		Player:  player,
-		Color:   color,
-		Coinche: 0,
-	}
-
-	game.rotateOrder()
-
-	return nil
-}
-
-func (game *Game) Pass(player string) error {
-	if game.Phase != Bidding {
-		return errors.New(ErrNotBidding)
-	}
-
-	err := game.checkPlayerTurn(player)
-	if err != nil {
-		return err
-	}
-
-	var maxValue Value
-	for value := range game.Bids {
-		if value > maxValue {
-			maxValue = value
-		}
-	}
-
-	lastBid := game.Bids[maxValue]
-
-	game.Bids[maxValue] = Bid{
-		Player:  lastBid.Player,
-		Color:   lastBid.Color,
-		Coinche: lastBid.Coinche,
-		Pass:    lastBid.Pass + 1,
-	}
-
-	if lastBid.Coinche > 0 {
-		if lastBid.Pass+1 > 1 {
-			game.startPlaying()
-		}
-
-		game.rotateOrder()
-		game.rotateOrder()
-	} else {
-		if lastBid.Pass+1 > 3 {
-			game.startPlaying()
-		}
-
-		game.rotateOrder()
-	}
-
-	return nil
-}
-
-func (game *Game) Coinche(player string) error {
-	if game.Phase != Bidding {
-		return errors.New(ErrNotBidding)
-	}
-
-	err := game.checkTeamTurn(player)
-	if err != nil {
-		return err
-	}
-
-	var maxValue Value
-	for value := range game.Bids {
-		if value > maxValue {
-			maxValue = value
-		}
-	}
-
-	if maxValue == 0 {
-		return errors.New(ErrNoBidYet)
-	}
-
-	lastBid := game.Bids[maxValue]
-
-	game.Bids[maxValue] = Bid{
-		Player:  lastBid.Player,
-		Color:   lastBid.Color,
-		Coinche: lastBid.Coinche + 1,
-		Pass:    0,
-	}
-
-	if lastBid.Coinche+1 > 2 {
-		game.startPlaying()
-	}
-
-	game.rotateOrder()
-
-	return nil
-}
-
-func (game *Game) rotateOrder() {
-	for name, player := range game.Players {
-		if player.Order == 1 {
-			player.Order = 4
-		} else {
-			player.Order--
-		}
-
-		game.Players[name] = player
-	}
-}
-
-func (game *Game) rotateInitialOrder() {
-	for name, player := range game.Players {
-		if player.InitialOrder == 1 {
-			player.InitialOrder = 4
-		} else {
-			player.InitialOrder--
-		}
-
-		game.Players[name] = player
-	}
-
-	game.resetOrderAsInitialOrder()
-}
-
-func (game *Game) initiateOrder() {
-	team1 := ""
-	team2 := ""
-	for name, player := range game.Players {
-
-		if team1 == "" {
-			team1 = player.Team
-			player.Order = 1
-			player.InitialOrder = 1
-		} else if team1 == player.Team {
-			player.Order = 3
-			player.InitialOrder = 3
-		} else if team2 == "" {
-			team2 = player.Team
-			player.Order = 2
-			player.InitialOrder = 2
-		} else {
-			player.Order = 4
-			player.InitialOrder = 4
-		}
-
-		game.Players[name] = player
+		Bids:    map[BidValue]Bid{},
+		deck:    shuffle(),
 	}
 }
 
@@ -434,18 +200,23 @@ func (game *Game) checkTeamTurn(playerName string) error {
 	return nil
 }
 
-func (game *Game) startPlaying() {
-	game.Phase = Playing
-
-	game.resetOrderAsInitialOrder()
+func (game *Game) setFirstPlayer(playerName string) {
+	for i := 0; i < len(game.Players); i++ {
+		if game.Players[playerName].Order == 1 {
+			return
+		}
+		game.rotateOrder()
+	}
 }
 
-func (game *Game) resetOrderAsInitialOrder() {
+func (game *Game) rotateOrder() {
 	for name, player := range game.Players {
-		game.Players[name] = Player{
-			Team:         player.Team,
-			Order:        player.InitialOrder,
-			InitialOrder: player.InitialOrder,
+		if player.Order == 1 {
+			player.Order = 4
+		} else {
+			player.Order--
 		}
+
+		game.Players[name] = player
 	}
 }

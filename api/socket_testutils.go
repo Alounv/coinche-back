@@ -1,7 +1,7 @@
 package api
 
 import (
-	"coinche/utilities"
+	testUtilities "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -14,7 +14,7 @@ func httpToWS(test *testing.T, u string) string {
 	test.Helper()
 
 	wsURL, err := url.Parse(u)
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 
 	switch wsURL.Scheme {
 	case "http":
@@ -28,7 +28,7 @@ func httpToWS(test *testing.T, u string) string {
 
 func newConnection(test *testing.T, wsURL string) *websocket.Conn {
 	connection, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-	utilities.FatalIfErr(err, test)
+	testUtilities.FatalIfErr(err, test)
 	return connection
 }
 
@@ -51,7 +51,7 @@ func NewGameWebSocketServer(
 ) (*httptest.Server, *websocket.Conn) {
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
 		connection, err := wsupgrader.Upgrade(w, r, nil)
-		utilities.FatalIfErr(err, test)
+		testUtilities.FatalIfErr(err, test)
 		PlayerSocketHandler(connection, ID, playerName, hub)
 	}
 	socketHandler := http.HandlerFunc(funcForHandlerFunc)
