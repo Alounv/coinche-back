@@ -69,46 +69,83 @@ type card struct {
 	TrumpStrength Strength
 }
 
-var cards = map[int]card{
-	0:  {Club, Seven, TSeven},
-	1:  {Club, Eight, TEight},
-	2:  {Club, Nine, TNine},
-	3:  {Club, Ten, TTen},
-	4:  {Club, Jack, TJack},
-	5:  {Club, Queen, TQueen},
-	6:  {Club, King, TKing},
-	7:  {Club, As, TAs},
-	8:  {Diamond, Seven, TSeven},
-	9:  {Diamond, Eight, TEight},
-	10: {Diamond, Nine, TNine},
-	11: {Diamond, Ten, TTen},
-	12: {Diamond, Jack, TJack},
-	13: {Diamond, Queen, TQueen},
-	14: {Diamond, King, TKing},
-	15: {Diamond, As, TAs},
-	16: {Heart, Seven, TSeven},
-	17: {Heart, Eight, TEight},
-	18: {Heart, Nine, TNine},
-	19: {Heart, Ten, TTen},
-	20: {Heart, Jack, TJack},
-	21: {Heart, Queen, TQueen},
-	22: {Heart, King, TKing},
-	23: {Heart, As, TAs},
-	24: {Spade, Seven, TSeven},
-	25: {Spade, Eight, TEight},
-	26: {Spade, Nine, TNine},
-	27: {Spade, Ten, TTen},
-	28: {Spade, Jack, TJack},
-	29: {Spade, Queen, TQueen},
-	30: {Spade, King, TKing},
-	31: {Spade, As, TAs},
+type cardID string
+
+const (
+	C_7  cardID = "7-club"
+	C_8  cardID = "8-club"
+	C_9  cardID = "9-club"
+	C_10 cardID = "10-club"
+	C_J  cardID = "jack-club"
+	C_Q  cardID = "queen-club"
+	C_K  cardID = "king-club"
+	C_A  cardID = "as-club"
+	D_7  cardID = "7-diamond"
+	D_8  cardID = "8-diamond"
+	D_9  cardID = "9-diamond"
+	D_10 cardID = "10-diamond"
+	D_J  cardID = "jack-diamond"
+	D_Q  cardID = "queen-diamond"
+	D_K  cardID = "king-diamond"
+	D_A  cardID = "as-diamond"
+	H_7  cardID = "7-heart"
+	H_8  cardID = "8-heart"
+	H_9  cardID = "9-heart"
+	H_10 cardID = "10-heart"
+	H_J  cardID = "jack-heart"
+	H_Q  cardID = "queen-heart"
+	H_K  cardID = "king-heart"
+	H_A  cardID = "as-heart"
+	S_7  cardID = "7-spade"
+	S_8  cardID = "8-spade"
+	S_9  cardID = "9-spade"
+	S_10 cardID = "10-spade"
+	S_J  cardID = "jack-spade"
+	S_Q  cardID = "queen-spade"
+	S_K  cardID = "king-spade"
+	S_A  cardID = "as-spade"
+)
+
+var cards = map[cardID]card{
+	C_7:  {Club, Seven, TSeven},
+	C_8:  {Club, Eight, TEight},
+	C_9:  {Club, Nine, TNine},
+	C_10: {Club, Ten, TTen},
+	C_J:  {Club, Jack, TJack},
+	C_Q:  {Club, Queen, TQueen},
+	C_K:  {Club, King, TKing},
+	C_A:  {Club, As, TAs},
+	D_7:  {Diamond, Seven, TSeven},
+	D_8:  {Diamond, Eight, TEight},
+	D_9:  {Diamond, Nine, TNine},
+	D_10: {Diamond, Ten, TTen},
+	D_J:  {Diamond, Jack, TJack},
+	D_Q:  {Diamond, Queen, TQueen},
+	D_K:  {Diamond, King, TKing},
+	D_A:  {Diamond, As, TAs},
+	H_7:  {Heart, Seven, TSeven},
+	H_8:  {Heart, Eight, TEight},
+	H_9:  {Heart, Nine, TNine},
+	H_10: {Heart, Ten, TTen},
+	H_J:  {Heart, Jack, TJack},
+	H_Q:  {Heart, Queen, TQueen},
+	H_K:  {Heart, King, TKing},
+	H_A:  {Heart, As, TAs},
+	S_7:  {Spade, Seven, TSeven},
+	S_8:  {Spade, Eight, TEight},
+	S_9:  {Spade, Nine, TNine},
+	S_10: {Spade, Ten, TTen},
+	S_J:  {Spade, Jack, TJack},
+	S_Q:  {Spade, Queen, TQueen},
+	S_K:  {Spade, King, TKing},
+	S_A:  {Spade, As, TAs},
 }
 
-func shuffle() []int {
-	a := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
+func newDeck() []cardID {
+	deck := []cardID{C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A, D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A, H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A, S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A}
 	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(a), func(i, j int) { a[i], a[j] = a[j], a[i] })
-	return a
+	rand.Shuffle(len(deck), func(i, j int) { deck[i], deck[j] = deck[j], deck[i] })
+	return deck
 }
 
 type Bid struct {
@@ -120,7 +157,7 @@ type Bid struct {
 
 type play struct {
 	playerName string
-	card       int
+	card       cardID
 }
 
 type turn struct {
@@ -142,7 +179,7 @@ func (turn *turn) setWinner(trump Color) {
 	turn.winner = winner
 }
 
-func getCardValue(card int, trump Color) Strength {
+func getCardValue(card cardID, trump Color) Strength {
 	color := cards[card].color
 
 	if trump == color || trump == AllTrump {
@@ -160,7 +197,7 @@ type Game struct {
 	Phase     Phase
 	Bids      map[BidValue]Bid
 	trump     Color
-	deck      []int
+	deck      []cardID
 	turns     []turn
 }
 
@@ -168,7 +205,7 @@ type Player struct {
 	Team         string
 	Order        int
 	InitialOrder int
-	Hand         []int
+	Hand         []cardID
 }
 
 func (player Player) CanPlay() bool {
@@ -181,7 +218,7 @@ func NewGame(name string) Game {
 		Players: map[string]Player{},
 		Phase:   Preparation,
 		Bids:    map[BidValue]Bid{},
-		deck:    shuffle(),
+		deck:    newDeck(),
 	}
 }
 

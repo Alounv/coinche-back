@@ -1,9 +1,7 @@
 package domain
 
 import (
-	"coinche/utilities"
 	"errors"
-	"fmt"
 )
 
 const (
@@ -36,10 +34,10 @@ func (game *Game) distributeCards() {
 		player.Hand = game.draw(player.Order)
 		game.Players[name] = player
 	}
-	game.deck = []int{}
+	game.deck = []cardID{}
 }
 
-func (game *Game) draw(order int) []int {
+func (game *Game) draw(order int) []cardID {
 	base := order - 1
 
 	deckIndexes := []int{
@@ -54,7 +52,7 @@ func (game *Game) draw(order int) []int {
 		20 + base*3 + 1,
 		20 + base*3 + 2,
 	}
-	hand := []int{}
+	hand := []cardID{}
 
 	for _, deckIndex := range deckIndexes {
 		hand = append(hand, game.deck[deckIndex])
@@ -71,7 +69,7 @@ func (game *Game) isNewTurn() bool {
 	return len(lastTurn.plays) >= 4
 }
 
-func (game *Game) Play(playerName string, card int) error {
+func (game *Game) Play(playerName string, card cardID) error {
 	if game.Phase != Playing {
 		return errors.New(ErrNotPlaying)
 	}
@@ -83,15 +81,14 @@ func (game *Game) Play(playerName string, card int) error {
 		}
 	}
 
-	fmt.Println(playerName, player)
 	err := game.checkPlayerTurn(playerName)
 	if err != nil {
 		return err
 	}
 
-	for _, index := range player.Hand {
-		if index == card {
-			player.Hand = utilities.Remove(player.Hand, card)
+	for _, cardID := range player.Hand {
+		if cardID == card {
+			player.Hand = removeCard(player.Hand, card)
 			game.Players[playerName] = player
 
 			newPlay := play{
@@ -125,4 +122,18 @@ func (game *Game) Play(playerName string, card int) error {
 	}
 
 	return errors.New(ErrCardNotInHand)
+}
+
+func removeCard(slice []cardID, valueToRemove cardID) []cardID {
+	for index, value := range slice {
+		if value == valueToRemove {
+			return removeWithIndex(slice, index)
+		}
+	}
+	return slice
+}
+
+func removeWithIndex(slice []cardID, index int) []cardID {
+	slice[index] = slice[len(slice)-1]
+	return slice[:len(slice)-1]
 }

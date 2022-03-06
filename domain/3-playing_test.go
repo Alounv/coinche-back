@@ -8,125 +8,128 @@ import (
 
 func TestStartPlaying(test *testing.T) {
 	assert := assert.New(test)
-	testGame := Game{
-		ID:   2,
-		Name: "GAME TWO",
-		Players: map[string]Player{
-			"P1": {Team: "odd", Order: 1, InitialOrder: 1},
-			"P2": {Team: "even", Order: 2, InitialOrder: 2},
-			"P3": {Team: "odd", Order: 3, InitialOrder: 3},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4},
-		},
-		Phase: Playing,
-		Bids:  map[BidValue]Bid{},
-		deck: []int{
-			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-			17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-		},
-	}
 
 	test.Run("should distribute as expected", func(test *testing.T) {
-		testGame.startPlaying()
-
-		assert.Equal([]int{}, testGame.deck)
-		assert.Equal([]int{0, 1, 2, 12, 13, 20, 21, 22}, testGame.Players["P1"].Hand)
-		assert.Equal([]int{3, 4, 5, 14, 15, 23, 24, 25}, testGame.Players["P2"].Hand)
-		assert.Equal([]int{6, 7, 8, 16, 17, 26, 27, 28}, testGame.Players["P3"].Hand)
-		assert.Equal([]int{9, 10, 11, 18, 19, 29, 30, 31}, testGame.Players["P4"].Hand)
-	})
-
-	test.Run("should distribute as expected with disordered values", func(test *testing.T) {
-		testGame.deck = []int{
-			31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17,
-			16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+		game := newBiddingGame()
+		game.deck = []cardID{
+			C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A,
+			D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A,
+			H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A,
+			S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A,
 		}
 
-		testGame.startPlaying()
+		game.startPlaying()
 
-		assert.Equal([]int{}, testGame.deck)
-		assert.Equal([]int{31, 30, 29, 19, 18, 11, 10, 9}, testGame.Players["P1"].Hand)
-		assert.Equal([]int{28, 27, 26, 17, 16, 8, 7, 6}, testGame.Players["P2"].Hand)
-		assert.Equal([]int{25, 24, 23, 15, 14, 5, 4, 3}, testGame.Players["P3"].Hand)
-		assert.Equal([]int{22, 21, 20, 13, 12, 2, 1, 0}, testGame.Players["P4"].Hand)
+		assert.Equal([]cardID{}, game.deck)
+		assert.Equal([]cardID{C_7, C_8, C_9, D_J, D_Q, H_J, H_Q, H_K}, game.Players["P1"].Hand)
+		assert.Equal([]cardID{C_10, C_J, C_Q, D_K, D_A, H_A, S_7, S_8}, game.Players["P2"].Hand)
+		assert.Equal([]cardID{C_K, C_A, D_7, H_7, H_8, S_9, S_10, S_J}, game.Players["P3"].Hand)
+		assert.Equal([]cardID{D_8, D_9, D_10, H_9, H_10, S_Q, S_K, S_A}, game.Players["P4"].Hand)
 	})
 
 	test.Run("should put the higher bid as trump", func(test *testing.T) {
-		testGame.deck = []int{
-			31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17,
-			16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+		game := newBiddingGame()
+		game.deck = []cardID{
+			C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A,
+			D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A,
+			H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A,
+			S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A,
 		}
 
-		testGame.Bids = map[BidValue]Bid{
+		game.Bids = map[BidValue]Bid{
 			Eighty:  {Player: "P1", Color: Club},
 			Ninety:  {Player: "P2", Color: Diamond},
 			Hundred: {Player: "P3", Color: Heart},
 		}
 
-		testGame.startPlaying()
+		game.startPlaying()
 
-		assert.Equal(Heart, testGame.trump)
+		assert.Equal(Heart, game.trump)
 	})
+}
+
+func newPlayingGame() Game {
+	return Game{
+		ID:   2,
+		Name: "GAME TWO",
+		Players: map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{C_7, C_8, C_9, D_J, D_Q, H_J, H_Q, H_K}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{C_10, C_J, C_Q, D_K, D_A, H_A, S_7, S_8}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{C_K, C_A, D_7, H_7, H_8, S_9, S_10, S_J}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8, D_9, D_10, H_9, H_10, S_Q, S_K, S_A}},
+		},
+		Phase: Playing,
+		Bids:  map[BidValue]Bid{},
+		trump: Heart,
+	}
 }
 
 func TestPlaying(test *testing.T) {
 	assert := assert.New(test)
-	testGame := Game{
-		ID:   2,
-		Name: "GAME TWO",
-		Players: map[string]Player{
-			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []int{0, 1, 2, 12, 13, 20, 21, 22}},
-			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []int{3, 4, 5, 14, 15, 23, 24, 25}},
-			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []int{6, 7, 8, 16, 17, 26, 27, 28}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []int{9, 10, 11, 18, 19, 29, 30, 31}},
-		},
-		Phase: Playing,
-		Bids:  map[BidValue]Bid{},
-	}
+
 	test.Run("should fail if not in playing", func(test *testing.T) {
 		biddingGame := Game{
 			ID:    2,
 			Phase: Bidding,
 		}
-		err := biddingGame.Play("P1", 0)
+		err := biddingGame.Play("P1", C_9)
 
 		assert.Error(err)
 		assert.Equal(ErrNotPlaying, err.Error())
 	})
 	test.Run("should fail if not in hand", func(test *testing.T) {
-		err := testGame.Play("P1", 3)
+		game := newPlayingGame()
+
+		err := game.Play("P1", C_10)
 
 		assert.Error(err)
 		assert.Equal(ErrCardNotInHand, err.Error())
 	})
 	test.Run("should fail if not your turn", func(test *testing.T) {
-		err := testGame.Play("P2", 3)
+		game := newPlayingGame()
+
+		err := game.Play("P2", C_10)
 
 		assert.Error(err)
 		assert.Equal(ErrNotYourTurn, err.Error())
 	})
 	test.Run("should be able to play a card", func(test *testing.T) {
-		err := testGame.Play("P1", 0)
+		game := newPlayingGame()
+
+		err := game.Play("P1", C_9)
 
 		assert.NoError(err)
-		assert.Equal(7, len(testGame.Players["P1"].Hand))
-		assert.Equal(1, len(testGame.turns))
+		assert.Equal(7, len(game.Players["P1"].Hand))
+		assert.Equal(1, len(game.turns))
 
-		turn := testGame.turns[0]
+		turn := game.turns[0]
 		assert.Equal(1, len(turn.plays))
 	})
+}
+
+func TestEndOfTurn(test *testing.T) {
+	assert := assert.New(test)
+
 	test.Run("should end the turn and determin a winner after four plays", func(test *testing.T) {
-		err := testGame.Play("P2", 3)
-		assert.NoError(err)
-		err = testGame.Play("P3", 6)
-		assert.NoError(err)
-		err = testGame.Play("P4", 9)
+		game := newPlayingGame()
 
+		err := game.Play("P1", C_7)
 		assert.NoError(err)
-		assert.Equal(1, len(testGame.turns))
 
-		turn := testGame.turns[0]
+		err = game.Play("P2", C_J)
+		assert.NoError(err)
+
+		err = game.Play("P3", C_A)
+		assert.NoError(err)
+
+		err = game.Play("P4", H_9)
+		assert.NoError(err)
+
+		assert.Equal(1, len(game.turns))
+
+		turn := game.turns[0]
 		assert.Equal(4, len(turn.plays))
-		assert.Equal("P2", turn.winner)
-		assert.Equal(1, testGame.Players["P2"].Order)
+		assert.Equal("P4", turn.winner)
+		assert.Equal(1, game.Players["P4"].Order)
 	})
 }

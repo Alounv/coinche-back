@@ -6,9 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBetting(test *testing.T) {
-	assert := assert.New(test)
-	testGame := Game{
+func newBiddingGame() Game {
+	return Game{
 		ID:   2,
 		Name: "GAME TWO",
 		Players: map[string]Player{
@@ -18,13 +17,16 @@ func TestBetting(test *testing.T) {
 			"P4": {Team: "even", Order: 4, InitialOrder: 4},
 		},
 		Phase: Bidding,
-		Bids:  map[BidValue]Bid{},
+		Bids:  make(map[BidValue]Bid),
+		deck:  newDeck(),
 	}
+}
+
+func TestBidding(test *testing.T) {
+	assert := assert.New(test)
 	test.Run("should fail if not in bidding", func(test *testing.T) {
-		teamingGame := Game{
-			ID:    2,
-			Phase: Teaming,
-		}
+		teamingGame := Game{ID: 2, Phase: Teaming}
+
 		err := teamingGame.PlaceBid("P1", Eighty, Spade)
 
 		assert.Error(err)
@@ -32,184 +34,181 @@ func TestBetting(test *testing.T) {
 	})
 
 	test.Run("should fail to coinche if no previous bid", func(test *testing.T) {
-		err := testGame.Coinche("P1")
+		game := newBiddingGame()
+
+		err := game.Coinche("P1")
 
 		assert.Error(err)
 		assert.Equal(ErrNoBidYet, err.Error())
 	})
 
 	test.Run("should place a bid", func(test *testing.T) {
-		want := Bid{Player: "P1", Color: Spade}
-		err := testGame.PlaceBid("P1", Eighty, Spade)
+		game := newBiddingGame()
 
+		err := game.PlaceBid("P1", Eighty, Spade)
+
+		want := Bid{Player: "P1", Color: Spade}
 		assert.NoError(err)
-		assert.Equal(want, testGame.Bids[Eighty])
+		assert.Equal(want, game.Bids[Eighty])
 	})
 
 	test.Run("should place another bid", func(test *testing.T) {
-		want := Bid{Player: "P2", Color: Club}
-		err := testGame.PlaceBid("P2", Ninety, Club)
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P1", Color: Spade},
+		}
+		game.Players = map[string]Player{
+			"P1": {Order: 4},
+			"P2": {Order: 1},
+			"P3": {Order: 2},
+			"P4": {Order: 3},
+		}
 
+		err := game.PlaceBid("P2", Ninety, Club)
+
+		want := Bid{Player: "P2", Color: Club}
 		assert.NoError(err)
-		assert.Equal(want, testGame.Bids[Ninety])
+		assert.Equal(want, game.Bids[Ninety])
 	})
 
 	test.Run("should fail if placing a bid smaller or equal to previous bid", func(test *testing.T) {
-		err := testGame.PlaceBid("P3", Eighty, Club)
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P1", Color: Spade},
+		}
+		game.Players = map[string]Player{
+			"P1": {Order: 3},
+			"P2": {Order: 4},
+			"P3": {Order: 1},
+			"P4": {Order: 2},
+		}
+
+		err := game.PlaceBid("P3", Eighty, Club)
 
 		assert.Error(err)
 		assert.Equal(ErrBidTooSmall, err.Error())
 	})
 
 	test.Run("should fail if the player is not the right one", func(test *testing.T) {
-		err := testGame.PlaceBid("P1", Hundred, Club)
+		game := newBiddingGame()
+
+		err := game.PlaceBid("P2", Hundred, Club)
 
 		assert.Error(err)
 		assert.Equal(ErrNotYourTurn, err.Error())
 	})
 
 	test.Run("order should rotate correctly", func(test *testing.T) {
-		err := testGame.Pass("P3")
+		game := newBiddingGame()
+
+		err := game.Pass("P1")
 		assert.NoError(err)
 
-		err = testGame.Pass("P4")
+		err = game.Pass("P2")
 		assert.NoError(err)
 
-		err = testGame.Pass("P1")
+		err = game.Pass("P3")
 		assert.NoError(err)
 	})
 
 	test.Run("should fail if the player bid on its own color", func(test *testing.T) {
-		err := testGame.PlaceBid("P2", HundredAndTen, Club)
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P1", Color: Spade},
+		}
+
+		err := game.PlaceBid("P1", HundredAndTen, Spade)
 
 		assert.Error(err)
 		assert.Equal(ErrBiddingItsOwnColor, err.Error())
 	})
+}
+
+func TestCoinche(test *testing.T) {
+	assert := assert.New(test)
 
 	test.Run("same team player should not be able to coinche", func(test *testing.T) {
-		err := testGame.PlaceBid("P2", HundredAndTen, Heart)
-		if err != nil {
-			test.Fatal(err)
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P1", Color: Spade, Coinche: 1},
+		}
+		game.Players = map[string]Player{
+			"P1": {Order: 4},
+			"P2": {Order: 1},
+			"P3": {Order: 2},
+			"P4": {Order: 3},
 		}
 
-		err = testGame.Coinche("P2")
+		err := game.Coinche("P3")
 
 		assert.Error(err)
 		assert.Equal(ErrNotYourTurn, err.Error())
 
-		err = testGame.Coinche("P4")
+		err = game.Coinche("P1")
 
 		assert.Error(err)
 		assert.Equal(ErrNotYourTurn, err.Error())
 	})
 
 	test.Run("should be able to coinche several times", func(t *testing.T) {
-		testGame := Game{
-			ID:   2,
-			Name: "GAME TWO",
-			Players: map[string]Player{
-				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
-				"P2": {Team: "even", Order: 2, InitialOrder: 2},
-				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
-				"P4": {Team: "even", Order: 4, InitialOrder: 4},
-			},
-			Phase: Bidding,
-			Bids: map[BidValue]Bid{
-				Eighty: {Player: "P4", Color: Spade},
-			},
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P4", Color: Spade},
 		}
 
-		err := testGame.Coinche("P1")
+		err := game.Coinche("P1")
 		assert.NoError(err)
 
-		err = testGame.Coinche("P4")
+		err = game.Coinche("P4")
 		assert.NoError(err)
 	})
+}
+
+func TestEndOfBidding(test *testing.T) {
+	assert := assert.New(test)
 
 	test.Run("should start playing after two passes after coinche", func(t *testing.T) {
-		testGame := Game{
-			ID:   2,
-			Name: "GAME TWO",
-			Players: map[string]Player{
-				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
-				"P2": {Team: "even", Order: 2, InitialOrder: 2},
-				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
-				"P4": {Team: "even", Order: 4, InitialOrder: 4},
-			},
-			Phase: Bidding,
-			Bids: map[BidValue]Bid{
-				Eighty: {Player: "P4", Color: Spade, Coinche: 2},
-			},
-			deck: []int{
-				31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17,
-				16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
-			},
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P4", Color: Spade, Coinche: 2},
 		}
 
-		err := testGame.Pass("P1")
+		err := game.Pass("P1")
 		assert.NoError(err)
 
-		err = testGame.Pass("P3")
+		err = game.Pass("P3")
 		assert.NoError(err)
 
-		assert.Equal(Playing, testGame.Phase)
+		assert.Equal(Playing, game.Phase)
 	})
 
 	test.Run("should start playing after 3 coinches", func(t *testing.T) {
-		testGame := Game{
-			ID:   2,
-			Name: "GAME TWO",
-			Players: map[string]Player{
-				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
-				"P2": {Team: "even", Order: 2, InitialOrder: 2},
-				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
-				"P4": {Team: "even", Order: 4, InitialOrder: 4},
-			},
-			Phase: Bidding,
-			Bids: map[BidValue]Bid{
-				Eighty: {Player: "P4", Color: Spade, Coinche: 2},
-			},
-			deck: []int{
-				31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17,
-				16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
-			},
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P4", Color: Spade, Coinche: 2},
 		}
 
-		err := testGame.Coinche("P1")
+		err := game.Coinche("P1")
 
 		assert.NoError(err)
-		assert.Equal(Playing, testGame.Phase)
+		assert.Equal(Playing, game.Phase)
 	})
 
 	test.Run("should start playing after 4 passes", func(t *testing.T) {
-		testGame := Game{
-			ID:   2,
-			Name: "GAME TWO",
-			Players: map[string]Player{
-				"P1": {Team: "odd", Order: 1, InitialOrder: 1},
-				"P2": {Team: "even", Order: 2, InitialOrder: 2},
-				"P3": {Team: "odd", Order: 3, InitialOrder: 3},
-				"P4": {Team: "even", Order: 4, InitialOrder: 4},
-			},
-			Phase: Bidding,
-			Bids: map[BidValue]Bid{
-				Eighty: {Player: "P4", Color: Spade},
-			},
-			deck: []int{
-				31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17,
-				16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
-			},
+		game := newBiddingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P4", Color: Spade},
 		}
 
-		err := testGame.Pass("P1")
+		err := game.Pass("P1")
 		assert.NoError(err)
-		err = testGame.Pass("P2")
+		err = game.Pass("P2")
 		assert.NoError(err)
-		err = testGame.Pass("P3")
+		err = game.Pass("P3")
 		assert.NoError(err)
-		err = testGame.Pass("P4")
+		err = game.Pass("P4")
 		assert.NoError(err)
 
-		assert.Equal(Playing, testGame.Phase)
+		assert.Equal(Playing, game.Phase)
 	})
 }

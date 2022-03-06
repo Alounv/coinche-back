@@ -114,7 +114,7 @@ func (game *Game) PlaceBid(player string, value BidValue, color Color) error {
 		return errors.New(ErrHasBeenCoinched)
 	}
 
-	if lastBid.Pass > 2 && lastBid.Color == color {
+	if lastBid.Player == player && lastBid.Color == color {
 		return errors.New(ErrBiddingItsOwnColor)
 	}
 
