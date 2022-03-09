@@ -5,8 +5,11 @@ import (
 )
 
 const (
-	ErrNotPlaying    = "NOT IN PLAYING PHASE"
-	ErrCardNotInHand = "CARD NOT IN HAND"
+	ErrNotPlaying            = "NOT IN PLAYING PHASE"
+	ErrCardNotInHand         = "CARD NOT IN HAND"
+	ErrShouldPlayAskedColor  = "SHOULD PLAY ASKED COLOR"
+	ErrShouldPlayBiggerTrump = "SHOULD PLAY BIGGER TRUMP"
+	ErrShouldPlayTrump       = "SHOULD PLAY TRUMP"
 )
 
 func (game *Game) startPlaying() {
@@ -69,6 +72,111 @@ func (game *Game) isNewTurn() bool {
 	return len(lastTurn.plays) >= 4
 }
 
+func (turn turn) askedColor() Color {
+	firstPlay := turn.plays[0]
+	return cards[firstPlay.card].color
+}
+
+func hasColor(color Color, hand []cardID) bool {
+	for _, card := range hand {
+		if cards[card].color == color {
+			return true
+		}
+	}
+	return false
+}
+
+func hasNoTrump(trump Color, hand []cardID) bool {
+	for _, card := range hand {
+		if cards[card].color == trump {
+			return false
+		}
+	}
+	return true
+}
+
+func (turn turn) getBiggestTrumpStrength(trump Color) Strength {
+	var biggestTrumpStrength Strength
+	for _, play := range turn.plays {
+		card := cards[play.card]
+		color := card.color
+		strength := card.TrumpStrength
+		if color == trump {
+			if strength > biggestTrumpStrength {
+				biggestTrumpStrength = strength
+			}
+		}
+	}
+	return biggestTrumpStrength
+}
+
+func (turn turn) isTheBiggestTrump(card cardID, trump Color) bool {
+	isTrump := cards[card].color == trump
+
+	if isTrump && cards[card].TrumpStrength > turn.getBiggestTrumpStrength(trump) {
+		return true
+	}
+
+	return false
+}
+
+func (turn turn) hasNoBiggerTrump(hand []cardID, trump Color) bool {
+	for _, cardID := range hand {
+		card := cards[cardID]
+		if card.color == trump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
+			return false
+		}
+	}
+	return true
+}
+
+func (game *Game) canPlayCard(card cardID, playerName string) error {
+	player := game.Players[playerName]
+
+	if len(game.turns) == 0 {
+		return nil
+	}
+
+	lastTurn := game.turns[len(game.turns)-1]
+	playCount := len(lastTurn.plays)
+
+	if playCount == 0 {
+		return nil
+	}
+
+	askedColor := lastTurn.askedColor()
+	color := cards[card].color
+
+	if color == askedColor {
+		return nil
+	}
+
+	if hasColor(askedColor, player.Hand) {
+		return errors.New(ErrShouldPlayAskedColor)
+	}
+
+	if hasNoTrump(game.trump, player.Hand) {
+		return nil
+	}
+
+	if playCount > 1 {
+		winnerTeam := game.Players[lastTurn.getWinner(game.trump)].Team
+		if winnerTeam == player.Team {
+			return nil
+		}
+	}
+
+	if color != game.trump {
+		return errors.New(ErrShouldPlayTrump)
+	}
+
+	if lastTurn.isTheBiggestTrump(card, game.trump) || lastTurn.hasNoBiggerTrump(player.Hand, game.trump) {
+		return nil
+	}
+
+	return errors.New(ErrShouldPlayBiggerTrump)
+}
+
 func (game *Game) Play(playerName string, card cardID) error {
 	if game.Phase != Playing {
 		return errors.New(ErrNotPlaying)
@@ -82,6 +190,11 @@ func (game *Game) Play(playerName string, card cardID) error {
 	}
 
 	err := game.checkPlayerTurn(playerName)
+	if err != nil {
+		return err
+	}
+
+	err = game.canPlayCard(card, playerName)
 	if err != nil {
 		return err
 	}

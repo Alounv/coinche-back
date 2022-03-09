@@ -165,7 +165,7 @@ type turn struct {
 	winner string
 }
 
-func (turn *turn) setWinner(trump Color) {
+func (turn turn) getWinner(trump Color) string {
 	var winner string
 	var strongerValue Strength
 	var firstCard cardID
@@ -180,7 +180,11 @@ func (turn *turn) setWinner(trump Color) {
 		}
 	}
 
-	turn.winner = winner
+	return winner
+}
+
+func (turn *turn) setWinner(trump Color) {
+	turn.winner = turn.getWinner(trump)
 }
 
 func getCardValue(card cardID, trump Color, firstCard cardID) Strength {

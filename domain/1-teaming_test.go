@@ -2,7 +2,6 @@ package domain
 
 import (
 	"coinche/utilities"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -95,8 +94,6 @@ func TestTeamingPhase(test *testing.T) {
 			"P3": {},
 			"P4": {},
 		}
-
-		fmt.Println(game)
 
 		err := game.AssignTeam("P3", "Team1")
 

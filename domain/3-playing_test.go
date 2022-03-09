@@ -133,3 +133,170 @@ func TestEndOfTurn(test *testing.T) {
 		assert.Equal(1, game.Players["P4"].Order)
 	})
 }
+
+func TestCanPlay(test *testing.T) {
+	assert := assert.New(test)
+
+	test.Run("should fail to play if trying to play another color while having the asked color", func(test *testing.T) {
+		game := newPlayingGame()
+
+		err := game.Play("P1", C_7)
+		assert.NoError(err)
+
+		err = game.Play("P2", S_7)
+
+		assert.Error(err)
+		assert.Equal(ErrShouldPlayAskedColor, err.Error())
+	})
+
+	test.Run("should fail to play if trying to play a trump while having the asked color", func(test *testing.T) {
+		game := newPlayingGame()
+
+		err := game.Play("P1", C_7)
+		assert.NoError(err)
+
+		err = game.Play("P2", H_A)
+
+		assert.Error(err)
+		assert.Equal(ErrShouldPlayAskedColor, err.Error())
+	})
+
+	test.Run("should be able to play anything if has no trump and no asked color", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{C_7}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{D_K}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{C_K}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.trump = Heart
+
+		err := game.Play("P1", C_7)
+		assert.NoError(err)
+
+		err = game.Play("P2", D_K)
+
+		assert.NoError(err)
+	})
+
+	test.Run("should fail to play if has trump, no asked color and plays something that is not trump", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{C_7}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{D_K, H_10}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{C_K}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.trump = Heart
+
+		err := game.Play("P1", C_7)
+		assert.NoError(err)
+
+		err = game.Play("P2", D_K)
+
+		assert.Error(err)
+		assert.Equal(ErrShouldPlayTrump, err.Error())
+	})
+
+	test.Run("should be able to play no trump if partner is winner", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{C_10}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{C_7}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{D_7, H_8}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.trump = Heart
+
+		err := game.Play("P1", C_10)
+		assert.NoError(err)
+
+		err = game.Play("P2", C_7)
+		assert.NoError(err)
+
+		err = game.Play("P3", D_7)
+		assert.NoError(err)
+	})
+
+	test.Run("should be able to play a bigger trump", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{C_10}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{H_9}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{H_J, H_8}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.trump = Heart
+
+		err := game.Play("P1", C_10)
+		assert.NoError(err)
+
+		err = game.Play("P2", H_9)
+		assert.NoError(err)
+
+		err = game.Play("P3", H_J)
+		assert.NoError(err)
+	})
+
+	test.Run("should be able to play a lower trump if has not bigger trump", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{C_10}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{H_9}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{D_7, H_8}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.trump = Heart
+
+		err := game.Play("P1", C_10)
+		assert.NoError(err)
+
+		err = game.Play("P2", H_9)
+		assert.NoError(err)
+
+		err = game.Play("P3", H_8)
+		assert.NoError(err)
+	})
+
+	test.Run("should fail to play a lower trump if has a bigger trump", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{C_10}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{H_9}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{H_J, H_8}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.trump = Heart
+
+		err := game.Play("P1", C_10)
+		assert.NoError(err)
+
+		err = game.Play("P2", H_9)
+		assert.NoError(err)
+
+		err = game.Play("P3", H_8)
+
+		assert.Error(err)
+		assert.Equal(ErrShouldPlayBiggerTrump, err.Error())
+	})
+
+	test.Run("should be able to play a lower while having a bigger trump if partner is winner", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{H_9}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{C_10}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{H_J, H_8}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.trump = Heart
+
+		err := game.Play("P1", H_9)
+		assert.NoError(err)
+
+		err = game.Play("P2", C_10)
+		assert.NoError(err)
+
+		err = game.Play("P3", H_8)
+		assert.NoError(err)
+	})
+}
