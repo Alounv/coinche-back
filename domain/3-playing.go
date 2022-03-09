@@ -77,8 +77,17 @@ func (turn turn) askedColor() Color {
 	return cards[firstPlay.card].color
 }
 
-func hasColor(color Color, hand []cardID) bool {
-	for _, card := range hand {
+func (player Player) hasCard(card cardID) bool {
+	for _, cardID := range player.Hand {
+		if cardID == card {
+			return true
+		}
+	}
+	return false
+}
+
+func (player Player) hasColor(color Color) bool {
+	for _, card := range player.Hand {
 		if cards[card].color == color {
 			return true
 		}
@@ -86,8 +95,8 @@ func hasColor(color Color, hand []cardID) bool {
 	return false
 }
 
-func hasNoTrump(trump Color, hand []cardID) bool {
-	for _, card := range hand {
+func (player Player) hasNoTrump(trump Color) bool {
+	for _, card := range player.Hand {
 		if cards[card].color == trump {
 			return false
 		}
@@ -120,8 +129,8 @@ func (turn turn) isTheBiggestTrump(card cardID, trump Color) bool {
 	return false
 }
 
-func (turn turn) hasNoBiggerTrump(hand []cardID, trump Color) bool {
-	for _, cardID := range hand {
+func (player Player) hasNoBiggerTrump(trump Color, turn turn) bool {
+	for _, cardID := range player.Hand {
 		card := cards[cardID]
 		if card.color == trump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
 			return false
@@ -151,11 +160,11 @@ func (game *Game) canPlayCard(card cardID, playerName string) error {
 		return nil
 	}
 
-	if hasColor(askedColor, player.Hand) {
+	if player.hasColor(askedColor) {
 		return errors.New(ErrShouldPlayAskedColor)
 	}
 
-	if hasNoTrump(game.trump, player.Hand) {
+	if player.hasNoTrump(game.trump) {
 		return nil
 	}
 
@@ -170,23 +179,40 @@ func (game *Game) canPlayCard(card cardID, playerName string) error {
 		return errors.New(ErrShouldPlayTrump)
 	}
 
-	if lastTurn.isTheBiggestTrump(card, game.trump) || lastTurn.hasNoBiggerTrump(player.Hand, game.trump) {
+	if lastTurn.isTheBiggestTrump(card, game.trump) || player.hasNoBiggerTrump(game.trump, lastTurn) {
 		return nil
 	}
 
 	return errors.New(ErrShouldPlayBiggerTrump)
 }
 
+func (game *Game) createTurn(newPlay play) {
+	game.turns = append(game.turns, turn{
+		plays: []play{newPlay},
+	})
+}
+
+func (game *Game) updateTurn(newPlay play) {
+	lastTurnIndex := len(game.turns) - 1
+	lastTurn := game.turns[lastTurnIndex]
+
+	lastTurn.plays = append(lastTurn.plays, newPlay)
+
+	if len(lastTurn.plays) == 4 {
+		lastTurn.setWinner(Color(game.trump))
+		game.setFirstPlayer(lastTurn.winner)
+	}
+
+	game.turns[lastTurnIndex] = lastTurn
+}
+
+func (game *Game) allCardsPlayed() bool {
+	return len(game.turns) == 8 && len(game.turns[7].plays) == 4
+}
+
 func (game *Game) Play(playerName string, card cardID) error {
 	if game.Phase != Playing {
 		return errors.New(ErrNotPlaying)
-	}
-
-	var player Player
-	for name, p := range game.Players {
-		if name == playerName {
-			player = p
-		}
 	}
 
 	err := game.checkPlayerTurn(playerName)
@@ -199,42 +225,34 @@ func (game *Game) Play(playerName string, card cardID) error {
 		return err
 	}
 
-	for _, cardID := range player.Hand {
-		if cardID == card {
-			player.Hand = removeCard(player.Hand, card)
-			game.Players[playerName] = player
+	player := game.Players[playerName]
 
-			newPlay := play{
-				playerName: playerName,
-				card:       card,
-			}
-
-			game.rotateOrder()
-
-			if game.isNewTurn() {
-				game.turns = append(game.turns, turn{
-					plays: []play{newPlay},
-				})
-				return nil
-			}
-
-			lastTurnIndex := len(game.turns) - 1
-			lastTurn := game.turns[lastTurnIndex]
-
-			lastTurn.plays = append(lastTurn.plays, newPlay)
-
-			if len(lastTurn.plays) == 4 {
-				lastTurn.setWinner(Color(game.trump))
-				game.setFirstPlayer(lastTurn.winner)
-			}
-
-			game.turns[lastTurnIndex] = lastTurn
-
-			return nil
-		}
+	if !player.hasCard(card) {
+		return errors.New(ErrCardNotInHand)
 	}
 
-	return errors.New(ErrCardNotInHand)
+	player.Hand = removeCard(player.Hand, card)
+	game.Players[playerName] = player
+
+	game.rotateOrder()
+
+	newPlay := play{
+		playerName: playerName,
+		card:       card,
+	}
+
+	if game.isNewTurn() {
+		game.createTurn(newPlay)
+		return nil
+	}
+
+	game.updateTurn(newPlay)
+
+	if game.allCardsPlayed() {
+		game.Phase = Counting
+	}
+
+	return nil
 }
 
 func removeCard(slice []cardID, valueToRemove cardID) []cardID {

@@ -300,3 +300,47 @@ func TestCanPlay(test *testing.T) {
 		assert.NoError(err)
 	})
 }
+
+func TestEndOfPlayingPhase(test *testing.T) {
+	assert := assert.New(test)
+
+	test.Run("should pass to counting phase when 8th turn is over", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []cardID{H_9}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []cardID{C_10}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []cardID{H_J}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []cardID{D_8}},
+		}
+		game.turns = []turn{
+			{[]play{}, "P1"},
+			{[]play{}, "P2"},
+			{[]play{}, "P3"},
+			{[]play{}, "P2"},
+			{[]play{}, "P2"},
+			{[]play{}, "P2"},
+			{[]play{
+				{"P1", H_9},
+				{"P2", C_10},
+				{"P3", H_J},
+				{"P4", D_8},
+			}, "P1"},
+		}
+
+		err := game.Play("P1", H_9)
+		assert.NoError(err)
+
+		err = game.Play("P2", C_10)
+		assert.NoError(err)
+
+		err = game.Play("P3", H_J)
+		assert.NoError(err)
+
+		assert.Equal(Playing, game.Phase)
+
+		err = game.Play("P4", D_8)
+		assert.NoError(err)
+
+		assert.Equal(Counting, game.Phase)
+	})
+}
