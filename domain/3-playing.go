@@ -280,11 +280,11 @@ func (game Game) getTeamPoints() map[string]int {
 
 	if game.trump == NoTrump {
 		for team, points := range teamPoints {
-			teamPoints[team] = points * 152 / 130
+			teamPoints[team] = points * 162 / 130
 		}
 	} else if game.trump == AllTrump {
 		for team, points := range teamPoints {
-			teamPoints[team] = points * 218 / 152
+			teamPoints[team] = points * 258 / 162
 		}
 	}
 
