@@ -67,6 +67,16 @@ type card struct {
 	color         Color
 	strength      Strength
 	TrumpStrength Strength
+	value         int
+	trumpValue    int
+}
+
+func (card card) getValue(trump Color) int {
+	if trump == card.color || trump == AllTrump {
+		return card.trumpValue
+	} else {
+		return card.value
+	}
 }
 
 type cardID string
@@ -107,38 +117,38 @@ const (
 )
 
 var cards = map[cardID]card{
-	C_7:  {Club, Seven, TSeven},
-	C_8:  {Club, Eight, TEight},
-	C_9:  {Club, Nine, TNine},
-	C_10: {Club, Ten, TTen},
-	C_J:  {Club, Jack, TJack},
-	C_Q:  {Club, Queen, TQueen},
-	C_K:  {Club, King, TKing},
-	C_A:  {Club, As, TAs},
-	D_7:  {Diamond, Seven, TSeven},
-	D_8:  {Diamond, Eight, TEight},
-	D_9:  {Diamond, Nine, TNine},
-	D_10: {Diamond, Ten, TTen},
-	D_J:  {Diamond, Jack, TJack},
-	D_Q:  {Diamond, Queen, TQueen},
-	D_K:  {Diamond, King, TKing},
-	D_A:  {Diamond, As, TAs},
-	H_7:  {Heart, Seven, TSeven},
-	H_8:  {Heart, Eight, TEight},
-	H_9:  {Heart, Nine, TNine},
-	H_10: {Heart, Ten, TTen},
-	H_J:  {Heart, Jack, TJack},
-	H_Q:  {Heart, Queen, TQueen},
-	H_K:  {Heart, King, TKing},
-	H_A:  {Heart, As, TAs},
-	S_7:  {Spade, Seven, TSeven},
-	S_8:  {Spade, Eight, TEight},
-	S_9:  {Spade, Nine, TNine},
-	S_10: {Spade, Ten, TTen},
-	S_J:  {Spade, Jack, TJack},
-	S_Q:  {Spade, Queen, TQueen},
-	S_K:  {Spade, King, TKing},
-	S_A:  {Spade, As, TAs},
+	C_7:  {Club, Seven, TSeven, 0, 0},
+	C_8:  {Club, Eight, TEight, 0, 0},
+	C_9:  {Club, Nine, TNine, 0, 14},
+	C_10: {Club, Ten, TTen, 10, 10},
+	C_J:  {Club, Jack, TJack, 2, 20},
+	C_Q:  {Club, Queen, TQueen, 3, 3},
+	C_K:  {Club, King, TKing, 4, 4},
+	C_A:  {Club, As, TAs, 11, 11},
+	D_7:  {Diamond, Seven, TSeven, 0, 0},
+	D_8:  {Diamond, Eight, TEight, 0, 0},
+	D_9:  {Diamond, Nine, TNine, 0, 14},
+	D_10: {Diamond, Ten, TTen, 10, 10},
+	D_J:  {Diamond, Jack, TJack, 2, 20},
+	D_Q:  {Diamond, Queen, TQueen, 3, 3},
+	D_K:  {Diamond, King, TKing, 4, 4},
+	D_A:  {Diamond, As, TAs, 11, 11},
+	H_7:  {Heart, Seven, TSeven, 0, 0},
+	H_8:  {Heart, Eight, TEight, 0, 0},
+	H_9:  {Heart, Nine, TNine, 0, 14},
+	H_10: {Heart, Ten, TTen, 10, 10},
+	H_J:  {Heart, Jack, TJack, 2, 20},
+	H_Q:  {Heart, Queen, TQueen, 3, 3},
+	H_K:  {Heart, King, TKing, 4, 4},
+	H_A:  {Heart, As, TAs, 11, 11},
+	S_7:  {Spade, Seven, TSeven, 0, 0},
+	S_8:  {Spade, Eight, TEight, 0, 0},
+	S_9:  {Spade, Nine, TNine, 0, 14},
+	S_10: {Spade, Ten, TTen, 10, 10},
+	S_J:  {Spade, Jack, TJack, 2, 20},
+	S_Q:  {Spade, Queen, TQueen, 3, 3},
+	S_K:  {Spade, King, TKing, 4, 4},
+	S_A:  {Spade, As, TAs, 11, 11},
 }
 
 func newDeck() []cardID {
@@ -210,6 +220,7 @@ type Game struct {
 	trump     Color
 	deck      []cardID
 	turns     []turn
+	scores    map[string]int
 }
 
 type Player struct {

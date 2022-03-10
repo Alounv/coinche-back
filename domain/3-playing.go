@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 )
 
 const (
@@ -199,7 +200,7 @@ func (game *Game) updateTurn(newPlay play) {
 	lastTurn.plays = append(lastTurn.plays, newPlay)
 
 	if len(lastTurn.plays) == 4 {
-		lastTurn.setWinner(Color(game.trump))
+		lastTurn.setWinner(game.trump)
 		game.setFirstPlayer(lastTurn.winner)
 	}
 
@@ -208,6 +209,80 @@ func (game *Game) updateTurn(newPlay play) {
 
 func (game *Game) allCardsPlayed() bool {
 	return len(game.turns) == 8 && len(game.turns[7].plays) == 4
+}
+
+func (card card) getStrength(trump Color) Strength {
+	if trump == card.color || trump == AllTrump {
+		return card.TrumpStrength
+	} else {
+		return card.strength
+	}
+}
+
+func (game Game) getPlayersCards() map[string][]cardID {
+	playersCards := map[string][]cardID{}
+
+	for _, turn := range game.turns {
+		for _, play := range turn.plays {
+			playersCards[turn.winner] = append(playersCards[turn.winner], play.card)
+		}
+	}
+
+	return playersCards
+}
+
+func (game Game) getTeamPoints() map[string]int {
+	playersCards := game.getPlayersCards()
+
+	teamPoints := map[string]int{}
+
+	for player, playerCards := range playersCards {
+		team := game.Players[player].Team
+		for _, card := range playerCards {
+			teamPoints[team] += cards[card].getValue(game.trump)
+		}
+	}
+
+	lastTurn := game.turns[len(game.turns)-1]
+	lastWinnerTeam := game.Players[lastTurn.winner].Team
+	teamPoints[lastWinnerTeam] += 10
+
+	for player, playerCards := range playersCards {
+		playerTeam := game.Players[player].Team
+
+		// IF PLAYER TEAM AS TAKEN
+		hasTrumpKingOrQueen := false
+		for _, card := range playerCards {
+			card := cards[card]
+			if card.getStrength(game.trump) == TQueen|TKing {
+				if hasTrumpKingOrQueen {
+					teamPoints[playerTeam] += 20
+				} else {
+					hasTrumpKingOrQueen = true
+				}
+			}
+		}
+	}
+
+	if game.trump == NoTrump {
+		for team, points := range teamPoints {
+			teamPoints[team] = points * 152 / 130
+		}
+	} else if game.trump == AllTrump {
+		for team, points := range teamPoints {
+			teamPoints[team] = points * 218 / 152
+		}
+	}
+
+	return teamPoints
+}
+
+func (game *Game) end() {
+	game.Phase = Counting
+
+	teamsPoints := game.getTeamPoints()
+
+	fmt.Println(teamsPoints)
 }
 
 func (game *Game) Play(playerName string, card cardID) error {
@@ -249,7 +324,7 @@ func (game *Game) Play(playerName string, card cardID) error {
 	game.updateTurn(newPlay)
 
 	if game.allCardsPlayed() {
-		game.Phase = Counting
+		game.end()
 	}
 
 	return nil
