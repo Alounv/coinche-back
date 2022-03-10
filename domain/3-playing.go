@@ -243,26 +243,40 @@ func (game Game) getTeamPoints() map[string]int {
 		}
 	}
 
+	fmt.Println(teamPoints)
+
 	lastTurn := game.turns[len(game.turns)-1]
 	lastWinnerTeam := game.Players[lastTurn.winner].Team
 	teamPoints[lastWinnerTeam] += 10
 
-	for player, playerCards := range playersCards {
-		playerTeam := game.Players[player].Team
+	fmt.Println(teamPoints)
 
-		// IF PLAYER TEAM AS TAKEN
-		hasTrumpKingOrQueen := false
-		for _, card := range playerCards {
-			card := cards[card]
-			if card.getStrength(game.trump) == TQueen|TKing {
-				if hasTrumpKingOrQueen {
+	// IF PLAYER TEAM AS TAKEN
+	playerWithTrumpQueen := ""
+	playerWithTrumpKing := ""
+	for _, turn := range game.turns {
+		for _, play := range turn.plays {
+			// CAREFULL ON ALL TRUMP
+			cardStrength := cards[play.card].getStrength(game.trump)
+			if cardStrength == TQueen {
+				if play.playerName == playerWithTrumpKing {
+					playerTeam := game.Players[playerWithTrumpKing].Team
 					teamPoints[playerTeam] += 20
 				} else {
-					hasTrumpKingOrQueen = true
+					playerWithTrumpQueen = play.playerName
+				}
+			} else if cardStrength == TKing {
+				if play.playerName == playerWithTrumpQueen {
+					playerTeam := game.Players[playerWithTrumpQueen].Team
+					teamPoints[playerTeam] += 20
+				} else {
+					playerWithTrumpKing = play.playerName
 				}
 			}
 		}
 	}
+
+	fmt.Println(teamPoints)
 
 	if game.trump == NoTrump {
 		for team, points := range teamPoints {
@@ -273,6 +287,8 @@ func (game Game) getTeamPoints() map[string]int {
 			teamPoints[team] = points * 218 / 152
 		}
 	}
+
+	fmt.Println(teamPoints)
 
 	return teamPoints
 }

@@ -106,10 +106,10 @@ func TestCounting(test *testing.T) {
 		assert.Equal([]cardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
 
 		teamPoints := game.getTeamPoints()
-		assert.Equal(99, teamPoints["odd"])
+		assert.Equal(119, teamPoints["odd"])
 		assert.Equal(63, teamPoints["even"])
 
-		assert.Equal(162, teamPoints["odd"]+teamPoints["even"])
+		assert.Equal(182, teamPoints["odd"]+teamPoints["even"])
 	})
 }
 
