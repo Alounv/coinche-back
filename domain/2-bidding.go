@@ -87,19 +87,22 @@ func (game *Game) initiateOrder() {
 	}
 }
 
-func (game *Game) PlaceBid(player string, value BidValue, color Color) error {
-	if game.Phase != Bidding {
-		return errors.New(ErrNotBidding)
-	}
-
+func (game *Game) getLastBid() (Bid, BidValue) {
 	var maxValue BidValue
 	for value := range game.Bids {
 		if value > maxValue {
 			maxValue = value
 		}
 	}
+	return game.Bids[maxValue], maxValue
+}
 
-	lastBid := game.Bids[maxValue]
+func (game *Game) PlaceBid(player string, value BidValue, color Color) error {
+	if game.Phase != Bidding {
+		return errors.New(ErrNotBidding)
+	}
+
+	lastBid, maxValue := game.getLastBid()
 
 	if value <= maxValue {
 		return errors.New(ErrBidTooSmall)
@@ -139,14 +142,7 @@ func (game *Game) Pass(player string) error {
 		return err
 	}
 
-	var maxValue BidValue
-	for value := range game.Bids {
-		if value > maxValue {
-			maxValue = value
-		}
-	}
-
-	lastBid := game.Bids[maxValue]
+	lastBid, maxValue := game.getLastBid()
 
 	game.Bids[maxValue] = Bid{
 		Player:  lastBid.Player,
@@ -183,18 +179,11 @@ func (game *Game) Coinche(player string) error {
 		return err
 	}
 
-	var maxValue BidValue
-	for value := range game.Bids {
-		if value > maxValue {
-			maxValue = value
-		}
-	}
+	lastBid, maxValue := game.getLastBid()
 
 	if maxValue == 0 {
 		return errors.New(ErrNoBidYet)
 	}
-
-	lastBid := game.Bids[maxValue]
 
 	game.Bids[maxValue] = Bid{
 		Player:  lastBid.Player,

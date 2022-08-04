@@ -175,7 +175,6 @@ func TestCanPlay(test *testing.T) {
 		assert.NoError(err)
 
 		err = game.Play("P2", D_K)
-
 		assert.NoError(err)
 	})
 

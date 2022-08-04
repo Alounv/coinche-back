@@ -231,52 +231,37 @@ func (game Game) getPlayersCards() map[string][]cardID {
 	return playersCards
 }
 
-func (game Game) getTeamPoints() map[string]int {
+func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) {
 	playersCards := game.getPlayersCards()
 
 	teamPoints := map[string]int{}
 
+	potentialBelotes := map[Color]string{}
+
 	for player, playerCards := range playersCards {
 		team := game.Players[player].Team
+		potentialPlayerBelotes := map[Color]int{}
+
 		for _, card := range playerCards {
 			teamPoints[team] += cards[card].getValue(game.trump)
+
+			card := cards[card]
+			cardStrength := card.getStrength(game.trump)
+			if cardStrength == TQueen || cardStrength == TKing {
+				potentialPlayerBelotes[card.color]++
+			}
 		}
-	}
 
-	fmt.Println(teamPoints)
-
-	lastTurn := game.turns[len(game.turns)-1]
-	lastWinnerTeam := game.Players[lastTurn.winner].Team
-	teamPoints[lastWinnerTeam] += 10
-
-	fmt.Println(teamPoints)
-
-	// IF PLAYER TEAM AS TAKEN
-	playerWithTrumpQueen := ""
-	playerWithTrumpKing := ""
-	for _, turn := range game.turns {
-		for _, play := range turn.plays {
-			// CAREFULL ON ALL TRUMP
-			cardStrength := cards[play.card].getStrength(game.trump)
-			if cardStrength == TQueen {
-				if play.playerName == playerWithTrumpKing {
-					playerTeam := game.Players[playerWithTrumpKing].Team
-					teamPoints[playerTeam] += 20
-				} else {
-					playerWithTrumpQueen = play.playerName
-				}
-			} else if cardStrength == TKing {
-				if play.playerName == playerWithTrumpQueen {
-					playerTeam := game.Players[playerWithTrumpQueen].Team
-					teamPoints[playerTeam] += 20
-				} else {
-					playerWithTrumpKing = play.playerName
-				}
+		for color, number := range potentialPlayerBelotes {
+			if number == 2 {
+				potentialBelotes[color] = player
 			}
 		}
 	}
 
-	fmt.Println(teamPoints)
+	lastTurn := game.turns[len(game.turns)-1]
+	lastWinnerTeam := game.Players[lastTurn.winner].Team
+	teamPoints[lastWinnerTeam] += 10
 
 	if game.trump == NoTrump {
 		for team, points := range teamPoints {
@@ -284,21 +269,52 @@ func (game Game) getTeamPoints() map[string]int {
 		}
 	} else if game.trump == AllTrump {
 		for team, points := range teamPoints {
-			teamPoints[team] = points * 258 / 162
+			teamPoints[team] = points * 162 / 258
 		}
 	}
 
-	fmt.Println(teamPoints)
+	// IF PLAYER TEAM AS TAKEN
+	playerWithBelote := ""
 
-	return teamPoints
+	if len(potentialBelotes) > 0 {
+		for _, turn := range game.turns {
+			for _, play := range turn.plays {
+				card := cards[play.card]
+				cardStrength := card.getStrength(game.trump)
+				if cardStrength == TQueen || cardStrength == TKing {
+					if player, ok := potentialBelotes[card.color]; ok {
+						playerWithBelote = player
+					}
+				}
+			}
+		}
+	}
+
+	teamScore := map[string]int{}
+	for team, points := range teamPoints {
+		teamScore[team] = points
+	}
+
+	if playerWithBelote != "" {
+		team := game.Players[playerWithBelote].Team
+		teamScore[team] += 20
+
+		lastBid, _ := game.getLastBid()
+		lastBidTeam := game.Players[lastBid.Player].Team
+		if lastBidTeam == team {
+			teamPoints[team] += 20
+		}
+	}
+
+	return teamPoints, teamScore
 }
 
 func (game *Game) end() {
 	game.Phase = Counting
 
-	teamsPoints := game.getTeamPoints()
+	teamsPoints, teamScore := game.getTeamPoints()
 
-	fmt.Println(teamsPoints)
+	fmt.Println(teamsPoints, teamScore)
 }
 
 func (game *Game) Play(playerName string, card cardID) error {
