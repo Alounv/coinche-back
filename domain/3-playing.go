@@ -231,6 +231,14 @@ func (game Game) getPlayersCards() map[string][]cardID {
 	return playersCards
 }
 
+func getScoreWithCoinche(score int, coinche int) int {
+	if coinche > 0 {
+		return score * 2 * coinche
+	} else {
+		return score
+	}
+}
+
 func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) {
 	playersCards := game.getPlayersCards()
 
@@ -290,20 +298,41 @@ func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) 
 		}
 	}
 
-	teamScore := map[string]int{}
-	for team, points := range teamPoints {
-		teamScore[team] = points
+	lastBid, contract := game.getLastBid()
+	lastBidTeam := game.Players[lastBid.Player].Team
+	otherTeam := ""
+
+	for team := range teamPoints {
+		if team != lastBidTeam {
+			otherTeam = team
+		}
+	}
+
+	teamScore := map[string]int{
+		lastBidTeam: 0,
+		otherTeam:   0,
 	}
 
 	if playerWithBelote != "" {
 		team := game.Players[playerWithBelote].Team
 		teamScore[team] += 20
 
-		lastBid, _ := game.getLastBid()
-		lastBidTeam := game.Players[lastBid.Player].Team
 		if lastBidTeam == team {
 			teamPoints[team] += 20
 		}
+	}
+
+	coinche := lastBid.Coinche
+
+	isCapotWon := contract == Capot && teamPoints[otherTeam] == 0
+	isNormalContractWon := contract != Capot && teamPoints[lastBidTeam] >= int(contract)
+
+	if isCapotWon {
+		teamScore[lastBidTeam] += getScoreWithCoinche(160, coinche)
+	} else if isNormalContractWon {
+		teamScore[lastBidTeam] += getScoreWithCoinche(int(contract), coinche)
+	} else {
+		teamScore[otherTeam] += getScoreWithCoinche(160, coinche)
 	}
 
 	return teamPoints, teamScore
