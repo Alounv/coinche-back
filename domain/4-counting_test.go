@@ -6,19 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-/*
-C_7, C_8, C_9, D_J, D_Q, H_J, H_Q, H_K,
-C_10, C_J, C_Q, D_K, D_A, H_A, S_7, S_8,
-C_K, C_A, D_7, H_7, H_8, S_9, S_10, S_J,
-D_8, D_9, D_10, H_9, H_10, S_Q, S_K, S_A,
-*/
-
-/*
-, , ,
-, , ,
-, , S_J,
-, , S_A,
-*/
 func newNormalGame() Game {
 	return Game{
 		ID:   2,
@@ -312,7 +299,7 @@ func newGameWithCapotWon() Game {
 	return game
 }
 
-func TestPhaseTransition(test *testing.T) {
+func TestCountingPhase(test *testing.T) {
 	assert := assert.New(test)
 
 	test.Run("should go to counting phase on last game", func(test *testing.T) {
@@ -331,6 +318,14 @@ func TestPhaseTransition(test *testing.T) {
 
 		assert.Equal(Counting, game.Phase)
 	})
+
+	/*test.Run("should restart a new game on restart", func(test *testing.T) {
+		game := newNormalGame()
+		assert.Equal(Counting, game.Phase)
+
+		err := game.Restart()
+		assert.NoError(err)
+	})*/ // TODO: implement restart
 }
 
 func TestPlayersCards(test *testing.T) {
@@ -480,6 +475,3 @@ func TestCounting(test *testing.T) {
 		assert.Equal(160, teamScores["even"])
 	})
 }
-
-// action to quit
-// action to restart
