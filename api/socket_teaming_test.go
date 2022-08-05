@@ -3,7 +3,6 @@ package api
 import (
 	"coinche/domain"
 	"coinche/usecases"
-	testUtilities "coinche/utilities/test"
 	"net/http/httptest"
 	"testing"
 
@@ -106,10 +105,14 @@ func TestSocketTeaming(test *testing.T) {
 
 	test.Run("Join a team", func(test *testing.T) {
 		err := SendMessage(c1, "joinTeam: AAA")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		err = SendMessage(c2, "joinTeam: AAA")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		_, _ = receive(c1)
 
@@ -124,7 +127,9 @@ func TestSocketTeaming(test *testing.T) {
 
 	test.Run("Should fail when joining a team already full", func(test *testing.T) {
 		err := SendMessage(c3, "joinTeam: AAA")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		reply := ReceiveMessageOrFatal(c3, test)
 
@@ -133,10 +138,14 @@ func TestSocketTeaming(test *testing.T) {
 
 	test.Run("Ready to start when two teams ready", func(test *testing.T) {
 		err := SendMessage(c3, "joinTeam: BBB")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		err = SendMessage(c4, "joinTeam: BBB")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		_, _ = receive(c1)
 
@@ -150,7 +159,9 @@ func TestSocketTeaming(test *testing.T) {
 
 	test.Run("Can start the game", func(test *testing.T) {
 		err := SendMessage(c3, "start")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		got := ReceiveGameOrFatal(c1, test)
 

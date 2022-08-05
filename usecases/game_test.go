@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"coinche/domain"
-	testUtilities "coinche/utilities/test"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +41,9 @@ func TestGameService(test *testing.T) {
 
 	test.Run("can create game", func(test *testing.T) {
 		gameID, err := gameUsecases.CreateGame("GAME TWO")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(1, mockRepository.creationCalls)
 		assert.Equal(1, gameID)
@@ -50,7 +51,9 @@ func TestGameService(test *testing.T) {
 
 	test.Run("can choose a team", func(test *testing.T) {
 		err := gameUsecases.JoinTeam(0, "P1", "A Team")
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		game, err := gameUsecases.GetGame(0)
 

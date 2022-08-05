@@ -1,7 +1,6 @@
 package api
 
 import (
-	testUtilities "coinche/utilities/test"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -14,7 +13,9 @@ func httpToWS(test *testing.T, u string) string {
 	test.Helper()
 
 	wsURL, err := url.Parse(u)
-	testUtilities.FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 
 	switch wsURL.Scheme {
 	case "http":
@@ -26,9 +27,13 @@ func httpToWS(test *testing.T, u string) string {
 	return wsURL.String()
 }
 
-func newConnection(test *testing.T, wsURL string) *websocket.Conn {
+func newConnection(test *testing.T, serverURL string) *websocket.Conn {
+	wsURL := httpToWS(test, serverURL)
+
 	connection, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-	testUtilities.FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 	return connection
 }
 
@@ -36,9 +41,8 @@ func newServer(test *testing.T, handler http.Handler) (*httptest.Server, *websoc
 	test.Helper()
 
 	server := httptest.NewServer(handler)
-	wsURL := httpToWS(test, server.URL)
 
-	connection := newConnection(test, wsURL)
+	connection := newConnection(test, server.URL)
 
 	return server, connection
 }
@@ -51,7 +55,9 @@ func NewGameWebSocketServer(
 ) (*httptest.Server, *websocket.Conn) {
 	funcForHandlerFunc := func(w http.ResponseWriter, r *http.Request) {
 		connection, err := wsupgrader.Upgrade(w, r, nil)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 		PlayerSocketHandler(connection, ID, playerName, hub)
 	}
 	socketHandler := http.HandlerFunc(funcForHandlerFunc)

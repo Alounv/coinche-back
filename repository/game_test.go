@@ -21,17 +21,23 @@ func TestGameRepo(test *testing.T) {
 	db := testUtilities.CreateDb(connectionInfo, dbName)
 
 	repository, err := NewGameRepositoryFromDb(db)
-	testUtilities.FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 
 	test.Run("create a game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
 		newPlayers := map[string]domain.Player{"P1": {}, "P2": {}}
 
 		newID, err := repository.CreateGame(domain.Game{Name: newName, Players: newPlayers})
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		got, err := repository.GetGame(newID)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(newName, got.Name)
 		assert.Equal(newPlayers, got.Players)
@@ -53,13 +59,17 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	db := testUtilities.CreateDb(connectionInfo, dbName)
 
 	repository, err := NewGameRepositoryWithData(db)
-	testUtilities.FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 
 	test.Run("get an empty game", func(test *testing.T) {
 		want := domain.Game{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}}
 
 		got, err := repository.GetGame(1)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(want, got)
 	})
@@ -68,7 +78,9 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		want := domain.Game{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}}
 
 		got, err := repository.GetGame(2)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(want, got)
 	})
@@ -80,7 +92,9 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		}
 
 		got, err := repository.ListGames()
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(want[0], got[0])
 		assert.Equal(want[1], got[1])
@@ -92,7 +106,9 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		err := repository.UpdatePlayers(2, players, domain.Pause)
 		utilities.PanicIfErr(err)
 		game, err := repository.GetGame(2)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(players, game.Players)
 		assert.Equal(domain.Pause, game.Phase)
@@ -102,20 +118,28 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		player := domain.Player{Team: "A Team"}
 
 		err := repository.UpdatePlayer(2, "P2", player)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		game, err := repository.GetGame(2)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal("A Team", game.Players["P2"].Team)
 	})
 
 	test.Run("update a game", func(test *testing.T) {
 		err := repository.UpdateGame(2, domain.Bidding)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		game, err := repository.GetGame(2)
-		testUtilities.FatalIfErr(err, test)
+		if err != nil {
+			test.Fatal(err)
+		}
 
 		assert.Equal(domain.Bidding, game.Phase)
 	})

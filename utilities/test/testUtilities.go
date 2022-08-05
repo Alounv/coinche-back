@@ -30,7 +30,9 @@ func NewJoinGameRequest(test *testing.T, gameID int, playerName string) *http.Re
 
 func GetNewRequest(test *testing.T, route string, method string) *http.Request {
 	request, err := http.NewRequest(method, route, nil)
-	FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 	return request
 }
 
@@ -72,10 +74,4 @@ func DecodeToGame(buf *bytes.Buffer, test *testing.T) domain.Game {
 		test.Fatalf("Unable to parse response from gameAPIs %q into %q, '%v'", buf, "Game", err)
 	}
 	return got
-}
-
-func FatalIfErr(err error, test *testing.T) {
-	if err != nil {
-		test.Fatal(err)
-	}
 }

@@ -3,8 +3,9 @@ package api
 import (
 	"coinche/domain"
 	"coinche/utilities"
-	testUtilities "coinche/utilities/test"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/gorilla/websocket"
@@ -42,24 +43,44 @@ func SendMessage(connection *websocket.Conn, msg string) error {
 	return err
 }
 
+func Unmarshal(message []byte, destination interface{}) error {
+	err := json.Unmarshal(message, &destination)
+	if err != nil {
+		return errors.New(fmt.Sprint(err, "Message: ", message))
+	}
+	return nil
+}
+
 func decodeGame(message []byte) (domain.Game, error) {
 	var game domain.Game
-	err := json.Unmarshal(message, &game)
-	return game, err
+	err := Unmarshal(message, &game)
+	if err != nil {
+		reply, err := decodeMessage(message)
+		if err != nil {
+			return game, err
+		} else {
+			return game, errors.New(fmt.Sprint(err, "Could not decode game: ", reply))
+		}
+	}
+	return game, nil
 }
 
 func decodeMessage(message []byte) (string, error) {
 	var reply string
-	err := json.Unmarshal(message, &reply)
+	err := Unmarshal(message, &reply)
 	return reply, err
 }
 
 func ReceiveGameOrFatal(connection *websocket.Conn, test *testing.T) domain.Game {
 	message, err := receive(connection)
-	testUtilities.FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 
 	game, err := decodeGame(message)
-	testUtilities.FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 	return game
 }
 
@@ -75,6 +96,8 @@ func ReceiveMessage(connection *websocket.Conn) (string, error) {
 
 func ReceiveMessageOrFatal(connection *websocket.Conn, test *testing.T) string {
 	reply, err := ReceiveMessage(connection)
-	testUtilities.FatalIfErr(err, test)
+	if err != nil {
+		test.Fatal(err)
+	}
 	return reply
 }
