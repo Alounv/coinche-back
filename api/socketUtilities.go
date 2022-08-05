@@ -84,6 +84,12 @@ func ReceiveGameOrFatal(connection *websocket.Conn, test *testing.T) domain.Game
 	return game
 }
 
+func ReceiveMultipleGameOrFatal(c *websocket.Conn, test *testing.T, count int) {
+	for i := 0; i < count; i++ {
+		_ = ReceiveGameOrFatal(c, test)
+	}
+}
+
 func ReceiveMessage(connection *websocket.Conn) (string, error) {
 	message, err := receive(connection)
 	if err != nil {

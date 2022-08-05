@@ -75,24 +75,21 @@ func (s *socketHandler) joinTeam(content string) {
 
 func (s socketHandler) startGame(content string) {
 	err := s.gameUsecases.StartGame(s.gameID)
-	fmt.Print("A")
 	if err != nil {
-		fmt.Print("B")
 		errorMessage := fmt.Sprint("Could not start the game: ", err)
 		err = SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
 	game, err := s.gameUsecases.GetGame(s.gameID)
-	fmt.Print("C")
+
 	if err != nil {
-		fmt.Print("D")
 		errorMessage := fmt.Sprint("Could not get updated game: ", err)
 		err := SendMessage(s.connection, errorMessage)
 		utilities.PanicIfErr(err)
 		return
 	}
-	fmt.Print("E")
+
 	broadcastGameOrPanic(game, s.player.hub)
 }
 

@@ -6,6 +6,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func newTeamingGame() Game {
+	return Game{
+		ID:   2,
+		Name: "GAME TWO",
+		Players: map[string]Player{
+			"P1": {Team: "odd"},
+			"P2": {Team: "even"},
+			"P3": {Team: "odd"},
+			"P4": {Team: "even"},
+		},
+		Phase: Teaming,
+		Bids:  make(map[BidValue]Bid),
+		Deck:  newDeck(),
+	}
+}
+
 func newBiddingGame() Game {
 	return Game{
 		ID:   2,
@@ -18,12 +34,34 @@ func newBiddingGame() Game {
 		},
 		Phase: Bidding,
 		Bids:  make(map[BidValue]Bid),
-		deck:  newDeck(),
+		Deck:  []CardID{},
 	}
 }
 
 func TestBidding(test *testing.T) {
 	assert := assert.New(test)
+
+	test.Run("should distribute as expected", func(test *testing.T) {
+		game := newTeamingGame()
+		game.Deck = []CardID{
+			C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A,
+			D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A,
+			H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A,
+			S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A,
+		}
+
+		err := game.StartBidding()
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal([]CardID{}, game.Deck)
+		assert.Equal([]CardID{C_7, C_8, C_9, D_J, D_Q, H_J, H_Q, H_K}, game.Players["P1"].Hand)
+		assert.Equal([]CardID{C_10, C_J, C_Q, D_K, D_A, H_A, S_7, S_8}, game.Players["P2"].Hand)
+		assert.Equal([]CardID{C_K, C_A, D_7, H_7, H_8, S_9, S_10, S_J}, game.Players["P3"].Hand)
+		assert.Equal([]CardID{D_8, D_9, D_10, H_9, H_10, S_Q, S_K, S_A}, game.Players["P4"].Hand)
+	})
+
 	test.Run("should fail if not in bidding", func(test *testing.T) {
 		teamingGame := Game{ID: 2, Phase: Teaming}
 

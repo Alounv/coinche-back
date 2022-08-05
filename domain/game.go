@@ -79,44 +79,44 @@ func (card card) getValue(trump Color) int {
 	}
 }
 
-type cardID string
+type CardID string
 
 const (
-	C_7  cardID = "7-club"
-	C_8  cardID = "8-club"
-	C_9  cardID = "9-club"
-	C_10 cardID = "10-club"
-	C_J  cardID = "jack-club"
-	C_Q  cardID = "queen-club"
-	C_K  cardID = "king-club"
-	C_A  cardID = "as-club"
-	D_7  cardID = "7-diamond"
-	D_8  cardID = "8-diamond"
-	D_9  cardID = "9-diamond"
-	D_10 cardID = "10-diamond"
-	D_J  cardID = "jack-diamond"
-	D_Q  cardID = "queen-diamond"
-	D_K  cardID = "king-diamond"
-	D_A  cardID = "as-diamond"
-	H_7  cardID = "7-heart"
-	H_8  cardID = "8-heart"
-	H_9  cardID = "9-heart"
-	H_10 cardID = "10-heart"
-	H_J  cardID = "jack-heart"
-	H_Q  cardID = "queen-heart"
-	H_K  cardID = "king-heart"
-	H_A  cardID = "as-heart"
-	S_7  cardID = "7-spade"
-	S_8  cardID = "8-spade"
-	S_9  cardID = "9-spade"
-	S_10 cardID = "10-spade"
-	S_J  cardID = "jack-spade"
-	S_Q  cardID = "queen-spade"
-	S_K  cardID = "king-spade"
-	S_A  cardID = "as-spade"
+	C_7  CardID = "7-club"
+	C_8  CardID = "8-club"
+	C_9  CardID = "9-club"
+	C_10 CardID = "10-club"
+	C_J  CardID = "jack-club"
+	C_Q  CardID = "queen-club"
+	C_K  CardID = "king-club"
+	C_A  CardID = "as-club"
+	D_7  CardID = "7-diamond"
+	D_8  CardID = "8-diamond"
+	D_9  CardID = "9-diamond"
+	D_10 CardID = "10-diamond"
+	D_J  CardID = "jack-diamond"
+	D_Q  CardID = "queen-diamond"
+	D_K  CardID = "king-diamond"
+	D_A  CardID = "as-diamond"
+	H_7  CardID = "7-heart"
+	H_8  CardID = "8-heart"
+	H_9  CardID = "9-heart"
+	H_10 CardID = "10-heart"
+	H_J  CardID = "jack-heart"
+	H_Q  CardID = "queen-heart"
+	H_K  CardID = "king-heart"
+	H_A  CardID = "as-heart"
+	S_7  CardID = "7-spade"
+	S_8  CardID = "8-spade"
+	S_9  CardID = "9-spade"
+	S_10 CardID = "10-spade"
+	S_J  CardID = "jack-spade"
+	S_Q  CardID = "queen-spade"
+	S_K  CardID = "king-spade"
+	S_A  CardID = "as-spade"
 )
 
-var cards = map[cardID]card{
+var cards = map[CardID]card{
 	C_7:  {Club, Seven, TSeven, 0, 0},
 	C_8:  {Club, Eight, TEight, 0, 0},
 	C_9:  {Club, Nine, TNine, 0, 14},
@@ -151,8 +151,8 @@ var cards = map[cardID]card{
 	S_A:  {Spade, As, TAs, 11, 11},
 }
 
-func newDeck() []cardID {
-	deck := []cardID{C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A, D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A, H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A, S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A}
+func newDeck() []CardID {
+	deck := []CardID{C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A, D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A, H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A, S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A}
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(deck), func(i, j int) { deck[i], deck[j] = deck[j], deck[i] })
 	return deck
@@ -167,7 +167,7 @@ type Bid struct {
 
 type play struct {
 	playerName string
-	card       cardID
+	card       CardID
 }
 
 type turn struct {
@@ -178,7 +178,7 @@ type turn struct {
 func (turn turn) getWinner(trump Color) string {
 	var winner string
 	var strongerValue Strength
-	var firstCard cardID
+	var firstCard CardID
 	for _, play := range turn.plays {
 		if firstCard == "" {
 			firstCard = play.card
@@ -197,7 +197,7 @@ func (turn *turn) setWinner(trump Color) {
 	turn.winner = turn.getWinner(trump)
 }
 
-func getCardValue(card cardID, trump Color, firstCard cardID) Strength {
+func getCardValue(card CardID, trump Color, firstCard CardID) Strength {
 	color := cards[card].color
 	colorAsked := cards[firstCard].color
 
@@ -217,8 +217,7 @@ type Game struct {
 	Players   map[string]Player
 	Phase     Phase
 	Bids      map[BidValue]Bid
-	trump     Color
-	deck      []cardID
+	Deck      []CardID
 	turns     []turn
 	scores    map[string]int
 }
@@ -227,7 +226,7 @@ type Player struct {
 	Team         string
 	Order        int
 	InitialOrder int
-	Hand         []cardID
+	Hand         []CardID
 }
 
 func (player Player) CanPlay() bool {
@@ -240,7 +239,7 @@ func NewGame(name string) Game {
 		Players: map[string]Player{},
 		Phase:   Preparation,
 		Bids:    map[BidValue]Bid{},
-		deck:    newDeck(),
+		Deck:    newDeck(),
 	}
 }
 
@@ -278,4 +277,9 @@ func (game *Game) rotateOrder() {
 
 		game.Players[name] = player
 	}
+}
+
+func (game *Game) trump() Color {
+	lastBid, _ := game.getLastBid()
+	return lastBid.Color
 }

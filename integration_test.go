@@ -7,6 +7,7 @@ import (
 	"coinche/usecases"
 	"coinche/utilities"
 	testUtilities "coinche/utilities/test"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -38,12 +39,20 @@ type IntegrationTestSuite struct {
 	hub            *api.Hub
 }
 
+func TestIntegrationSuite(test *testing.T) {
+	suite.Run(test, new(IntegrationTestSuite))
+}
+
 func (s *IntegrationTestSuite) SetupSuite() {
 	utilities.LoadEnv("")
 	s.connectionInfo = os.Getenv("SQLX_POSTGRES_INFO")
 	s.dbName = "testdb"
 
+	fmt.Print("AAAA")
+
 	s.db = testUtilities.CreateDb(s.connectionInfo, s.dbName)
+
+	fmt.Print("BBBB")
 
 	gameRepository, err := repository.NewGameRepositoryFromDb(s.db)
 	if err != nil {
@@ -53,6 +62,18 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.gameUsecases = &usecases.GameUsecases{Repo: gameRepository}
 
 	s.router, s.hub = api.SetupRouter(s.gameUsecases)
+}
+
+func (s *IntegrationTestSuite) TearDownSuite() {
+	testUtilities.DropDb(s.connectionInfo, s.dbName, s.db)
+	s.server1.Close()
+	s.server2.Close()
+	s.server3.Close()
+	s.server4.Close()
+	s.connection1.Close()
+	s.connection2.Close()
+	s.connection3.Close()
+	s.connection4.Close()
 }
 
 func (s *IntegrationTestSuite) TestCreateGame() {
@@ -75,6 +96,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal("NEW GAME", got.Name)
 		assert.Equal(1, got.ID)
 		assert.Equal(map[string]domain.Player{}, got.Players)
+		assert.Equal([]domain.CardID(nil), got.Deck) // FIXME: this is a bug because REPOSITORY has no deck registered.
 		assert.IsType(time.Time{}, got.CreatedAt)
 	})
 
@@ -129,14 +151,9 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		s.server2, s.connection2 = api.NewGameWebSocketServer(test, 1, "P2", s.hub)
 		s.server3, s.connection3 = api.NewGameWebSocketServer(test, 1, "P3", s.hub)
 		s.server4, s.connection4 = api.NewGameWebSocketServer(test, 1, "P4", s.hub)
-		_ = api.ReceiveGameOrFatal(s.connection1, test)
-		_ = api.ReceiveGameOrFatal(s.connection1, test)
-		_ = api.ReceiveGameOrFatal(s.connection1, test)
-		_ = api.ReceiveGameOrFatal(s.connection2, test)
-		_ = api.ReceiveGameOrFatal(s.connection2, test)
-		_ = api.ReceiveGameOrFatal(s.connection2, test)
-		_ = api.ReceiveGameOrFatal(s.connection3, test)
-		_ = api.ReceiveGameOrFatal(s.connection3, test)
+		api.ReceiveMultipleGameOrFatal(s.connection1, test, 3)
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 3)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 2)
 		got := api.ReceiveGameOrFatal(s.connection4, test)
 
 		assert.IsType(domain.Game{}, got)
@@ -173,27 +190,30 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 			test.Fatal(err)
 		}
 
-		_ = api.ReceiveGameOrFatal(s.connection1, test)
-		_ = api.ReceiveGameOrFatal(s.connection1, test)
-		_ = api.ReceiveGameOrFatal(s.connection1, test)
+		api.ReceiveMultipleGameOrFatal(s.connection1, test, 3)
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 4)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 4)
+		api.ReceiveMultipleGameOrFatal(s.connection4, test, 4)
 		got := api.ReceiveGameOrFatal(s.connection1, test)
 
 		assert.Equal(map[string]domain.Player{"P1": {Team: "Odd"}, "P2": {Team: "Even"}, "P3": {Team: "Odd"}, "P4": {Team: "Even"}}, got.Players)
 	})
-}
 
-func (s *IntegrationTestSuite) TearDownSuite() {
-	testUtilities.DropDb(s.connectionInfo, s.dbName, s.db)
-	s.server1.Close()
-	s.server2.Close()
-	s.server3.Close()
-	s.server4.Close()
-	s.connection1.Close()
-	s.connection2.Close()
-	s.connection3.Close()
-	s.connection4.Close()
-}
+	/*
+		test.Run("start game", func(test *testing.T) {
+			err := api.SendMessage(s.connection1, "start") // FIXME: cannot work because there is no deck (see message above)
+			if err != nil {
+				test.Fatal(err)
+			}
 
-func TestIntegrationSuite(test *testing.T) {
-	suite.Run(test, new(IntegrationTestSuite))
+			got := api.ReceiveGameOrFatal(s.connection1, test)
+
+			assert.Equal(1, got.ID)
+			assert.Equal("NEW GAME", got.Name)
+			assert.Equal(map[string]domain.Player{"P1": {Team: "Odd"}, "P2": {Team: "Even"}, "P3": {Team: "Odd"}, "P4": {Team: "Even"}}, got.Players)
+			assert.Equal(domain.Bidding, got.Phase)
+			assert.Equal(map[domain.BidValue]domain.Bid(nil), got.Bids)
+			assert.Equal([]domain.CardID(nil), got.Deck)
+		})
+	*/
 }

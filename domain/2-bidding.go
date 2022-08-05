@@ -35,7 +35,41 @@ func (game *Game) StartBidding() error {
 		game.rotateInitialOrder()
 	}
 
+	game.distributeCards()
+
 	return nil
+}
+
+func (game *Game) distributeCards() {
+	for name, player := range game.Players {
+		player.Hand = game.draw(player.Order)
+		game.Players[name] = player
+	}
+	game.Deck = []CardID{}
+}
+
+func (game *Game) draw(order int) []CardID {
+	base := order - 1
+
+	deckIndexes := []int{
+		base*3 + 0,
+		base*3 + 1,
+		base*3 + 2,
+
+		12 + base*2 + 0,
+		12 + base*2 + 1,
+
+		20 + base*3 + 0,
+		20 + base*3 + 1,
+		20 + base*3 + 2,
+	}
+	hand := []CardID{}
+
+	for _, deckIndex := range deckIndexes {
+		hand = append(hand, game.Deck[deckIndex])
+	}
+
+	return hand
 }
 
 func (game *Game) rotateInitialOrder() {

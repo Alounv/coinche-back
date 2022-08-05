@@ -19,15 +19,17 @@ func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) 
 
 	potentialBelotes := map[Color]string{}
 
+	trump := game.trump()
+
 	for player, playerCards := range playersCards {
 		team := game.Players[player].Team
 		potentialPlayerBelotes := map[Color]int{}
 
 		for _, card := range playerCards {
-			teamPoints[team] += cards[card].getValue(game.trump)
+			teamPoints[team] += cards[card].getValue(trump)
 
 			card := cards[card]
-			cardStrength := card.getStrength(game.trump)
+			cardStrength := card.getStrength(trump)
 			if cardStrength == TQueen || cardStrength == TKing {
 				potentialPlayerBelotes[card.color]++
 			}
@@ -54,9 +56,9 @@ func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) 
 		}
 	}
 
-	if game.trump == NoTrump {
+	if trump == NoTrump {
 		teamPoints[contractTeam] = teamPoints[contractTeam] * 162 / 130 // converting to int automatically rounds down which is what we want because we use >= to check if contract is fulfilled
-	} else if game.trump == AllTrump {
+	} else if trump == AllTrump {
 		teamPoints[contractTeam] = teamPoints[contractTeam] * 162 / 258
 	}
 
@@ -69,7 +71,7 @@ func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) 
 		for _, turn := range game.turns {
 			for _, play := range turn.plays {
 				card := cards[play.card]
-				cardStrength := card.getStrength(game.trump)
+				cardStrength := card.getStrength(trump)
 				if cardStrength == TQueen || cardStrength == TKing {
 					if player, ok := potentialBelotes[card.color]; ok {
 						playerWithBelote = player
@@ -117,8 +119,8 @@ func (card card) getStrength(trump Color) Strength {
 	}
 }
 
-func (game Game) getPlayersCards() map[string][]cardID {
-	playersCards := map[string][]cardID{}
+func (game Game) getPlayersCards() map[string][]CardID {
+	playersCards := map[string][]CardID{}
 
 	for _, turn := range game.turns {
 		for _, play := range turn.plays {

@@ -14,54 +14,7 @@ const (
 
 func (game *Game) startPlaying() {
 	game.Phase = Playing
-	game.setTrump()
 	game.resetOrderAsInitialOrder()
-	game.distributeCards()
-}
-
-func (game *Game) setTrump() {
-	var maxValue BidValue
-	for value := range game.Bids {
-		if value > maxValue {
-			maxValue = value
-		}
-	}
-
-	lastBid := game.Bids[maxValue]
-
-	game.trump = lastBid.Color
-}
-
-func (game *Game) distributeCards() {
-	for name, player := range game.Players {
-		player.Hand = game.draw(player.Order)
-		game.Players[name] = player
-	}
-	game.deck = []cardID{}
-}
-
-func (game *Game) draw(order int) []cardID {
-	base := order - 1
-
-	deckIndexes := []int{
-		base*3 + 0,
-		base*3 + 1,
-		base*3 + 2,
-
-		12 + base*2 + 0,
-		12 + base*2 + 1,
-
-		20 + base*3 + 0,
-		20 + base*3 + 1,
-		20 + base*3 + 2,
-	}
-	hand := []cardID{}
-
-	for _, deckIndex := range deckIndexes {
-		hand = append(hand, game.deck[deckIndex])
-	}
-
-	return hand
 }
 
 func (game *Game) isNewTurn() bool {
@@ -77,9 +30,9 @@ func (turn turn) askedColor() Color {
 	return cards[firstPlay.card].color
 }
 
-func (player Player) hasCard(card cardID) bool {
-	for _, cardID := range player.Hand {
-		if cardID == card {
+func (player Player) hasCard(card CardID) bool {
+	for _, CardID := range player.Hand {
+		if CardID == card {
 			return true
 		}
 	}
@@ -119,7 +72,7 @@ func (turn turn) getBiggestTrumpStrength(trump Color) Strength {
 	return biggestTrumpStrength
 }
 
-func (turn turn) isTheBiggestTrump(card cardID, trump Color) bool {
+func (turn turn) isTheBiggestTrump(card CardID, trump Color) bool {
 	isTrump := cards[card].color == trump
 
 	if isTrump && cards[card].TrumpStrength > turn.getBiggestTrumpStrength(trump) {
@@ -130,8 +83,8 @@ func (turn turn) isTheBiggestTrump(card cardID, trump Color) bool {
 }
 
 func (player Player) hasNoBiggerTrump(trump Color, turn turn) bool {
-	for _, cardID := range player.Hand {
-		card := cards[cardID]
+	for _, CardID := range player.Hand {
+		card := cards[CardID]
 		if card.color == trump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
 			return false
 		}
@@ -139,7 +92,7 @@ func (player Player) hasNoBiggerTrump(trump Color, turn turn) bool {
 	return true
 }
 
-func (game *Game) canPlayCard(card cardID, playerName string) error {
+func (game *Game) canPlayCard(card CardID, playerName string) error {
 	player := game.Players[playerName]
 
 	if len(game.turns) == 0 {
@@ -164,22 +117,24 @@ func (game *Game) canPlayCard(card cardID, playerName string) error {
 		return errors.New(ErrShouldPlayAskedColor)
 	}
 
-	if player.hasNoTrump(game.trump) {
+	trump := game.trump()
+
+	if player.hasNoTrump(trump) {
 		return nil
 	}
 
 	if playCount > 1 {
-		winnerTeam := game.Players[lastTurn.getWinner(game.trump)].Team
+		winnerTeam := game.Players[lastTurn.getWinner(trump)].Team
 		if winnerTeam == player.Team {
 			return nil
 		}
 	}
 
-	if color != game.trump {
+	if color != trump {
 		return errors.New(ErrShouldPlayTrump)
 	}
 
-	if lastTurn.isTheBiggestTrump(card, game.trump) || player.hasNoBiggerTrump(game.trump, lastTurn) {
+	if lastTurn.isTheBiggestTrump(card, trump) || player.hasNoBiggerTrump(trump, lastTurn) {
 		return nil
 	}
 
@@ -199,7 +154,7 @@ func (game *Game) updateTurn(newPlay play) {
 	lastTurn.plays = append(lastTurn.plays, newPlay)
 
 	if len(lastTurn.plays) == 4 {
-		lastTurn.setWinner(game.trump)
+		lastTurn.setWinner(game.trump())
 		game.setFirstPlayer(lastTurn.winner)
 	}
 
@@ -210,7 +165,7 @@ func (game *Game) allCardsPlayed() bool {
 	return len(game.turns) == 8 && len(game.turns[7].plays) == 4
 }
 
-func (game *Game) Play(playerName string, card cardID) error {
+func (game *Game) Play(playerName string, card CardID) error {
 	if game.Phase != Playing {
 		return errors.New(ErrNotPlaying)
 	}
@@ -255,7 +210,7 @@ func (game *Game) Play(playerName string, card cardID) error {
 	return nil
 }
 
-func removeCard(slice []cardID, valueToRemove cardID) []cardID {
+func removeCard(slice []CardID, valueToRemove CardID) []CardID {
 	for index, value := range slice {
 		if value == valueToRemove {
 			return removeWithIndex(slice, index)
@@ -264,7 +219,7 @@ func removeCard(slice []cardID, valueToRemove cardID) []cardID {
 	return slice
 }
 
-func removeWithIndex(slice []cardID, index int) []cardID {
+func removeWithIndex(slice []CardID, index int) []CardID {
 	slice[index] = slice[len(slice)-1]
 	return slice[:len(slice)-1]
 }

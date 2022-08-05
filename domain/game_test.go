@@ -7,9 +7,9 @@ import (
 )
 
 type cardTest struct {
-	card      cardID
+	card      CardID
 	trump     Color
-	firstCard cardID
+	firstCard CardID
 	strength  Strength
 }
 

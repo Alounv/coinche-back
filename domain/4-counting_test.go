@@ -11,10 +11,10 @@ func newNormalGame() Game {
 		ID:   2,
 		Name: "GAME TWO",
 		Players: map[string]Player{
-			"P1": {Team: "odd", Order: 2, InitialOrder: 1, Hand: []cardID{}},
-			"P2": {Team: "even", Order: 3, InitialOrder: 2, Hand: []cardID{}},
-			"P3": {Team: "odd", Order: 4, InitialOrder: 3, Hand: []cardID{}},
-			"P4": {Team: "even", Order: 1, InitialOrder: 4, Hand: []cardID{S_A}},
+			"P1": {Team: "odd", Order: 2, InitialOrder: 1, Hand: []CardID{}},
+			"P2": {Team: "even", Order: 3, InitialOrder: 2, Hand: []CardID{}},
+			"P3": {Team: "odd", Order: 4, InitialOrder: 3, Hand: []CardID{}},
+			"P4": {Team: "even", Order: 1, InitialOrder: 4, Hand: []CardID{S_A}},
 		},
 		Phase: Counting,
 		Bids: map[BidValue]Bid{
@@ -25,7 +25,6 @@ func newNormalGame() Game {
 				Pass:    0,
 			},
 		},
-		trump: Heart,
 		scores: map[string]int{
 			"odd":  0,
 			"even": 0,
@@ -105,7 +104,6 @@ func newGameWithNoTrump() Game {
 			Pass:    0,
 		},
 	}
-	game.trump = NoTrump
 	game.turns = []turn{
 		{[]play{
 			{"P1", C_7},
@@ -169,7 +167,6 @@ func newGameWithAllTrump() Game {
 			Pass:    0,
 		},
 	}
-	game.trump = AllTrump
 	game.turns = []turn{
 		{[]play{
 			{"P1", C_7},
@@ -335,40 +332,40 @@ func TestPlayersCards(test *testing.T) {
 		game := newNormalGame()
 
 		playerCards := game.getPlayersCards()
-		assert.Equal([]cardID{H_8, D_10, H_J, H_A, S_7, S_10, S_K, H_Q}, playerCards["P1"])
-		assert.Equal([]cardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q, S_8, H_K, S_J, S_A}, playerCards["P2"])
-		assert.Equal([]cardID{D_9, D_Q, D_A, H_7}, playerCards["P3"])
-		assert.Equal([]cardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
+		assert.Equal([]CardID{H_8, D_10, H_J, H_A, S_7, S_10, S_K, H_Q}, playerCards["P1"])
+		assert.Equal([]CardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q, S_8, H_K, S_J, S_A}, playerCards["P2"])
+		assert.Equal([]CardID{D_9, D_Q, D_A, H_7}, playerCards["P3"])
+		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
 	})
 
 	test.Run("should count correctly in a normal game with belote", func(test *testing.T) {
 		game := newGameWithBelote()
 
 		playerCards := game.getPlayersCards()
-		assert.Equal([]cardID{H_8, D_10, H_J, H_A, S_7, S_10, S_K, H_Q, H_K, S_8, S_J, S_A}, playerCards["P1"])
-		assert.Equal([]cardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q}, playerCards["P2"])
-		assert.Equal([]cardID{D_9, D_Q, D_A, H_7}, playerCards["P3"])
-		assert.Equal([]cardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
+		assert.Equal([]CardID{H_8, D_10, H_J, H_A, S_7, S_10, S_K, H_Q, H_K, S_8, S_J, S_A}, playerCards["P1"])
+		assert.Equal([]CardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q}, playerCards["P2"])
+		assert.Equal([]CardID{D_9, D_Q, D_A, H_7}, playerCards["P3"])
+		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
 	})
 
 	test.Run("should count correctly in a game with no trump", func(test *testing.T) {
 		game := newGameWithNoTrump()
 
 		playerCards := game.getPlayersCards()
-		assert.Equal([]cardID(nil), playerCards["P1"])
-		assert.Equal([]cardID{C_7, C_10, C_K, H_9, D_8, D_J, D_K, D_7, D_9, D_Q, D_A, H_7, H_8, D_10, H_J, H_A, C_9, C_Q, S_9, S_Q}, playerCards["P2"])
-		assert.Equal([]cardID{C_J, C_A, H_10, C_8, S_7, S_10, S_K, H_Q}, playerCards["P3"])
-		assert.Equal([]cardID{S_8, H_K, S_J, S_A}, playerCards["P4"])
+		assert.Equal([]CardID(nil), playerCards["P1"])
+		assert.Equal([]CardID{C_7, C_10, C_K, H_9, D_8, D_J, D_K, D_7, D_9, D_Q, D_A, H_7, H_8, D_10, H_J, H_A, C_9, C_Q, S_9, S_Q}, playerCards["P2"])
+		assert.Equal([]CardID{C_J, C_A, H_10, C_8, S_7, S_10, S_K, H_Q}, playerCards["P3"])
+		assert.Equal([]CardID{S_8, H_K, S_J, S_A}, playerCards["P4"])
 	})
 
 	test.Run("should count correctly in a game with all trump (one belotte for odd team)", func(test *testing.T) {
 		game := newGameWithAllTrump()
 
 		playerCards := game.getPlayersCards()
-		assert.Equal([]cardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q}, playerCards["P1"])
-		assert.Equal([]cardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8, H_8, D_10, H_J, H_A}, playerCards["P2"])
-		assert.Equal([]cardID{S_7, S_10, S_K, H_Q, S_8, H_K, S_J, S_A}, playerCards["P3"])
-		assert.Equal([]cardID{D_9, D_A, D_Q, H_7}, playerCards["P4"])
+		assert.Equal([]CardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q}, playerCards["P1"])
+		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8, H_8, D_10, H_J, H_A}, playerCards["P2"])
+		assert.Equal([]CardID{S_7, S_10, S_K, H_Q, S_8, H_K, S_J, S_A}, playerCards["P3"])
+		assert.Equal([]CardID{D_9, D_A, D_Q, H_7}, playerCards["P4"])
 	})
 }
 
