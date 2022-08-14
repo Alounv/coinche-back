@@ -4,6 +4,11 @@ import (
 	"fmt"
 )
 
+const (
+	CAPO_WON_SCORE  = 500
+	CAPO_LOST_SCORE = 320
+)
+
 func (game *Game) end() {
 	game.Phase = Counting
 
@@ -86,6 +91,9 @@ func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) 
 		otherTeam:    0,
 	}
 
+	contractTeamPointsWithoutBelote := teamPoints[contractTeam]
+	otherTeamPointsWithoutBelote := teamPoints[otherTeam]
+
 	if playerWithBelote != "" {
 		team := game.Players[playerWithBelote].Team
 		teamScore[team] += 20
@@ -96,16 +104,44 @@ func (game Game) getTeamPoints() (points map[string]int, scores map[string]int) 
 	}
 
 	coinche := lastBid.Coinche
+	isCapot := contract == Capot
+	isCoinche := coinche > 0
+	contractPoints := int(contract)
 
-	isCapotWon := contract == Capot && teamPoints[otherTeam] == 0
-	isNormalContractWon := contract != Capot && teamPoints[contractTeam] >= int(contract)
+	isCapotWon := isCapot && teamPoints[otherTeam] == 0
+	isCapotLost := isCapot && teamPoints[otherTeam] != 0
+	isContractWon := teamPoints[contractTeam] >= contractPoints
+	isNormalContractWon := !isCapot && isContractWon
+	isNormalContractLost := !isCapot && !isContractWon
+	isNormalContractWonWithCoinche := isNormalContractWon && isCoinche
+	isNormalContractLostWithCoinche := isNormalContractLost && isCoinche
+
+	if !isCapot {
+		if isContractWon {
+			teamScore[contractTeam] += contractPoints
+		} else {
+			teamScore[otherTeam] += contractPoints
+		}
+	}
 
 	if isCapotWon {
-		teamScore[contractTeam] += getScoreWithCoinche(160, coinche)
+		teamScore[contractTeam] += CAPO_WON_SCORE
+	} else if isCapotLost {
+		teamScore[otherTeam] += CAPO_LOST_SCORE
+	} else if isNormalContractWonWithCoinche {
+		teamScore[contractTeam] += 160
+	} else if isNormalContractLostWithCoinche {
+		teamScore[otherTeam] += 160
 	} else if isNormalContractWon {
-		teamScore[contractTeam] += getScoreWithCoinche(int(contract), coinche)
+		teamScore[contractTeam] += contractTeamPointsWithoutBelote
+		teamScore[otherTeam] += otherTeamPointsWithoutBelote
 	} else {
-		teamScore[otherTeam] += getScoreWithCoinche(160, coinche)
+		teamScore[contractTeam] += contractTeamPointsWithoutBelote
+		teamScore[otherTeam] += 160
+	}
+
+	for team, score := range teamScore {
+		teamScore[team] = getScoreWithCoinche(score, coinche)
 	}
 
 	return teamPoints, teamScore

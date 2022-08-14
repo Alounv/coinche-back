@@ -328,7 +328,7 @@ func TestCountingPhase(test *testing.T) {
 func TestPlayersCards(test *testing.T) {
 	assert := assert.New(test)
 
-	test.Run("should count correctly in a normal game", func(test *testing.T) {
+	test.Run("should count correctly in a game", func(test *testing.T) {
 		game := newNormalGame()
 
 		playerCards := game.getPlayersCards()
@@ -338,7 +338,7 @@ func TestPlayersCards(test *testing.T) {
 		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
 	})
 
-	test.Run("should count correctly in a normal game with belote", func(test *testing.T) {
+	test.Run("should count correctly in a game with BELOTE", func(test *testing.T) {
 		game := newGameWithBelote()
 
 		playerCards := game.getPlayersCards()
@@ -348,7 +348,7 @@ func TestPlayersCards(test *testing.T) {
 		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
 	})
 
-	test.Run("should count correctly in a game with no trump", func(test *testing.T) {
+	test.Run("should count correctly in a game with NO-TRUMP", func(test *testing.T) {
 		game := newGameWithNoTrump()
 
 		playerCards := game.getPlayersCards()
@@ -358,7 +358,7 @@ func TestPlayersCards(test *testing.T) {
 		assert.Equal([]CardID{S_8, H_K, S_J, S_A}, playerCards["P4"])
 	})
 
-	test.Run("should count correctly in a game with all trump (one belotte for odd team)", func(test *testing.T) {
+	test.Run("should count correctly in a game with ALL-TRUMP and BELOTE (for odd team)", func(test *testing.T) {
 		game := newGameWithAllTrump()
 
 		playerCards := game.getPlayersCards()
@@ -372,19 +372,19 @@ func TestPlayersCards(test *testing.T) {
 func TestCounting(test *testing.T) {
 	assert := assert.New(test)
 
-	test.Run("should count correctly in a normal game", func(test *testing.T) {
+	test.Run("should count correctly in a LOST game", func(test *testing.T) {
 		game := newNormalGame()
 
 		teamPoints, teamScores := game.getTeamPoints()
 		assert.Equal(72, teamPoints["odd"])
 		assert.Equal(90, teamPoints["even"])
-		assert.Equal(0, teamScores["odd"])
-		assert.Equal(160, teamScores["even"])
+		assert.Equal(72, teamScores["odd"])
+		assert.Equal(160+80, teamScores["even"])
 
 		assert.Equal(162, teamPoints["odd"]+teamPoints["even"])
 	})
 
-	test.Run("should count correctly in a normal game with coinche", func(test *testing.T) {
+	test.Run("should count correctly in a WON game with COINCHE and BELOTE (for odd team)", func(test *testing.T) {
 		game := newGameWithBelote()
 		game.Bids = map[BidValue]Bid{
 			Eighty: {
@@ -395,48 +395,52 @@ func TestCounting(test *testing.T) {
 			},
 		}
 
-		_, teamScores := game.getTeamPoints()
-		assert.Equal(180, teamScores["odd"])
-		assert.Equal(0, teamScores["even"])
-	})
-
-	test.Run("should count correctly in a normal game with belote", func(test *testing.T) {
-		game := newGameWithBelote()
-
 		teamPoints, teamScores := game.getTeamPoints()
-		assert.Equal(119, teamPoints["odd"])
+		assert.Equal(99+20, teamPoints["odd"])
 		assert.Equal(63, teamPoints["even"])
-		assert.Equal(100, teamScores["odd"])
+		assert.Equal((80+160+20)*2, teamScores["odd"])
 		assert.Equal(0, teamScores["even"])
 
 		assert.Equal(182, teamPoints["odd"]+teamPoints["even"])
 	})
 
-	test.Run("should count correctly in a game with no trump", func(test *testing.T) {
+	test.Run("should count correctly in a WON game with BELOTE", func(test *testing.T) {
+		game := newGameWithBelote()
+
+		teamPoints, teamScores := game.getTeamPoints()
+		assert.Equal(99+20, teamPoints["odd"])
+		assert.Equal(63, teamPoints["even"])
+		assert.Equal((80 + 99 + 20), teamScores["odd"])
+		assert.Equal(63, teamScores["even"])
+
+		assert.Equal(182, teamPoints["odd"]+teamPoints["even"])
+	})
+
+	test.Run("should count correctly in a LOST game with NO-TRUMP", func(test *testing.T) {
 		game := newGameWithNoTrump()
 
 		teamPoints, teamScores := game.getTeamPoints()
 		assert.Equal(49, teamPoints["odd"])
 		assert.Equal(113, teamPoints["even"])
-		assert.Equal(0, teamScores["odd"])
-		assert.Equal(160, teamScores["even"])
+		assert.Equal(49, teamScores["odd"])
+		assert.Equal(160+80, teamScores["even"])
 
 		assert.Equal(162, teamPoints["odd"]+teamPoints["even"])
 	})
 
-	test.Run("should count correctly in a game with all trump (one belotte for odd team)", func(test *testing.T) {
+	test.Run("should count correctly in a WON game with ALL-TRUMP and BELOTE (for odd team)", func(test *testing.T) {
 		game := newGameWithAllTrump()
 
 		teamPoints, teamScores := game.getTeamPoints()
 		assert.Equal(76, teamPoints["odd"])
 		assert.Equal(86, teamPoints["even"])
-		assert.Equal(20, teamScores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
-		assert.Equal(80, teamScores["even"])
+		assert.Equal(20+76, teamScores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
+		assert.Equal(80+86, teamScores["even"])
 
 		assert.Equal(162, teamPoints["odd"]+teamPoints["even"])
 	})
 
-	test.Run("should count correctly in a game with all trump with surcoinche", func(test *testing.T) {
+	test.Run("should count correctly in a game with ALL-TRUMP with SURCOINCHE", func(test *testing.T) {
 		game := newGameWithAllTrump()
 		game.Bids = map[BidValue]Bid{
 			Eighty: {
@@ -447,28 +451,30 @@ func TestCounting(test *testing.T) {
 			},
 		}
 
-		_, teamScores := game.getTeamPoints()
-		assert.Equal(20, teamScores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
-		assert.Equal(320, teamScores["even"])
+		teamPoints, teamScores := game.getTeamPoints()
+		assert.Equal(76, teamPoints["odd"])
+		assert.Equal(86, teamPoints["even"])
+		assert.Equal(20*4, teamScores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
+		assert.Equal((160+80)*4, teamScores["even"])
 	})
 
-	test.Run("should count correctly with capot lost", func(test *testing.T) {
+	test.Run("should count correctly with CAPOT LOST", func(test *testing.T) {
 		game := newGameWithCapotLost()
 
 		teamPoints, teamScores := game.getTeamPoints()
 		assert.Equal(27, teamPoints["odd"])
 		assert.Equal(135, teamPoints["even"])
-		assert.Equal(160, teamScores["odd"])
+		assert.Equal(320, teamScores["odd"])
 		assert.Equal(0, teamScores["even"])
 	})
 
-	test.Run("should count correctly with capot won", func(test *testing.T) {
+	test.Run("should count correctly with CAPOT WON", func(test *testing.T) {
 		game := newGameWithCapotWon()
 
 		teamPoints, teamScores := game.getTeamPoints()
 		assert.Equal(0, teamPoints["odd"])
 		assert.Equal(162, teamPoints["even"])
 		assert.Equal(0, teamScores["odd"])
-		assert.Equal(160, teamScores["even"])
+		assert.Equal(500, teamScores["even"])
 	})
 }
