@@ -81,8 +81,7 @@ func (game Game) getTeams() (string, string) {
 
 }
 
-func (game *Game) calculatesTeamPoints() (contractTeamPointsWithoutBelote int, otherTeamPointsWithoutBelote int) {
-	game.points = map[string]int{}
+func (game *Game) calculateBasePoints() {
 	trump := game.trump()
 	playersCards := game.getPlayersCards()
 
@@ -93,18 +92,34 @@ func (game *Game) calculatesTeamPoints() (contractTeamPointsWithoutBelote int, o
 			game.points[team] += cards[card].getValue(trump)
 		}
 	}
+}
 
+func (game *Game) applyLastTen() {
 	lastTurn := game.turns[len(game.turns)-1]
 	lastWinnerTeam := game.Players[lastTurn.winner].Team
 	game.points[lastWinnerTeam] += 10
+}
 
-	contractTeam, otherTeam := game.getTeams()
+func (game *Game) applyAllTrumpNoTrump(contractTeam string) {
+	trump := game.trump()
 
 	if trump == NoTrump {
 		game.points[contractTeam] = game.points[contractTeam] * 162 / 130 // converting to int automatically rounds down which is what we want because we use >= to check if contract is fulfilled
 	} else if trump == AllTrump {
 		game.points[contractTeam] = game.points[contractTeam] * 162 / 258
 	}
+}
+
+func (game *Game) calculatesTeamPoints() (contractTeamPointsWithoutBelote int, otherTeamPointsWithoutBelote int) {
+	game.points = map[string]int{}
+
+	game.calculateBasePoints()
+
+	game.applyLastTen()
+
+	contractTeam, otherTeam := game.getTeams()
+
+	game.applyAllTrumpNoTrump(contractTeam)
 
 	game.points[otherTeam] = 162 - game.points[contractTeam]
 
