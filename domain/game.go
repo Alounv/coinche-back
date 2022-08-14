@@ -220,6 +220,7 @@ type Game struct {
 	Deck      []CardID
 	turns     []turn
 	scores    map[string]int
+	points    map[string]int
 }
 
 type Player struct {
