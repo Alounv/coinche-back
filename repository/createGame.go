@@ -2,19 +2,27 @@ package repository
 
 import (
 	"coinche/domain"
+	"coinche/utilities"
+	"encoding/json"
 )
 
 func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 	tx := s.db.MustBegin()
 
 	var gameID int
-	err := tx.QueryRow(
+
+	deck, err := json.Marshal(game.Deck)
+	utilities.PanicIfErr(err)
+
+	err = tx.QueryRow(
 		`
-		INSERT INTO game (name) 
-		VALUES ($1) 
+		INSERT INTO game (name, phase, deck) 
+		VALUES ($1, $2, $3) 
 		RETURNING id
 		`,
 		game.Name,
+		game.Phase,
+		deck,
 	).Scan(&gameID)
 	if err != nil {
 		return 0, err

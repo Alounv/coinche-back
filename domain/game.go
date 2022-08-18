@@ -165,36 +165,36 @@ type Bid struct {
 	Pass    int
 }
 
-type play struct {
-	playerName string
-	card       CardID
+type Play struct {
+	PlayerName string
+	Card       CardID
 }
 
-type turn struct {
-	plays  []play
-	winner string
+type Turn struct {
+	Plays  []Play
+	Winner string
 }
 
-func (turn turn) getWinner(trump Color) string {
+func (turn Turn) getWinner(trump Color) string {
 	var winner string
 	var strongerValue Strength
 	var firstCard CardID
-	for _, play := range turn.plays {
+	for _, play := range turn.Plays {
 		if firstCard == "" {
-			firstCard = play.card
+			firstCard = play.Card
 		}
-		cardValue := getCardValue(play.card, trump, firstCard)
+		cardValue := getCardValue(play.Card, trump, firstCard)
 		if cardValue > strongerValue {
 			strongerValue = cardValue
-			winner = play.playerName
+			winner = play.PlayerName
 		}
 	}
 
 	return winner
 }
 
-func (turn *turn) setWinner(trump Color) {
-	turn.winner = turn.getWinner(trump)
+func (turn *Turn) setWinner(trump Color) {
+	turn.Winner = turn.getWinner(trump)
 }
 
 func getCardValue(card CardID, trump Color, firstCard CardID) Strength {
@@ -218,9 +218,9 @@ type Game struct {
 	Phase     Phase
 	Bids      map[BidValue]Bid
 	Deck      []CardID
-	turns     []turn
-	scores    map[string]int
-	points    map[string]int
+	Turns     []Turn
+	Scores    map[string]int
+	Points    map[string]int
 }
 
 type Player struct {

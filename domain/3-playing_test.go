@@ -83,10 +83,10 @@ func TestPlaying(test *testing.T) {
 
 		assert.NoError(err)
 		assert.Equal(7, len(game.Players["P1"].Hand))
-		assert.Equal(1, len(game.turns))
+		assert.Equal(1, len(game.Turns))
 
-		turn := game.turns[0]
-		assert.Equal(1, len(turn.plays))
+		turn := game.Turns[0]
+		assert.Equal(1, len(turn.Plays))
 	})
 }
 
@@ -108,11 +108,11 @@ func TestEndOfTurn(test *testing.T) {
 		err = game.Play("P4", H_9)
 		assert.NoError(err)
 
-		assert.Equal(1, len(game.turns))
+		assert.Equal(1, len(game.Turns))
 
-		turn := game.turns[0]
-		assert.Equal(4, len(turn.plays))
-		assert.Equal("P4", turn.winner)
+		turn := game.Turns[0]
+		assert.Equal(4, len(turn.Plays))
+		assert.Equal("P4", turn.Winner)
 		assert.Equal(1, game.Players["P4"].Order)
 	})
 }
@@ -287,14 +287,14 @@ func TestEndOfPlayingPhase(test *testing.T) {
 			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{H_J}},
 			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D_8}},
 		}
-		game.turns = []turn{
-			{[]play{}, "P1"},
-			{[]play{}, "P2"},
-			{[]play{}, "P3"},
-			{[]play{}, "P2"},
-			{[]play{}, "P2"},
-			{[]play{}, "P2"},
-			{[]play{
+		game.Turns = []Turn{
+			{[]Play{}, "P1"},
+			{[]Play{}, "P2"},
+			{[]Play{}, "P3"},
+			{[]Play{}, "P2"},
+			{[]Play{}, "P2"},
+			{[]Play{}, "P2"},
+			{[]Play{
 				{"P1", H_9},
 				{"P2", C_10},
 				{"P3", H_J},

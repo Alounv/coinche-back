@@ -3,20 +3,30 @@ package repository
 import (
 	"coinche/domain"
 	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
 
 func getGame(rows *sql.Rows, db *sqlx.DB) (domain.Game, error) {
 	var game domain.Game
+	var deck []byte
 	err := rows.Scan(
 		&game.ID,
 		&game.Name,
 		&game.CreatedAt,
 		&game.Phase,
+		&deck,
 	)
 	if err != nil {
 		return domain.Game{}, err
+	}
+
+	err = json.Unmarshal(deck, &game.Deck)
+	if err != nil {
+		return domain.Game{}, errors.New(fmt.Sprint(err, "Deck: ", deck))
 	}
 
 	rows, err = db.Query("SELECT name, team FROM player WHERE gameid=$1", game.ID)

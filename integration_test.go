@@ -96,7 +96,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal("NEW GAME", got.Name)
 		assert.Equal(1, got.ID)
 		assert.Equal(map[string]domain.Player{}, got.Players)
-		assert.Equal([]domain.CardID(nil), got.Deck) // FIXME: this is a bug because REPOSITORY has no deck registered.
+		assert.IsType([]domain.CardID{}, got.Deck)
 		assert.IsType(time.Time{}, got.CreatedAt)
 	})
 

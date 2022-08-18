@@ -12,6 +12,103 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func newTeamingGame() domain.Game {
+	return domain.Game{
+		ID:      3,
+		Name:    "GAME TEAMING",
+		Players: map[string]domain.Player{},
+		Phase:   domain.Teaming,
+		Bids:    map[domain.BidValue]domain.Bid{},
+		Deck: []domain.CardID{
+			domain.C_7, domain.C_8, domain.C_9, domain.C_10, domain.C_J, domain.C_Q, domain.C_K, domain.C_A,
+			domain.D_7, domain.D_8, domain.D_9, domain.D_10, domain.D_J, domain.D_Q, domain.D_K, domain.D_A,
+			domain.H_7, domain.H_8, domain.H_9, domain.H_10, domain.H_J, domain.H_Q, domain.H_K, domain.H_A,
+			domain.S_7, domain.S_8, domain.S_9, domain.S_10, domain.S_J, domain.S_Q, domain.S_K, domain.S_A,
+		},
+	}
+}
+
+/*func newCompleteGame() domain.Game {
+	game := newTeamingGame()
+	game.ID = 4
+	game.Name = "GAME COMPLETE"
+	game.Players = map[string]domain.Player{
+		"P1": {Team: "odd", Order: 1, InitialOrder: 1},
+		"P2": {Team: "even", Order: 2, InitialOrder: 2},
+		"P3": {Team: "odd", Order: 3, InitialOrder: 3},
+		"P4": {Team: "even", Order: 4, InitialOrder: 4},
+	}
+	game.Phase = domain.Bidding
+	game.Bids = map[domain.BidValue]domain.Bid{
+		domain.Eighty: {
+			Player:  "P1",
+			Color:   domain.Heart,
+			Coinche: 0,
+			Pass:    0,
+		},
+	}
+	game.Deck = []domain.CardID{}
+	game.Scores = map[string]int{
+		"odd":  72,
+		"even": 90,
+	}
+	game.Points = map[string]int{
+		"odd":  72,
+		"even": 160 + 80,
+	}
+	game.Turns = []domain.Turn{
+		{Plays: []domain.Play{
+			{PlayerName: "P1", Card: domain.C_7},
+			{PlayerName: "P2", Card: domain.C_10},
+			{PlayerName: "P3", Card: domain.C_K},
+			{PlayerName: "P4", Card: domain.H_9},
+		}, Winner: "P4"},
+		{Plays: []domain.Play{
+			{PlayerName: "P4", Card: domain.D_8},
+			{PlayerName: "P1", Card: domain.D_J},
+			{PlayerName: "P2", Card: domain.D_K},
+			{PlayerName: "P3", Card: domain.D_7},
+		}, Winner: "P2"},
+		{Plays: []domain.Play{
+			{PlayerName: "P2", Card: domain.C_J},
+			{PlayerName: "P3", Card: domain.C_A},
+			{PlayerName: "P4", Card: domain.H_10},
+			{PlayerName: "P1", Card: domain.C_8},
+		}, Winner: "P4"},
+		{Plays: []domain.Play{
+			{PlayerName: "P4", Card: domain.D_9},
+			{PlayerName: "P1", Card: domain.D_Q},
+			{PlayerName: "P2", Card: domain.D_A},
+			{PlayerName: "P3", Card: domain.H_7},
+		}, Winner: "P3"},
+		{Plays: []domain.Play{
+			{PlayerName: "P3", Card: domain.H_8},
+			{PlayerName: "P4", Card: domain.D_10},
+			{PlayerName: "P1", Card: domain.H_J},
+			{PlayerName: "P2", Card: domain.H_A},
+		}, Winner: "P1"},
+		{Plays: []domain.Play{
+			{PlayerName: "P1", Card: domain.C_9},
+			{PlayerName: "P2", Card: domain.C_Q},
+			{PlayerName: "P3", Card: domain.S_9},
+			{PlayerName: "P4", Card: domain.S_Q},
+		}, Winner: "P2"},
+		{Plays: []domain.Play{
+			{PlayerName: "P2", Card: domain.S_7},
+			{PlayerName: "P3", Card: domain.S_10},
+			{PlayerName: "P4", Card: domain.S_K},
+			{PlayerName: "P1", Card: domain.H_Q},
+		}, Winner: "P1"},
+		{Plays: []domain.Play{
+			{PlayerName: "P1", Card: domain.S_8},
+			{PlayerName: "P2", Card: domain.H_K},
+			{PlayerName: "P3", Card: domain.S_J},
+			{PlayerName: "P4", Card: domain.S_A},
+		}, Winner: "P2"},
+	}
+	return game
+}*/
+
 func TestGameRepo(test *testing.T) {
 	assert := assert.New(test)
 	dbName := "testgamerepodb"
@@ -25,7 +122,7 @@ func TestGameRepo(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	test.Run("create a game", func(test *testing.T) {
+	test.Run("create a simple game", func(test *testing.T) {
 		newName := "NEW GAME ONE"
 		newPlayers := map[string]domain.Player{"P1": {}, "P2": {}}
 
@@ -43,6 +140,27 @@ func TestGameRepo(test *testing.T) {
 		assert.Equal(newPlayers, got.Players)
 		assert.Equal(newID, got.ID)
 		assert.IsType(time.Time{}, got.CreatedAt)
+	})
+
+	test.Run("create a teaming game", func(test *testing.T) {
+		newGame := newTeamingGame()
+
+		newID, err := repository.CreateGame(newGame)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		got, err := repository.GetGame(newID)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal(newID, got.ID)
+		assert.Equal(newGame.Name, got.Name)
+		assert.Equal(newGame.Players, got.Players)
+		assert.IsType(time.Time{}, got.CreatedAt)
+		assert.Equal(newGame.Phase, got.Phase)
+		assert.Equal(newGame.Deck, got.Deck)
 	})
 
 	test.Cleanup(func() {
@@ -158,6 +276,8 @@ func NewGameRepositoryWithData(db *sqlx.DB) (*GameRepository, error) {
 	err = repository.CreateGames([]domain.Game{
 		{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}},
 		{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}},
+		newTeamingGame(),
+		//newCompleteGame(),
 	})
 
 	return repository, err

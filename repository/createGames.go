@@ -2,21 +2,28 @@ package repository
 
 import (
 	"coinche/domain"
+	"coinche/utilities"
+	"encoding/json"
 )
 
 func (s *GameRepository) CreateGames(games []domain.Game) error {
 	tx := s.db.MustBegin()
 
 	for _, game := range games {
-		_, err := tx.Exec(
+
+		deck, err := json.Marshal(game.Deck)
+		utilities.PanicIfErr(err)
+
+		_, err = tx.Exec(
 			`
-			INSERT INTO game (id, name, createdAt, phase)
-			VALUES ($1, $2, $3, $4)
+			INSERT INTO game (id, name, createdAt, phase, deck)
+			VALUES ($1, $2, $3, $4, $5)
 			`,
 			game.ID,
 			game.Name,
 			game.CreatedAt,
 			game.Phase,
+			deck,
 		)
 		if err != nil {
 			return err

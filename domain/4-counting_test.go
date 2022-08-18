@@ -25,54 +25,54 @@ func newNormalGame() Game {
 				Pass:    0,
 			},
 		},
-		scores: map[string]int{
+		Scores: map[string]int{
 			"odd":  0,
 			"even": 0,
 		},
-		turns: []turn{
-			{[]play{
+		Turns: []Turn{
+			{[]Play{
 				{"P1", C_7},
 				{"P2", C_10},
 				{"P3", C_K},
 				{"P4", H_9},
 			}, "P4"},
-			{[]play{
+			{[]Play{
 				{"P4", D_8},
 				{"P1", D_J},
 				{"P2", D_K},
 				{"P3", D_7},
 			}, "P2"},
-			{[]play{
+			{[]Play{
 				{"P2", C_J},
 				{"P3", C_A},
 				{"P4", H_10},
 				{"P1", C_8},
 			}, "P4"},
-			{[]play{
+			{[]Play{
 				{"P4", D_9},
 				{"P1", D_Q},
 				{"P2", D_A},
 				{"P3", H_7},
 			}, "P3"},
-			{[]play{
+			{[]Play{
 				{"P3", H_8},
 				{"P4", D_10},
 				{"P1", H_J},
 				{"P2", H_A},
 			}, "P1"},
-			{[]play{
+			{[]Play{
 				{"P1", C_9},
 				{"P2", C_Q},
 				{"P3", S_9},
 				{"P4", S_Q},
 			}, "P2"},
-			{[]play{
+			{[]Play{
 				{"P2", S_7},
 				{"P3", S_10},
 				{"P4", S_K},
 				{"P1", H_Q},
 			}, "P1"},
-			{[]play{
+			{[]Play{
 				{"P1", S_8},
 				{"P2", H_K},
 				{"P3", S_J},
@@ -84,8 +84,8 @@ func newNormalGame() Game {
 
 func newGameWithBelote() Game {
 	game := newNormalGame()
-	game.turns = game.turns[:len(game.turns)-1]
-	game.turns = append(game.turns, turn{[]play{
+	game.Turns = game.Turns[:len(game.Turns)-1]
+	game.Turns = append(game.Turns, Turn{[]Play{
 		{"P1", H_K}, // belote with H_Q
 		{"P2", S_8},
 		{"P3", S_J},
@@ -104,50 +104,50 @@ func newGameWithNoTrump() Game {
 			Pass:    0,
 		},
 	}
-	game.turns = []turn{
-		{[]play{
+	game.Turns = []Turn{
+		{[]Play{
 			{"P1", C_7},
 			{"P2", C_10},
 			{"P3", C_K},
 			{"P4", H_9},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P4", D_8},
 			{"P1", D_J},
 			{"P2", D_K},
 			{"P3", D_7},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P2", C_J},
 			{"P3", C_A},
 			{"P4", H_10},
 			{"P1", C_8},
 		}, "P3"},
-		{[]play{
+		{[]Play{
 			{"P4", D_9},
 			{"P1", D_Q},
 			{"P2", D_A},
 			{"P3", H_7},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P3", H_8},
 			{"P4", D_10},
 			{"P1", H_J},
 			{"P2", H_A},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P1", C_9},
 			{"P2", C_Q},
 			{"P3", S_9},
 			{"P4", S_Q},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P2", S_7},
 			{"P3", S_10},
 			{"P4", S_K},
 			{"P1", H_Q},
 		}, "P3"},
-		{[]play{
+		{[]Play{
 			{"P1", S_8},
 			{"P2", H_K},
 			{"P3", S_J},
@@ -167,50 +167,50 @@ func newGameWithAllTrump() Game {
 			Pass:    0,
 		},
 	}
-	game.turns = []turn{
-		{[]play{
+	game.Turns = []Turn{
+		{[]Play{
 			{"P1", C_7},
 			{"P2", C_10},
 			{"P3", C_K}, // first belote with C_Q
 			{"P4", H_9},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P4", D_8},
 			{"P1", D_J},
 			{"P2", D_K}, // could be a belote but too late
 			{"P3", D_7},
 		}, "P1"},
-		{[]play{
+		{[]Play{
 			{"P2", C_J},
 			{"P3", C_A},
 			{"P4", H_10},
 			{"P1", C_8},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P4", D_9},
 			{"P1", D_A},
 			{"P2", D_Q}, // could be a rebelote but too late
 			{"P3", H_7},
 		}, "P4"},
-		{[]play{
+		{[]Play{
 			{"P3", H_8},
 			{"P4", D_10},
 			{"P1", H_J},
 			{"P2", H_A},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P1", C_9},
 			{"P2", C_Q}, // rebelote
 			{"P3", S_9},
 			{"P4", S_Q},
 		}, "P1"},
-		{[]play{
+		{[]Play{
 			{"P2", S_7},
 			{"P3", S_10},
 			{"P4", S_K},
 			{"P1", H_Q},
 		}, "P3"},
-		{[]play{
+		{[]Play{
 			{"P1", S_8},
 			{"P2", H_K},
 			{"P3", S_J},
@@ -230,50 +230,50 @@ func newGameWithCapotLost() Game {
 			Pass:    0,
 		},
 	}
-	game.turns = []turn{
-		{[]play{
+	game.Turns = []Turn{
+		{[]Play{
 			{"P1", C_7},
 			{"P2", C_10},
 			{"P3", C_K},
 			{"P4", H_9},
 		}, "P4"},
-		{[]play{
+		{[]Play{
 			{"P4", D_8},
 			{"P1", D_J},
 			{"P2", D_K},
 			{"P3", D_7},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P2", C_J},
 			{"P3", C_A},
 			{"P4", H_10},
 			{"P1", C_8},
 		}, "P4"},
-		{[]play{
+		{[]Play{
 			{"P4", D_9},
 			{"P1", D_Q},
 			{"P2", H_7},
 			{"P3", D_A},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P3", H_8},
 			{"P4", D_10},
 			{"P1", H_A},
 			{"P2", H_J},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P1", C_9},
 			{"P2", C_Q},
 			{"P3", S_9},
 			{"P4", S_Q},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P1", S_8},
 			{"P2", H_K},
 			{"P3", S_J},
 			{"P4", S_A},
 		}, "P2"},
-		{[]play{
+		{[]Play{
 			{"P2", S_7},
 			{"P3", S_10},
 			{"P4", S_K},
@@ -285,8 +285,8 @@ func newGameWithCapotLost() Game {
 
 func newGameWithCapotWon() Game {
 	game := newGameWithCapotLost()
-	game.turns = game.turns[:len(game.turns)-1]
-	game.turns = append(game.turns, turn{[]play{
+	game.Turns = game.Turns[:len(game.Turns)-1]
+	game.Turns = append(game.Turns, Turn{[]Play{
 		{"P2", S_7},
 		{"P3", S_10},
 		{"P4", H_Q},
@@ -302,8 +302,8 @@ func TestCountingPhase(test *testing.T) {
 	test.Run("should go to counting phase on last game", func(test *testing.T) {
 		game := newNormalGame()
 		game.Phase = Playing
-		game.turns = game.turns[:len(game.turns)-1]
-		game.turns = append(game.turns, turn{[]play{
+		game.Turns = game.Turns[:len(game.Turns)-1]
+		game.Turns = append(game.Turns, Turn{[]Play{
 			{"P1", S_8},
 			{"P2", H_K},
 			{"P3", S_J},
@@ -376,12 +376,12 @@ func TestCounting(test *testing.T) {
 		game := newNormalGame()
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(72, game.points["odd"])
-		assert.Equal(90, game.points["even"])
-		assert.Equal(72, game.scores["odd"])
-		assert.Equal(160+80, game.scores["even"])
+		assert.Equal(72, game.Points["odd"])
+		assert.Equal(90, game.Points["even"])
+		assert.Equal(72, game.Scores["odd"])
+		assert.Equal(160+80, game.Scores["even"])
 
-		assert.Equal(162, game.points["odd"]+game.points["even"])
+		assert.Equal(162, game.Points["odd"]+game.Points["even"])
 	})
 
 	test.Run("should count correctly in a WON game with COINCHE and BELOTE (for odd team)", func(test *testing.T) {
@@ -396,48 +396,48 @@ func TestCounting(test *testing.T) {
 		}
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(99+20, game.points["odd"])
-		assert.Equal(63, game.points["even"])
-		assert.Equal((80+160+20)*2, game.scores["odd"])
-		assert.Equal(0, game.scores["even"])
+		assert.Equal(99+20, game.Points["odd"])
+		assert.Equal(63, game.Points["even"])
+		assert.Equal((80+160+20)*2, game.Scores["odd"])
+		assert.Equal(0, game.Scores["even"])
 
-		assert.Equal(182, game.points["odd"]+game.points["even"])
+		assert.Equal(182, game.Points["odd"]+game.Points["even"])
 	})
 
 	test.Run("should count correctly in a WON game with BELOTE", func(test *testing.T) {
 		game := newGameWithBelote()
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(99+20, game.points["odd"])
-		assert.Equal(63, game.points["even"])
-		assert.Equal((80 + 99 + 20), game.scores["odd"])
-		assert.Equal(63, game.scores["even"])
+		assert.Equal(99+20, game.Points["odd"])
+		assert.Equal(63, game.Points["even"])
+		assert.Equal((80 + 99 + 20), game.Scores["odd"])
+		assert.Equal(63, game.Scores["even"])
 
-		assert.Equal(182, game.points["odd"]+game.points["even"])
+		assert.Equal(182, game.Points["odd"]+game.Points["even"])
 	})
 
 	test.Run("should count correctly in a LOST game with NO-TRUMP", func(test *testing.T) {
 		game := newGameWithNoTrump()
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(49, game.points["odd"])
-		assert.Equal(113, game.points["even"])
-		assert.Equal(49, game.scores["odd"])
-		assert.Equal(160+80, game.scores["even"])
+		assert.Equal(49, game.Points["odd"])
+		assert.Equal(113, game.Points["even"])
+		assert.Equal(49, game.Scores["odd"])
+		assert.Equal(160+80, game.Scores["even"])
 
-		assert.Equal(162, game.points["odd"]+game.points["even"])
+		assert.Equal(162, game.Points["odd"]+game.Points["even"])
 	})
 
 	test.Run("should count correctly in a WON game with ALL-TRUMP and BELOTE (for odd team)", func(test *testing.T) {
 		game := newGameWithAllTrump()
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(76, game.points["odd"])
-		assert.Equal(86, game.points["even"])
-		assert.Equal(20+76, game.scores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
-		assert.Equal(80+86, game.scores["even"])
+		assert.Equal(76, game.Points["odd"])
+		assert.Equal(86, game.Points["even"])
+		assert.Equal(20+76, game.Scores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
+		assert.Equal(80+86, game.Scores["even"])
 
-		assert.Equal(162, game.points["odd"]+game.points["even"])
+		assert.Equal(162, game.Points["odd"]+game.Points["even"])
 	})
 
 	test.Run("should count correctly in a game with ALL-TRUMP with SURCOINCHE", func(test *testing.T) {
@@ -452,29 +452,29 @@ func TestCounting(test *testing.T) {
 		}
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(76, game.points["odd"])
-		assert.Equal(86, game.points["even"])
-		assert.Equal(20*4, game.scores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
-		assert.Equal((160+80)*4, game.scores["even"])
+		assert.Equal(76, game.Points["odd"])
+		assert.Equal(86, game.Points["even"])
+		assert.Equal(20*4, game.Scores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
+		assert.Equal((160+80)*4, game.Scores["even"])
 	})
 
 	test.Run("should count correctly with CAPOT LOST", func(test *testing.T) {
 		game := newGameWithCapotLost()
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(27, game.points["odd"])
-		assert.Equal(135, game.points["even"])
-		assert.Equal(320, game.scores["odd"])
-		assert.Equal(0, game.scores["even"])
+		assert.Equal(27, game.Points["odd"])
+		assert.Equal(135, game.Points["even"])
+		assert.Equal(320, game.Scores["odd"])
+		assert.Equal(0, game.Scores["even"])
 	})
 
 	test.Run("should count correctly with CAPOT WON", func(test *testing.T) {
 		game := newGameWithCapotWon()
 
 		game.calculatesTeamPointsAndScores()
-		assert.Equal(0, game.points["odd"])
-		assert.Equal(162, game.points["even"])
-		assert.Equal(0, game.scores["odd"])
-		assert.Equal(500, game.scores["even"])
+		assert.Equal(0, game.Points["odd"])
+		assert.Equal(162, game.Points["even"])
+		assert.Equal(0, game.Scores["odd"])
+		assert.Equal(500, game.Scores["even"])
 	})
 }

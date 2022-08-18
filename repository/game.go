@@ -12,7 +12,8 @@ CREATE TABLE game (
 	id serial PRIMARY KEY NOT NULL,
 	name text NOT NULL,
 	createdAt timestamp NOT NULL DEFAULT now(),
-	phase integer DEFAULT 0
+	phase integer DEFAULT 0,
+	deck json NOT NULL DEFAULT '{}'
 )`
 
 var playerSchema = `

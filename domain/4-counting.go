@@ -14,7 +14,7 @@ func (game *Game) end() {
 
 	game.calculatesTeamPointsAndScores()
 
-	fmt.Println(game.points, game.scores)
+	fmt.Println(game.Points, game.Scores)
 }
 
 func (game Game) getPotentialBelotes() map[Color]string {
@@ -50,9 +50,9 @@ func (game Game) getPlayerWithBelote() string {
 	potentialBelotes := game.getPotentialBelotes()
 
 	if len(potentialBelotes) > 0 {
-		for _, turn := range game.turns {
-			for _, play := range turn.plays {
-				card := cards[play.card]
+		for _, turn := range game.Turns {
+			for _, play := range turn.Plays {
+				card := cards[play.Card]
 				cardStrength := card.getStrength(game.trump())
 				if cardStrength == TQueen || cardStrength == TKing {
 					if player, ok := potentialBelotes[card.color]; ok {
@@ -71,7 +71,7 @@ func (game Game) getTeams() (string, string) {
 	contractTeam := game.Players[lastBid.Player].Team
 	otherTeam := ""
 
-	for team := range game.points {
+	for team := range game.Points {
 		if team != contractTeam {
 			otherTeam = team
 		}
@@ -89,29 +89,29 @@ func (game *Game) calculateBasePoints() {
 		team := game.Players[player].Team
 
 		for _, card := range playerCards {
-			game.points[team] += cards[card].getValue(trump)
+			game.Points[team] += cards[card].getValue(trump)
 		}
 	}
 }
 
 func (game *Game) applyLastTen() {
-	lastTurn := game.turns[len(game.turns)-1]
-	lastWinnerTeam := game.Players[lastTurn.winner].Team
-	game.points[lastWinnerTeam] += 10
+	lastTurn := game.Turns[len(game.Turns)-1]
+	lastWinnerTeam := game.Players[lastTurn.Winner].Team
+	game.Points[lastWinnerTeam] += 10
 }
 
 func (game *Game) applyAllTrumpNoTrump(contractTeam string) {
 	trump := game.trump()
 
 	if trump == NoTrump {
-		game.points[contractTeam] = game.points[contractTeam] * 162 / 130 // converting to int automatically rounds down which is what we want because we use >= to check if contract is fulfilled
+		game.Points[contractTeam] = game.Points[contractTeam] * 162 / 130 // converting to int automatically rounds down which is what we want because we use >= to check if contract is fulfilled
 	} else if trump == AllTrump {
-		game.points[contractTeam] = game.points[contractTeam] * 162 / 258
+		game.Points[contractTeam] = game.Points[contractTeam] * 162 / 258
 	}
 }
 
 func (game *Game) calculatesTeamPoints() (contractTeamPointsWithoutBelote int, otherTeamPointsWithoutBelote int) {
-	game.points = map[string]int{}
+	game.Points = map[string]int{}
 
 	game.calculateBasePoints()
 
@@ -121,10 +121,10 @@ func (game *Game) calculatesTeamPoints() (contractTeamPointsWithoutBelote int, o
 
 	game.applyAllTrumpNoTrump(contractTeam)
 
-	game.points[otherTeam] = 162 - game.points[contractTeam]
+	game.Points[otherTeam] = 162 - game.Points[contractTeam]
 
-	contractTeamPointsWithoutBelote = game.points[contractTeam]
-	otherTeamPointsWithoutBelote = game.points[otherTeam]
+	contractTeamPointsWithoutBelote = game.Points[contractTeam]
+	otherTeamPointsWithoutBelote = game.Points[otherTeam]
 
 	game.applyBeloteToPoints(contractTeam)
 
@@ -138,7 +138,7 @@ func (game *Game) applyBeloteToPoints(contractTeam string) {
 		team := game.Players[playerWithBelote].Team
 
 		if contractTeam == team {
-			game.points[team] += 20
+			game.Points[team] += 20
 		}
 	}
 }
@@ -148,7 +148,7 @@ func (game *Game) applyBeloteToScores() {
 
 	if playerWithBelote != "" {
 		team := game.Players[playerWithBelote].Team
-		game.scores[team] += 20
+		game.Scores[team] += 20
 	}
 }
 
@@ -157,9 +157,9 @@ func (game *Game) addContractPoints(isCapot bool, isContractWon bool, contractPo
 
 	if !isCapot {
 		if isContractWon {
-			game.scores[contractTeam] += contractPoints
+			game.Scores[contractTeam] += contractPoints
 		} else {
-			game.scores[otherTeam] += contractPoints
+			game.Scores[otherTeam] += contractPoints
 		}
 	}
 }
@@ -168,39 +168,39 @@ func (game *Game) addRealizedPoints(isCapot bool, isContractWon bool, coinche in
 	contractTeam, otherTeam := game.getTeams()
 
 	isCoinche := coinche > 0
-	isCapotWon := isCapot && game.points[otherTeam] == 0
-	isCapotLost := isCapot && game.points[otherTeam] != 0
+	isCapotWon := isCapot && game.Points[otherTeam] == 0
+	isCapotLost := isCapot && game.Points[otherTeam] != 0
 	isNormalContractWon := !isCapot && isContractWon
 	isNormalContractLost := !isCapot && !isContractWon
 	isNormalContractWonWithCoinche := isNormalContractWon && isCoinche
 	isNormalContractLostWithCoinche := isNormalContractLost && isCoinche
 
 	if isCapotWon {
-		game.scores[contractTeam] += CAPO_WON_SCORE
+		game.Scores[contractTeam] += CAPO_WON_SCORE
 	} else if isCapotLost {
-		game.scores[otherTeam] += CAPO_LOST_SCORE
+		game.Scores[otherTeam] += CAPO_LOST_SCORE
 	} else if isNormalContractWonWithCoinche {
-		game.scores[contractTeam] += 160
+		game.Scores[contractTeam] += 160
 	} else if isNormalContractLostWithCoinche {
-		game.scores[otherTeam] += 160
+		game.Scores[otherTeam] += 160
 	} else if isNormalContractWon {
-		game.scores[contractTeam] += contractTeamPointsWithoutBelote
-		game.scores[otherTeam] += otherTeamPointsWithoutBelote
+		game.Scores[contractTeam] += contractTeamPointsWithoutBelote
+		game.Scores[otherTeam] += otherTeamPointsWithoutBelote
 	} else {
-		game.scores[contractTeam] += contractTeamPointsWithoutBelote
-		game.scores[otherTeam] += 160
+		game.Scores[contractTeam] += contractTeamPointsWithoutBelote
+		game.Scores[otherTeam] += 160
 	}
 }
 
 func (game *Game) applyCoinche(coinche int) {
-	for team, score := range game.scores {
-		game.scores[team] = getScoreWithCoinche(score, coinche)
+	for team, score := range game.Scores {
+		game.Scores[team] = getScoreWithCoinche(score, coinche)
 	}
 }
 
 func (game *Game) calculatesTeamScores(contractTeamPointsWithoutBelote int, otherTeamPointsWithoutBelote int) {
 	contractTeam, otherTeam := game.getTeams()
-	game.scores = map[string]int{
+	game.Scores = map[string]int{
 		contractTeam: 0,
 		otherTeam:    0,
 	}
@@ -208,7 +208,7 @@ func (game *Game) calculatesTeamScores(contractTeamPointsWithoutBelote int, othe
 	lastBid, contract := game.getLastBid()
 	contractPoints := int(contract)
 	isCapot := contract == Capot
-	isContractWon := game.points[contractTeam] >= contractPoints
+	isContractWon := game.Points[contractTeam] >= contractPoints
 
 	game.addContractPoints(isCapot, isContractWon, contractPoints)
 
@@ -237,9 +237,9 @@ func (card card) getStrength(trump Color) Strength {
 func (game Game) getPlayersCards() map[string][]CardID {
 	playersCards := map[string][]CardID{}
 
-	for _, turn := range game.turns {
-		for _, play := range turn.plays {
-			playersCards[turn.winner] = append(playersCards[turn.winner], play.card)
+	for _, turn := range game.Turns {
+		for _, play := range turn.Plays {
+			playersCards[turn.Winner] = append(playersCards[turn.Winner], play.Card)
 		}
 	}
 

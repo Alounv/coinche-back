@@ -18,16 +18,16 @@ func (game *Game) startPlaying() {
 }
 
 func (game *Game) isNewTurn() bool {
-	if len(game.turns) == 0 {
+	if len(game.Turns) == 0 {
 		return true
 	}
-	lastTurn := game.turns[len(game.turns)-1]
-	return len(lastTurn.plays) >= 4
+	lastTurn := game.Turns[len(game.Turns)-1]
+	return len(lastTurn.Plays) >= 4
 }
 
-func (turn turn) askedColor() Color {
-	firstPlay := turn.plays[0]
-	return cards[firstPlay.card].color
+func (turn Turn) askedColor() Color {
+	firstPlay := turn.Plays[0]
+	return cards[firstPlay.Card].color
 }
 
 func (player Player) hasCard(card CardID) bool {
@@ -57,10 +57,10 @@ func (player Player) hasNoTrump(trump Color) bool {
 	return true
 }
 
-func (turn turn) getBiggestTrumpStrength(trump Color) Strength {
+func (turn Turn) getBiggestTrumpStrength(trump Color) Strength {
 	var biggestTrumpStrength Strength
-	for _, play := range turn.plays {
-		card := cards[play.card]
+	for _, play := range turn.Plays {
+		card := cards[play.Card]
 		color := card.color
 		strength := card.TrumpStrength
 		if color == trump {
@@ -72,7 +72,7 @@ func (turn turn) getBiggestTrumpStrength(trump Color) Strength {
 	return biggestTrumpStrength
 }
 
-func (turn turn) isTheBiggestTrump(card CardID, trump Color) bool {
+func (turn Turn) isTheBiggestTrump(card CardID, trump Color) bool {
 	isTrump := cards[card].color == trump
 
 	if isTrump && cards[card].TrumpStrength > turn.getBiggestTrumpStrength(trump) {
@@ -82,7 +82,7 @@ func (turn turn) isTheBiggestTrump(card CardID, trump Color) bool {
 	return false
 }
 
-func (player Player) hasNoBiggerTrump(trump Color, turn turn) bool {
+func (player Player) hasNoBiggerTrump(trump Color, turn Turn) bool {
 	for _, CardID := range player.Hand {
 		card := cards[CardID]
 		if card.color == trump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
@@ -95,12 +95,12 @@ func (player Player) hasNoBiggerTrump(trump Color, turn turn) bool {
 func (game *Game) canPlayCard(card CardID, playerName string) error {
 	player := game.Players[playerName]
 
-	if len(game.turns) == 0 {
+	if len(game.Turns) == 0 {
 		return nil
 	}
 
-	lastTurn := game.turns[len(game.turns)-1]
-	playCount := len(lastTurn.plays)
+	lastTurn := game.Turns[len(game.Turns)-1]
+	playCount := len(lastTurn.Plays)
 
 	if playCount == 0 {
 		return nil
@@ -141,28 +141,28 @@ func (game *Game) canPlayCard(card CardID, playerName string) error {
 	return errors.New(ErrShouldPlayBiggerTrump)
 }
 
-func (game *Game) createTurn(newPlay play) {
-	game.turns = append(game.turns, turn{
-		plays: []play{newPlay},
+func (game *Game) createTurn(newPlay Play) {
+	game.Turns = append(game.Turns, Turn{
+		Plays: []Play{newPlay},
 	})
 }
 
-func (game *Game) updateTurn(newPlay play) {
-	lastTurnIndex := len(game.turns) - 1
-	lastTurn := game.turns[lastTurnIndex]
+func (game *Game) updateTurn(newPlay Play) {
+	lastTurnIndex := len(game.Turns) - 1
+	lastTurn := game.Turns[lastTurnIndex]
 
-	lastTurn.plays = append(lastTurn.plays, newPlay)
+	lastTurn.Plays = append(lastTurn.Plays, newPlay)
 
-	if len(lastTurn.plays) == 4 {
+	if len(lastTurn.Plays) == 4 {
 		lastTurn.setWinner(game.trump())
-		game.setFirstPlayer(lastTurn.winner)
+		game.setFirstPlayer(lastTurn.Winner)
 	}
 
-	game.turns[lastTurnIndex] = lastTurn
+	game.Turns[lastTurnIndex] = lastTurn
 }
 
 func (game *Game) allCardsPlayed() bool {
-	return len(game.turns) == 8 && len(game.turns[7].plays) == 4
+	return len(game.Turns) == 8 && len(game.Turns[7].Plays) == 4
 }
 
 func (game *Game) Play(playerName string, card CardID) error {
@@ -191,9 +191,9 @@ func (game *Game) Play(playerName string, card CardID) error {
 
 	game.rotateOrder()
 
-	newPlay := play{
-		playerName: playerName,
-		card:       card,
+	newPlay := Play{
+		PlayerName: playerName,
+		Card:       card,
 	}
 
 	if game.isNewTurn() {

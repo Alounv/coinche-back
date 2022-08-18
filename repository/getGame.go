@@ -2,20 +2,31 @@ package repository
 
 import (
 	"coinche/domain"
+	"encoding/json"
+	"errors"
+	"fmt"
 )
 
 func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 	tx := s.db.MustBegin()
 
 	var game domain.Game
+	var deck []byte
 	err := tx.QueryRow(`SELECT * FROM game WHERE id=$1`, gameID).Scan(
 		&game.ID,
 		&game.Name,
 		&game.CreatedAt,
 		&game.Phase,
+		&deck,
 	)
+
 	if err != nil {
 		return domain.Game{}, err
+	}
+
+	err = json.Unmarshal(deck, &game.Deck)
+	if err != nil {
+		return domain.Game{}, errors.New(fmt.Sprint(err, "Deck: ", deck))
 	}
 
 	rows, err := tx.Query(`SELECT name, team FROM player WHERE gameid=$1`, gameID)
