@@ -158,7 +158,10 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		assert.IsType(domain.Game{}, got)
 
-		assert.Equal(map[string]domain.Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}}, got.Players)
+		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P1"])
+		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P2"])
+		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P3"])
+		assert.Equal(domain.Player{Hand: []domain.CardID(nil)}, got.Players["P4"])
 	})
 
 	test.Run("start game should return error if team not ready", func(test *testing.T) {
@@ -196,7 +199,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		api.ReceiveMultipleGameOrFatal(s.connection4, test, 4)
 		got := api.ReceiveGameOrFatal(s.connection1, test)
 
-		assert.Equal(map[string]domain.Player{"P1": {Team: "Odd"}, "P2": {Team: "Even"}, "P3": {Team: "Odd"}, "P4": {Team: "Even"}}, got.Players)
+		assert.Equal(map[string]domain.Player{"P1": {Team: "Odd", Hand: []domain.CardID{}}, "P2": {Team: "Even", Hand: []domain.CardID{}}, "P3": {Team: "Odd", Hand: []domain.CardID{}}, "P4": {Team: "Even", Hand: []domain.CardID{}}}, got.Players)
 	})
 
 	/*

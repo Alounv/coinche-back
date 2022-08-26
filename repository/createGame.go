@@ -29,14 +29,38 @@ func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 	}
 
 	for playerName, player := range game.Players {
-		_, err := tx.Exec(
+		hand, err := json.Marshal(player.Hand)
+		utilities.PanicIfErr(err)
+
+		_, err = tx.Exec(
 			`
-			INSERT INTO player (name, team, gameid) 
-			VALUES ($1, $2, $3)
+			INSERT INTO player (name, team, gameid, initialOrder, cOrder, hand) 
+			VALUES ($1, $2, $3, $4, $5, $6)
 			`,
 			playerName,
 			player.Team,
 			gameID,
+			player.InitialOrder,
+			player.Order,
+			hand,
+		)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	for bidValue, bid := range game.Bids {
+		_, err = tx.Exec(
+			`
+			INSERT INTO bid (gameid, value, player, coinche, color, pass) 
+			VALUES ($1, $2, $3, $4, $5, $6)
+			`,
+			gameID,
+			bidValue,
+			bid.Player,
+			bid.Coinche,
+			bid.Color,
+			bid.Pass,
 		)
 		if err != nil {
 			return 0, err
