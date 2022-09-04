@@ -73,5 +73,28 @@ func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 		game.Bids[bidValue] = bid
 	}
 
+	rows, err = tx.Query(`SELECT winner, plays FROM turn WHERE gameid=$1`, gameID)
+	if err != nil {
+		return domain.Game{}, err
+	}
+	game.Turns = []domain.Turn{}
+
+	for rows.Next() {
+		var turn domain.Turn
+		var plays []byte
+
+		err := rows.Scan(&turn.Winner, &plays)
+		if err != nil {
+			return domain.Game{}, err
+		}
+
+		err = json.Unmarshal(plays, &turn.Plays)
+		if err != nil {
+			return domain.Game{}, errors.New(fmt.Sprint(err, "Plays: ", plays))
+		}
+		game.Turns = append(game.Turns, turn)
+	}
+
 	return game, tx.Commit()
+
 }

@@ -67,5 +67,23 @@ func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 		}
 	}
 
+	for _, turn := range game.Turns {
+		var plays []byte
+		plays, err = json.Marshal(turn.Plays)
+		utilities.PanicIfErr(err)
+		_, err = tx.Exec(
+			`
+			INSERT INTO turn (gameid, winner, plays) 
+			VALUES ($1, $2, $3)
+			`,
+			gameID,
+			turn.Winner,
+			plays,
+		)
+
+		if err != nil {
+			return 0, err
+		}
+	}
 	return gameID, tx.Commit()
 }

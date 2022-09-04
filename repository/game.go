@@ -39,6 +39,14 @@ CREATE TABLE bid (
 	pass integer DEFAULT 0
 )`
 
+var turnSchema = `
+CREATE TABLE turn (
+	id serial PRIMARY KEY NOT NULL,
+	gameid integer NOT NULL REFERENCES game(id),
+	winner  text NOT NULL,
+	plays json NOT NULL DEFAULT '[]'
+)`
+
 type GameRepository struct {
 	usecases.GameRepositoryInterface
 	db *sqlx.DB
@@ -54,8 +62,13 @@ func (s *GameRepository) CreatePlayerTableIfNeeded() error {
 	return err
 }
 
-func (s *GameRepository) CreateBidsTableIfNeeded() error {
+func (s *GameRepository) CreateBidTableIfNeeded() error {
 	_, err := s.db.Exec(bidSchema)
+	return err
+}
+
+func (s *GameRepository) CreateTurnTableIfNeeded() error {
+	_, err := s.db.Exec(turnSchema)
 	return err
 }
 
@@ -73,7 +86,12 @@ func NewGameRepositoryFromDb(db *sqlx.DB) (*GameRepository, error) {
 		return &gameRepository, err
 	}
 
-	err = gameRepository.CreateBidsTableIfNeeded()
+	err = gameRepository.CreateBidTableIfNeeded()
+	if err != nil {
+		return &gameRepository, err
+	}
+
+	err = gameRepository.CreateTurnTableIfNeeded()
 	if err != nil {
 		return &gameRepository, err
 	}
