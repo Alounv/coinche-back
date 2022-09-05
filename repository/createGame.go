@@ -4,11 +4,22 @@ import (
 	"coinche/domain"
 	"coinche/utilities"
 	"encoding/json"
+
+	"github.com/jmoiron/sqlx"
 )
 
 func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 	tx := s.db.MustBegin()
 
+	gameID, err := s.createAGame(game, tx)
+	if err != nil {
+		return 0, err
+	}
+
+	return gameID, tx.Commit()
+}
+
+func (s *GameRepository) createAGame(game domain.Game, tx *sqlx.Tx) (int, error) {
 	var gameID int
 
 	deck, err := json.Marshal(game.Deck)
@@ -120,5 +131,5 @@ func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 		}
 	}
 
-	return gameID, tx.Commit()
+	return gameID, nil
 }

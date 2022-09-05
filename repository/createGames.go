@@ -2,8 +2,6 @@ package repository
 
 import (
 	"coinche/domain"
-	"coinche/utilities"
-	"encoding/json"
 )
 
 func (s *GameRepository) CreateGames(games []domain.Game) error {
@@ -11,37 +9,9 @@ func (s *GameRepository) CreateGames(games []domain.Game) error {
 
 	for _, game := range games {
 
-		deck, err := json.Marshal(game.Deck)
-		utilities.PanicIfErr(err)
-
-		_, err = tx.Exec(
-			`
-			INSERT INTO game (id, name, createdAt, phase, deck)
-			VALUES ($1, $2, $3, $4, $5)
-			`,
-			game.ID,
-			game.Name,
-			game.CreatedAt,
-			game.Phase,
-			deck,
-		)
+		_, err := s.createAGame(game, tx)
 		if err != nil {
 			return err
-		}
-
-		for playerName, player := range game.Players {
-			_, err := tx.Exec(
-				`
-				INSERT INTO player (name, team, gameid) 
-				VALUES ($1, $2, $3)
-				`,
-				playerName,
-				player.Team,
-				game.ID,
-			)
-			if err != nil {
-				return err
-			}
 		}
 	}
 
