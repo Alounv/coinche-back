@@ -85,5 +85,40 @@ func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 			return 0, err
 		}
 	}
+
+	for team, points := range game.Points {
+		utilities.PanicIfErr(err)
+		_, err = tx.Exec(
+			`
+			INSERT INTO point (gameid, team, value) 
+			VALUES ($1, $2, $3)
+			`,
+			gameID,
+			team,
+			points,
+		)
+
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	for team, scores := range game.Scores {
+		utilities.PanicIfErr(err)
+		_, err = tx.Exec(
+			`
+			INSERT INTO score (gameid, team, value) 
+			VALUES ($1, $2, $3)
+			`,
+			gameID,
+			team,
+			scores,
+		)
+
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	return gameID, tx.Commit()
 }

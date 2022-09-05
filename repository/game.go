@@ -47,6 +47,22 @@ CREATE TABLE turn (
 	plays json NOT NULL DEFAULT '[]'
 )`
 
+var pointSchema = `
+CREATE TABLE point (
+	id serial PRIMARY KEY NOT NULL,
+	gameid integer NOT NULL REFERENCES game(id),
+	team  text NOT NULL,
+	value integer NOT NULL
+)`
+
+var scoreSchema = `
+CREATE TABLE score (
+	id serial PRIMARY KEY NOT NULL,
+	gameid integer NOT NULL REFERENCES game(id),
+	team  text NOT NULL,
+	value integer NOT NULL
+)`
+
 type GameRepository struct {
 	usecases.GameRepositoryInterface
 	db *sqlx.DB
@@ -72,6 +88,15 @@ func (s *GameRepository) CreateTurnTableIfNeeded() error {
 	return err
 }
 
+func (s *GameRepository) CreatePointTableIfNeeded() error {
+	_, err := s.db.Exec(pointSchema)
+	return err
+}
+
+func (s *GameRepository) CreateScoreTableIfNeeded() error {
+	_, err := s.db.Exec(scoreSchema)
+	return err
+}
 func NewGameRepository(dsn string) (*GameRepository, error) {
 	db := sqlx.MustOpen("pgx", dsn)
 
@@ -92,6 +117,16 @@ func NewGameRepositoryFromDb(db *sqlx.DB) (*GameRepository, error) {
 	}
 
 	err = gameRepository.CreateTurnTableIfNeeded()
+	if err != nil {
+		return &gameRepository, err
+	}
+
+	err = gameRepository.CreatePointTableIfNeeded()
+	if err != nil {
+		return &gameRepository, err
+	}
+
+	err = gameRepository.CreateScoreTableIfNeeded()
 	if err != nil {
 		return &gameRepository, err
 	}

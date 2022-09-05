@@ -184,9 +184,8 @@ func TestGameRepo(test *testing.T) {
 		assert.Equal(newGame.Deck, got.Deck)
 		assert.Equal(newGame.Bids, got.Bids)
 		assert.Equal(newGame.Turns, got.Turns)
-		//assert.Equal(newGame.Points, got.Points)
-		//assert.Equal(newGame.Scores, got.Scores)
-		// TODO:
+		assert.Equal(newGame.Points, got.Points)
+		assert.Equal(newGame.Scores, got.Scores)
 	})
 
 	test.Cleanup(func() {

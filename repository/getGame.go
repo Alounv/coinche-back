@@ -95,6 +95,43 @@ func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 		game.Turns = append(game.Turns, turn)
 	}
 
+	rows, err = tx.Query(`SELECT value, team FROM point WHERE gameid=$1`, gameID)
+	if err != nil {
+		return domain.Game{}, err
+	}
+
+	game.Points = map[string]int{}
+
+	for rows.Next() {
+		var value int
+		var team string
+
+		err := rows.Scan(&value, &team)
+		if err != nil {
+			return domain.Game{}, err
+		}
+
+		game.Points[team] = value
+	}
+
+	rows, err = tx.Query(`SELECT value, team FROM score WHERE gameid=$1`, gameID)
+	if err != nil {
+		return domain.Game{}, err
+	}
+
+	game.Scores = map[string]int{}
+
+	for rows.Next() {
+		var value int
+		var team string
+
+		err := rows.Scan(&value, &team)
+		if err != nil {
+			return domain.Game{}, err
+		}
+
+		game.Scores[team] = value
+	}
 	return game, tx.Commit()
 
 }
