@@ -202,21 +202,19 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal(map[string]domain.Player{"P1": {Team: "Odd", Hand: []domain.CardID{}}, "P2": {Team: "Even", Hand: []domain.CardID{}}, "P3": {Team: "Odd", Hand: []domain.CardID{}}, "P4": {Team: "Even", Hand: []domain.CardID{}}}, got.Players)
 	})
 
-	/*
-		test.Run("start game", func(test *testing.T) {
-			err := api.SendMessage(s.connection1, "start") // FIXME: cannot work because there is no deck (see message above)
-			if err != nil {
-				test.Fatal(err)
-			}
+	test.Run("start game", func(test *testing.T) {
+		err := api.SendMessage(s.connection1, "start")
+		if err != nil {
+			test.Fatal(err)
+		}
 
-			got := api.ReceiveGameOrFatal(s.connection1, test)
+		got := api.ReceiveGameOrFatal(s.connection1, test)
 
-			assert.Equal(1, got.ID)
-			assert.Equal("NEW GAME", got.Name)
-			assert.Equal(map[string]domain.Player{"P1": {Team: "Odd"}, "P2": {Team: "Even"}, "P3": {Team: "Odd"}, "P4": {Team: "Even"}}, got.Players)
-			assert.Equal(domain.Bidding, got.Phase)
-			assert.Equal(map[domain.BidValue]domain.Bid(nil), got.Bids)
-			assert.Equal([]domain.CardID(nil), got.Deck)
-		})
-	*/
+		assert.Equal(1, got.ID)
+		assert.Equal("NEW GAME", got.Name)
+		assert.Equal(map[string]domain.Player{"P1": {Team: "Odd", Hand: []domain.CardID{}}, "P2": {Team: "Even", Hand: []domain.CardID{}}, "P3": {Team: "Odd", Hand: []domain.CardID{}}, "P4": {Team: "Even", Hand: []domain.CardID{}}}, got.Players)
+		assert.Equal(domain.Bidding, got.Phase)
+		assert.Equal(map[domain.BidValue]domain.Bid{}, got.Bids)
+		assert.Equal(32, len(got.Deck))
+	})
 }
