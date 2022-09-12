@@ -49,6 +49,12 @@ func (s *GameUsecases) JoinGame(gameID int, playerName string) (domain.Game, err
 		return domain.Game{}, err
 	}
 	err = s.Repo.UpdatePlayers(game.ID, game.Players, game.Phase)
+	if err != nil {
+		return domain.Game{}, err
+	}
+
+	game, err = s.Repo.GetGame(gameID)
+
 	return game, err
 }
 
@@ -62,6 +68,11 @@ func (s *GameUsecases) LeaveGame(gameID int, playerName string) error {
 		return err
 	}
 	err = s.Repo.UpdatePlayers(game.ID, game.Players, game.Phase)
+	if err != nil {
+		return err
+	}
+	game, err = s.Repo.GetGame(gameID)
+
 	return err
 }
 

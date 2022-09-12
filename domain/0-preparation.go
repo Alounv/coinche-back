@@ -29,7 +29,8 @@ func (game *Game) AddPlayer(playerName string) error {
 	}
 
 	game.Players[playerName] = Player{}
-	if game.IsFull() && game.Phase == Preparation {
+
+	if game.IsFull() && (game.Phase == Preparation || game.Phase == Pause) {
 		game.Phase = Teaming
 	}
 	return nil

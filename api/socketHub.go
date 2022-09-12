@@ -39,8 +39,8 @@ type Hub struct {
 	gameUsecases *usecases.GameUsecases
 }
 
-func NewHub(gameUsecases *usecases.GameUsecases) *Hub {
-	return &Hub{
+func NewHub(gameUsecases *usecases.GameUsecases) Hub {
+	return Hub{
 		broadcast:    make(chan message),
 		single:       make(chan private),
 		register:     make(chan subscription),

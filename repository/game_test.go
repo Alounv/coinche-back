@@ -139,6 +139,7 @@ func TestGameRepo(test *testing.T) {
 		assert.Equal(newName, got.Name)
 		assert.Equal(newPlayers, got.Players)
 		assert.Equal(newID, got.ID)
+		assert.Equal(domain.Phase(0), got.Phase)
 		assert.IsType(time.Time{}, got.CreatedAt)
 	})
 
@@ -249,10 +250,10 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want[1].Players, got[1].Players)
 	})
 
-	test.Run("update a game", func(test *testing.T) {
+	test.Run("update players", func(test *testing.T) {
 		players := map[string]domain.Player{"P1": {Hand: []domain.CardID(nil)}, "P2": {Hand: []domain.CardID(nil)}, "P3": {Hand: []domain.CardID{}}, "P4": {Hand: []domain.CardID{}}}
 
-		err := repository.UpdatePlayers(2, players, domain.Pause)
+		err := repository.UpdatePlayers(2, players, domain.Teaming)
 		utilities.PanicIfErr(err)
 		game, err := repository.GetGame(2)
 		if err != nil {
@@ -260,7 +261,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		}
 
 		assert.Equal(players, game.Players)
-		assert.Equal(domain.Pause, game.Phase)
+		assert.Equal(domain.Teaming, game.Phase)
 	})
 
 	test.Run("update a player", func(test *testing.T) {

@@ -35,10 +35,10 @@ func CreateConnections(test *testing.T, gameUsecases *usecases.GameUsecases) (
 	hub := NewHub(gameUsecases)
 	go hub.run()
 
-	s1, c1 = NewGameWebSocketServer(test, 1, "P1", hub)
-	s2, c2 = NewGameWebSocketServer(test, 1, "P2", hub)
-	s3, c3 = NewGameWebSocketServer(test, 1, "P3", hub)
-	s4, c4 = NewGameWebSocketServer(test, 1, "P4", hub)
+	s1, c1 = NewGameWebSocketServer(test, 1, "P1", &hub)
+	s2, c2 = NewGameWebSocketServer(test, 1, "P2", &hub)
+	s3, c3 = NewGameWebSocketServer(test, 1, "P3", &hub)
+	s4, c4 = NewGameWebSocketServer(test, 1, "P4", &hub)
 
 	_, _ = receive(c1)
 	_, _ = receive(c1)
@@ -88,7 +88,7 @@ func EmptyMessages(connections []*websocket.Conn, count int) {
 func TestSocketTeaming(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
-		map[int]*domain.Game{
+		map[int]domain.Game{
 			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 		},

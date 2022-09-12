@@ -48,11 +48,11 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.connectionInfo = os.Getenv("SQLX_POSTGRES_INFO")
 	s.dbName = "testdb"
 
-	fmt.Print("AAAA")
+	fmt.Println("AAAA")
 
 	s.db = testUtilities.CreateDb(s.connectionInfo, s.dbName)
 
-	fmt.Print("BBBB")
+	fmt.Println("BBBB")
 
 	gameRepository, err := repository.NewGameRepositoryFromDb(s.db)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		assert.IsType(domain.Game{}, receivedGame)
 
-		assert.Equal(map[string]domain.Player{"P1": {}}, receivedGame.Players)
+		assert.Equal(map[string]domain.Player{"P1": {Hand: []domain.CardID{}}}, receivedGame.Players)
 	})
 
 	test.Run("leave unstarted game", func(test *testing.T) {
@@ -144,7 +144,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		assert.IsType(domain.Game{}, got)
 
-		assert.Equal(map[string]domain.Player{"P1": {}}, got.Players)
+		assert.Equal(map[string]domain.Player{"P1": {Hand: []domain.CardID{}}}, got.Players)
 	})
 
 	test.Run("other players join", func(test *testing.T) {
@@ -161,7 +161,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P1"])
 		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P2"])
 		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P3"])
-		assert.Equal(domain.Player{Hand: []domain.CardID(nil)}, got.Players["P4"])
+		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P4"])
 	})
 
 	test.Run("start game should return error if team not ready", func(test *testing.T) {

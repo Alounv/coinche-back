@@ -13,7 +13,7 @@ import (
 func TestFailingSocketHandler(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
-		map[int]*domain.Game{
+		map[int]domain.Game{
 			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 		},
@@ -22,7 +22,7 @@ func TestFailingSocketHandler(test *testing.T) {
 
 	hub := NewHub(gameUsecases)
 	go hub.run()
-	server, connection := NewGameWebSocketServer(test, 3, "P1", hub)
+	server, connection := NewGameWebSocketServer(test, 3, "P1", &hub)
 
 	test.Run("Receive error when failing to join", func(test *testing.T) {
 		reply := ReceiveMessageOrFatal(connection, test)
@@ -50,7 +50,7 @@ func TestSocketHandler(test *testing.T) {
 	assert := assert.New(test)
 
 	mockRepository := usecases.NewMockGameRepo(
-		map[int]*domain.Game{
+		map[int]domain.Game{
 			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
 		},
@@ -79,17 +79,16 @@ func TestSocketHandler(test *testing.T) {
 			"P1": {},
 		}})
 
-		s1, c1 = NewGameWebSocketServer(test, 1, "P1", hub)
+		s1, c1 = NewGameWebSocketServer(test, 1, "P1", &hub)
 
 		got := ReceiveGameOrFatal(c1, test)
 
 		assert.Equal(want, got)
 	})
-
 	test.Run("Receive the teaming phase when full", func(test *testing.T) {
-		s2, c2 = NewGameWebSocketServer(test, 1, "P2", hub)
-		s3, c3 = NewGameWebSocketServer(test, 1, "P3", hub)
-		s4, c4 = NewGameWebSocketServer(test, 1, "P4", hub)
+		s2, c2 = NewGameWebSocketServer(test, 1, "P2", &hub)
+		s3, c3 = NewGameWebSocketServer(test, 1, "P3", &hub)
+		s4, c4 = NewGameWebSocketServer(test, 1, "P4", &hub)
 
 		_, _ = receive(c1)
 		_, _ = receive(c1)
@@ -111,7 +110,7 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Try to join when already in game", func(test *testing.T) {
-		s5, c5 = NewGameWebSocketServer(test, 1, "P4", hub)
+		s5, c5 = NewGameWebSocketServer(test, 1, "P4", &hub)
 
 		reply := ReceiveMessageOrFatal(c5, test)
 
@@ -119,7 +118,7 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Try to join a full game", func(test *testing.T) {
-		s5, c5 = NewGameWebSocketServer(test, 1, "P5", hub)
+		s5, c5 = NewGameWebSocketServer(test, 1, "P5", &hub)
 
 		reply := ReceiveMessageOrFatal(c5, test)
 

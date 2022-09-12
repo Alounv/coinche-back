@@ -14,7 +14,7 @@ import (
 func TestGetGame(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
-		map[int]*domain.Game{
+		map[int]domain.Game{
 			1: {Name: "GAME ONE"},
 			2: {Name: "GAME TWO", Players: map[string]domain.Player{
 				"P1": {},
