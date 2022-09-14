@@ -2,6 +2,8 @@ package domain
 
 import (
 	"errors"
+	"fmt"
+	"sort"
 )
 
 const (
@@ -28,7 +30,7 @@ func (game *Game) StartBidding() error {
 		}
 		break
 	}
-
+	fmt.Println(shouldInitiateOrder)
 	if shouldInitiateOrder {
 		game.initiateOrder()
 	} else {
@@ -42,6 +44,7 @@ func (game *Game) StartBidding() error {
 
 func (game *Game) distributeCards() {
 	for name, player := range game.Players {
+		fmt.Println("---", player, name)
 		player.Hand = game.draw(player.Order)
 		game.Players[name] = player
 	}
@@ -99,7 +102,15 @@ func (game *Game) resetOrderAsInitialOrder() {
 func (game *Game) initiateOrder() {
 	team1 := ""
 	team2 := ""
-	for name, player := range game.Players {
+
+	keys := make([]string, 0, 4)
+	for name := range game.Players {
+		keys = append(keys, name)
+	}
+	sort.Strings(keys)
+
+	for _, name := range keys {
+		player := game.Players[name]
 
 		if team1 == "" {
 			team1 = player.Team
