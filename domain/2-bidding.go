@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-	"fmt"
 	"sort"
 )
 
@@ -20,7 +19,6 @@ func (game *Game) StartBidding() error {
 	if err != nil {
 		return err
 	}
-
 	game.Phase = Bidding
 
 	shouldInitiateOrder := false
@@ -30,7 +28,6 @@ func (game *Game) StartBidding() error {
 		}
 		break
 	}
-	fmt.Println(shouldInitiateOrder)
 	if shouldInitiateOrder {
 		game.initiateOrder()
 	} else {
@@ -44,7 +41,6 @@ func (game *Game) StartBidding() error {
 
 func (game *Game) distributeCards() {
 	for name, player := range game.Players {
-		fmt.Println("---", player, name)
 		player.Hand = game.draw(player.Order)
 		game.Players[name] = player
 	}
@@ -67,7 +63,6 @@ func (game *Game) draw(order int) []CardID {
 		20 + base*3 + 2,
 	}
 	hand := []CardID{}
-
 	for _, deckIndex := range deckIndexes {
 		hand = append(hand, game.Deck[deckIndex])
 	}

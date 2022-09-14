@@ -18,7 +18,7 @@ func newTeamingGame() Game {
 		},
 		Phase: Teaming,
 		Bids:  make(map[BidValue]Bid),
-		Deck:  newDeck(),
+		Deck:  NewDeck(),
 	}
 }
 

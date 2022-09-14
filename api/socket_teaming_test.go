@@ -89,8 +89,8 @@ func TestSocketTeaming(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]domain.Game{
-			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
-			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
+			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}, Deck: domain.NewDeck()},
+			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}, Deck: domain.NewDeck()},
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
@@ -149,18 +149,29 @@ func TestSocketTeaming(test *testing.T) {
 
 		assert.Equal("GAME ONE", got.Name)
 		assert.NoError(got.CanStartBidding())
+		assert.Equal(32, len(got.Deck))
 	})
 
-	/*test.Run("Can start the game", func(test *testing.T) {
-		err := SendMessage(c3, "start")  // FIXME: cannot work because there is no deck
+	test.Run("Can start the game", func(test *testing.T) {
+		err := SendMessage(c3, "start")
 		if err != nil {
 			test.Fatal(err)
 		}
 
-		got := ReceiveGameOrFatal(c1, test)
+		got := ReceiveGameOrFatal(c3, test)
 
 		assert.Equal(domain.Bidding, got.Phase)
-	})*/
+	})
+
+	// TODO: TEST PLACE SOME BIDS
+
+	// TODO: TEST PLAY CARDS
+
+	// TODO: TEST COUNTING
+
+	// TODO: TEST RESTART
+
+	// TODO: TEST SCORES ON MULTIPLE
 
 	test.Cleanup(func() {
 		CloseConnections(c1, c2, c3, c4, s1, s2, s3, s4)

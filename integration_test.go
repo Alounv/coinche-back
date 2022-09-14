@@ -217,4 +217,15 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal(map[domain.BidValue]domain.Bid{}, got.Bids)
 		assert.Equal(32, len(got.Deck))
 	})
+
+	// TODO: TEST PLACE SOME BIDS
+
+	// TODO: TEST PLAY CARDS
+
+	// TODO: TEST COUNTING
+
+	// TODO: TEST RESTART
+
+	// TODO: TEST SCORES ON MULTIPLE
+
 }

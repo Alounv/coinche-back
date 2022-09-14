@@ -121,7 +121,7 @@ func newTeamingGameWithoutPlayers() Game {
 		ID:    2,
 		Name:  "GAME TWO",
 		Phase: Teaming,
-		Deck:  newDeck(),
+		Deck:  NewDeck(),
 	}
 }
 

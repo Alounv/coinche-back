@@ -151,7 +151,7 @@ var cards = map[CardID]card{
 	S_A:  {Spade, As, TAs, 11, 11},
 }
 
-func newDeck() []CardID {
+func NewDeck() []CardID {
 	deck := []CardID{C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A, D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A, H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A, S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A}
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(deck), func(i, j int) { deck[i], deck[j] = deck[j], deck[i] })
@@ -240,7 +240,7 @@ func NewGame(name string) Game {
 		Players: map[string]Player{},
 		Phase:   Preparation,
 		Bids:    map[BidValue]Bid{},
-		Deck:    newDeck(),
+		Deck:    NewDeck(),
 	}
 }
 
