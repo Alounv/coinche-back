@@ -4,15 +4,15 @@ import (
 	"coinche/domain"
 )
 
-func (s *GameRepository) UpdateGame(gameID int, phase domain.Phase) error {
+func (s *GameRepository) UpdateGame(game domain.Game) error {
 	_, err := s.db.Exec(
 		`
 		UPDATE game
 		SET phase = $1
 		WHERE id = $2
 		`,
-		phase,
-		gameID,
+		game.Phase,
+		game.ID,
 	)
 	if err != nil {
 		return err

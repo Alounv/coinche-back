@@ -141,7 +141,6 @@ func (game *Game) PlaceBid(player string, value BidValue, color Color) error {
 	if game.Phase != Bidding {
 		return errors.New(ErrNotBidding)
 	}
-
 	lastBid, maxValue := game.getLastBid()
 
 	if value <= maxValue {
@@ -166,8 +165,6 @@ func (game *Game) PlaceBid(player string, value BidValue, color Color) error {
 		Color:   color,
 		Coinche: 0,
 	}
-
-	game.rotateOrder()
 
 	return nil
 }

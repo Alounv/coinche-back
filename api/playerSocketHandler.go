@@ -5,6 +5,7 @@ import (
 	"coinche/usecases"
 	"coinche/utilities"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -93,6 +94,46 @@ func (s socketHandler) startGame(content string) {
 	broadcastGameOrPanic(game, s.player.hub)
 }
 
+func (s socketHandler) bid(content string) {
+	array := strings.Split(content, ",")
+	if len(array) != 2 {
+		err := SendMessage(s.connection, "Invalid bid")
+		utilities.PanicIfErr(err)
+		return
+	}
+
+	colorString := array[0]
+	valueString := array[1]
+	valueInt, err := strconv.Atoi(valueString)
+	if err != nil {
+		errorMessage := fmt.Sprint("Could not parse bid value: ", err)
+		err = SendMessage(s.connection, errorMessage)
+		utilities.PanicIfErr(err)
+		return
+	}
+
+	bidColor := domain.Color(colorString)
+	bidValue := domain.BidValue(valueInt)
+
+	err = s.gameUsecases.Bid(s.gameID, s.playerName, bidValue, bidColor)
+	if err != nil {
+		errorMessage := fmt.Sprint("Could not bid: ", err)
+		err = SendMessage(s.connection, errorMessage)
+		utilities.PanicIfErr(err)
+		return
+	}
+	game, err := s.gameUsecases.GetGame(s.gameID)
+
+	if err != nil {
+		errorMessage := fmt.Sprint("Could not get updated game: ", err)
+		err := SendMessage(s.connection, errorMessage)
+		utilities.PanicIfErr(err)
+		return
+	}
+
+	broadcastGameOrPanic(game, s.player.hub)
+}
+
 func PlayerSocketHandler(
 	connection *websocket.Conn,
 	gameID int,
@@ -134,6 +175,11 @@ func PlayerSocketHandler(
 		case "start":
 			{
 				socketHandler.startGame(content)
+				break
+			}
+		case "bid":
+			{
+				socketHandler.bid(content)
 				break
 			}
 		default:

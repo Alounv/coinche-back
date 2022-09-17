@@ -280,8 +280,12 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal("A Team", game.Players["P2"].Team)
 	})
 
-	test.Run("update a game", func(test *testing.T) {
-		err := repository.UpdateGame(2, domain.Bidding)
+	test.Run("update a game", func(test *testing.T) { // FIXME: should be progressively augmented
+		newGame := domain.Game{
+			ID:    2,
+			Phase: domain.Bidding,
+		}
+		err := repository.UpdateGame(newGame)
 		if err != nil {
 			test.Fatal(err)
 		}

@@ -18,7 +18,7 @@ type GameRepositoryInterface interface {
 	CreateGame(game domain.Game) (int, error)
 	UpdatePlayers(gameID int, players map[string]domain.Player, phase domain.Phase) error
 	UpdatePlayer(gameID int, playerName string, players domain.Player) error
-	UpdateGame(gameID int, phase domain.Phase) error
+	UpdateGame(game domain.Game) error
 }
 
 type GameUsecases struct {
@@ -111,7 +111,21 @@ func (s *GameUsecases) StartGame(gameID int) error {
 	if err != nil {
 		return err
 	}
-	err = s.Repo.UpdateGame(game.ID, game.Phase)
+	err = s.Repo.UpdateGame(game)
+	return err
+}
+
+func (s *GameUsecases) Bid(gameID int, playerName string, value domain.BidValue, color domain.Color) error {
+	game, err := s.Repo.GetGame(gameID)
+	if err != nil {
+		return err
+	}
+
+	err = game.PlaceBid(playerName, value, color)
+	if err != nil {
+		return err
+	}
+	err = s.Repo.UpdateGame(game)
 	return err
 }
 

@@ -10,14 +10,14 @@ import (
 func TestGameService(test *testing.T) {
 	assert := assert.New(test)
 
+	game := domain.NewGame("GAME ONE")
+	game.Players = map[string]domain.Player{
+		"P1": {},
+		"P2": {},
+		"P3": {},
+	}
 	mockRepository := NewMockGameRepo(
-		map[int]domain.Game{
-			0: {Name: "GAME ONE", Players: map[string]domain.Player{
-				"P1": {},
-				"P2": {},
-				"P3": {},
-			}},
-		},
+		map[int]domain.Game{0: game},
 	)
 	gameUsecases := NewGameUsecases(&mockRepository)
 
@@ -74,4 +74,43 @@ func TestGameService(test *testing.T) {
 		assert.Equal("A Team", game.Players["P1"].Team)
 	})
 
+	test.Run("can start a game", func(test *testing.T) {
+		err := gameUsecases.JoinTeam(0, "P2", "A Team")
+		if err != nil {
+			test.Fatal(err)
+		}
+		err = gameUsecases.JoinTeam(0, "P3", "B Team")
+		if err != nil {
+			test.Fatal(err)
+		}
+		err = gameUsecases.JoinTeam(0, "P4", "B Team")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		err = gameUsecases.StartGame(0)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		game, err := gameUsecases.GetGame(0)
+
+		assert.NoError(err)
+		assert.Equal(domain.Bidding, game.Phase)
+	})
+
+	test.Run("can bid", func(test *testing.T) {
+		err := gameUsecases.Bid(0, "P1", 80, domain.Spade)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		game, err := gameUsecases.GetGame(0)
+
+		assert.NoError(err)
+		assert.Equal(0, game.Bids[80].Coinche)
+		assert.Equal(domain.Spade, game.Bids[80].Color)
+		assert.Equal("P1", game.Bids[80].Player)
+		assert.Equal(0, game.Bids[80].Pass)
+	})
 }

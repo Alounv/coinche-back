@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateConnections(test *testing.T, gameUsecases *usecases.GameUsecases) (
+func CreateConnections(test *testing.T, gameUsecases *usecases.GameUsecases, gameID int) (
 	*websocket.Conn,
 	*websocket.Conn,
 	*websocket.Conn,
@@ -35,10 +35,10 @@ func CreateConnections(test *testing.T, gameUsecases *usecases.GameUsecases) (
 	hub := NewHub(gameUsecases)
 	go hub.run()
 
-	s1, c1 = NewGameWebSocketServer(test, 1, "P1", &hub)
-	s2, c2 = NewGameWebSocketServer(test, 1, "P2", &hub)
-	s3, c3 = NewGameWebSocketServer(test, 1, "P3", &hub)
-	s4, c4 = NewGameWebSocketServer(test, 1, "P4", &hub)
+	s1, c1 = NewGameWebSocketServer(test, gameID, "P1", &hub)
+	s2, c2 = NewGameWebSocketServer(test, gameID, "P2", &hub)
+	s3, c3 = NewGameWebSocketServer(test, gameID, "P3", &hub)
+	s4, c4 = NewGameWebSocketServer(test, gameID, "P4", &hub)
 
 	_, _ = receive(c1)
 	_, _ = receive(c1)
@@ -87,15 +87,24 @@ func EmptyMessages(connections []*websocket.Conn, count int) {
 
 func TestSocketTeaming(test *testing.T) {
 	assert := assert.New(test)
+
+	gameOne := domain.NewGame("GAME ONE")
+	gameOne.Phase = domain.Preparation
+	gameOne.ID = 0
+
+	gameTwo := domain.NewGame("GAME TWO")
+	gameTwo.Phase = domain.Preparation
+	gameTwo.ID = 1
+
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]domain.Game{
-			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}, Deck: domain.NewDeck()},
-			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}, Deck: domain.NewDeck()},
+			0: gameOne,
+			1: gameTwo,
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
 
-	c1, c2, c3, c4, s1, s2, s3, s4 := CreateConnections(test, gameUsecases)
+	c1, c2, c3, c4, s1, s2, s3, s4 := CreateConnections(test, gameUsecases, 0)
 
 	test.Run("Join a team", func(test *testing.T) {
 		err := SendMessage(c1, "joinTeam: AAA")
@@ -160,18 +169,27 @@ func TestSocketTeaming(test *testing.T) {
 
 		got := ReceiveGameOrFatal(c3, test)
 
+		EmptyMessages([]*websocket.Conn{c2, c1, c4}, 1)
+
 		assert.Equal(domain.Bidding, got.Phase)
 	})
 
-	// TODO: TEST PLACE SOME BIDS
+	test.Run("Can place a bid", func(test *testing.T) {
+		err := SendMessage(c1, "bid: spade,80")
+		if err != nil {
+			test.Fatal(err)
+		}
 
-	// TODO: TEST PLAY CARDS
+		got := ReceiveGameOrFatal(c1, test)
 
-	// TODO: TEST COUNTING
+		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 1)
 
-	// TODO: TEST RESTART
-
-	// TODO: TEST SCORES ON MULTIPLE
+		assert.Equal("GAME ONE", got.Name)
+		assert.Equal(0, got.Bids[80].Coinche)
+		assert.Equal(0, got.Bids[80].Pass)
+		assert.Equal("P1", got.Bids[80].Player)
+		assert.Equal(domain.Spade, got.Bids[80].Color)
+	})
 
 	test.Cleanup(func() {
 		CloseConnections(c1, c2, c3, c4, s1, s2, s3, s4)

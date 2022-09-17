@@ -53,14 +53,17 @@ func (repo *MockGameRepo) UpdatePlayer(gameID int, playerName string, player dom
 	repo.games[gameID] = game
 	return nil
 }
-func (repo *MockGameRepo) UpdateGame(gameID int, phase domain.Phase) error {
-	game, ok := repo.games[gameID]
+
+func (repo *MockGameRepo) UpdateGame(game domain.Game) error {
+	repoGame, ok := repo.games[game.ID]
 	if !ok {
 		return errors.New("GAME NOT FOUND")
 
 	}
-	game.Phase = phase
-	repo.games[gameID] = game
+	repoGame.Phase = game.Phase
+	repoGame.Bids = game.Bids
+	// FIXME: update other fields progressively
+	repo.games[game.ID] = repoGame
 	return nil
 }
 

@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-	"fmt"
 )
 
 const (
@@ -82,7 +81,7 @@ func (game *Game) AssignTeam(playerName string, teamName string) error {
 	game.Players[playerName] = newPlayer
 
 	if game.CanStartBidding() == nil {
-		fmt.Println("FIXME: add new deck")
+		game.Deck = NewDeck()
 	}
 
 	return nil
