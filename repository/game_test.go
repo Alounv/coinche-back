@@ -284,7 +284,11 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		newGame := domain.Game{
 			ID:    2,
 			Phase: domain.Bidding,
+			Bids: map[domain.BidValue]domain.Bid{
+				domain.Eighty: {Player: "P1", Color: domain.Spade, Coinche: 1},
+			},
 		}
+
 		err := repository.UpdateGame(newGame)
 		if err != nil {
 			test.Fatal(err)
@@ -296,6 +300,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		}
 
 		assert.Equal(domain.Bidding, game.Phase)
+		assert.Equal(newGame.Bids, game.Bids)
 	})
 
 	test.Cleanup(func() {

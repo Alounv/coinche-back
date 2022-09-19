@@ -8,6 +8,27 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+func (s *GameRepository) CreateBids(tx *sqlx.Tx, gameID int, bids map[domain.BidValue]domain.Bid) error {
+	for bidValue, bid := range bids {
+		_, err := tx.Exec(
+			`
+			INSERT INTO bid (gameid, value, player, coinche, color, pass) 
+			VALUES ($1, $2, $3, $4, $5, $6)
+			`,
+			gameID,
+			bidValue,
+			bid.Player,
+			bid.Coinche,
+			bid.Color,
+			bid.Pass,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *GameRepository) CreateGame(game domain.Game) (int, error) {
 	tx := s.db.MustBegin()
 
@@ -60,22 +81,9 @@ func (s *GameRepository) createAGame(game domain.Game, tx *sqlx.Tx) (int, error)
 		}
 	}
 
-	for bidValue, bid := range game.Bids {
-		_, err = tx.Exec(
-			`
-			INSERT INTO bid (gameid, value, player, coinche, color, pass) 
-			VALUES ($1, $2, $3, $4, $5, $6)
-			`,
-			gameID,
-			bidValue,
-			bid.Player,
-			bid.Coinche,
-			bid.Color,
-			bid.Pass,
-		)
-		if err != nil {
-			return 0, err
-		}
+	err = s.CreateBids(tx, gameID, game.Bids)
+	if err != nil {
+		return 0, err
 	}
 
 	for _, turn := range game.Turns {
