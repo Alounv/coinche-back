@@ -151,9 +151,9 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 	test.Run("other players join", func(test *testing.T) {
 		s.server2, s.connection2 = api.NewGameWebSocketServer(test, 1, "P2", s.hub)
-		time.Sleep(100 * time.Millisecond) // wait because if all players join at the same time, the IsFull never gets true in AddPlayer
+		time.Sleep(50 * time.Millisecond) // wait because if all players join at the same time, the IsFull never gets true in AddPlayer
 		s.server3, s.connection3 = api.NewGameWebSocketServer(test, 1, "P3", s.hub)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 		s.server4, s.connection4 = api.NewGameWebSocketServer(test, 1, "P4", s.hub)
 		api.ReceiveMultipleGameOrFatal(s.connection1, test, 3)
 		api.ReceiveMultipleGameOrFatal(s.connection2, test, 3)
@@ -238,6 +238,9 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		}
 
 		got := api.ReceiveGameOrFatal(s.connection4, test)
+		api.ReceiveMultipleGameOrFatal(s.connection1, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
 
 		assert.Equal(1, got.ID)
 		assert.Equal(1, len(got.Bids))
@@ -246,6 +249,20 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal(domain.Spade, got.Bids[domain.Eighty].Color)
 		assert.Equal("P1", got.Bids[domain.Eighty].Player)
 	})
+
+	test.Run("place some bids with error", func(test *testing.T) {
+		err := api.SendMessage(s.connection2, "bid: heart,80")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		got := api.ReceiveMessageOrFatal(s.connection2, test)
+
+		assert.Equal("Could not bid: BID IS TOO SMALL", got)
+	})
+
+	// TODO: END OF BID
+
 	// TODO: TEST PLAY CARDS
 
 	// TODO: TEST COUNTING

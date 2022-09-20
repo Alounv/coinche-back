@@ -5,6 +5,7 @@ import (
 	"coinche/usecases"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -112,6 +113,8 @@ func TestSocketTeaming(test *testing.T) {
 			test.Fatal(err)
 		}
 
+		time.Sleep(50 * time.Millisecond) // prevents concurrent map read and map write
+
 		err = SendMessage(c2, "joinTeam: AAA")
 		if err != nil {
 			test.Fatal(err)
@@ -144,6 +147,8 @@ func TestSocketTeaming(test *testing.T) {
 		if err != nil {
 			test.Fatal(err)
 		}
+
+		time.Sleep(50 * time.Millisecond) // prevents concurent map read and map write
 
 		err = SendMessage(c4, "joinTeam: BBB")
 		if err != nil {
