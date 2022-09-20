@@ -14,7 +14,6 @@ import (
 func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, gameID int, playerName string) domain.Game {
 	game, err := usecases.JoinGame(gameID, playerName)
 	if err != nil {
-		fmt.Println("Error joining game:", err)
 		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
 		utilities.PanicIfErr(err)
 		connection.Close()

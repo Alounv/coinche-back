@@ -51,7 +51,7 @@ func deletePlayers(currentPlayers map[string]int, players map[string]domain.Play
 	return nil
 }
 
-func createPlayers(currentPlayers map[string]int, players map[string]domain.Player, gameID int, tx *sqlx.Tx) error {
+func createAndUpdatePlayers(currentPlayers map[string]int, players map[string]domain.Player, gameID int, tx *sqlx.Tx) error {
 	for playerName, player := range players {
 		shouldCreate := false
 		if _, ok := currentPlayers[playerName]; !ok {
@@ -71,12 +71,17 @@ func createPlayers(currentPlayers map[string]int, players map[string]domain.Play
 			if err != nil {
 				return err
 			}
+		} else {
+			err := updatePlayer(tx, gameID, playerName, player)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func updatePlayers(gameID int, players map[string]domain.Player, tx *sqlx.Tx) error {
+func updatePlayers(tx *sqlx.Tx, gameID int, players map[string]domain.Player) error {
 	currentPlayers, err := getCurrentPlayers(tx, gameID)
 	if err != nil {
 		return err
@@ -87,42 +92,10 @@ func updatePlayers(gameID int, players map[string]domain.Player, tx *sqlx.Tx) er
 		return err
 	}
 
-	err = createPlayers(currentPlayers, players, gameID, tx)
+	err = createAndUpdatePlayers(currentPlayers, players, gameID, tx)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func updatePhase(phase domain.Phase, gameID int, tx *sqlx.Tx) error {
-	_, err := tx.Exec(
-		`
-		UPDATE game
-		SET phase = $1
-		WHERE id = $2
-		`,
-		phase,
-		gameID,
-	)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *GameRepository) UpdatePlayers(gameID int, players map[string]domain.Player, phase domain.Phase) error {
-	tx := s.db.MustBegin()
-
-	err := updatePlayers(gameID, players, tx)
-	if err != nil {
-		return err
-	}
-
-	err = updatePhase(phase, gameID, tx)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
 }

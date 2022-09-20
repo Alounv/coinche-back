@@ -119,6 +119,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		assert.IsType(domain.Game{}, receivedGame)
 
+		assert.Equal(1, len(receivedGame.Players))
 		assert.Equal(map[string]domain.Player{"P1": {Hand: []domain.CardID{}}}, receivedGame.Players)
 	})
 
@@ -135,7 +136,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		s.router.ServeHTTP(response, testUtilities.NewGetGameRequest(test, 1))
 		got := testUtilities.DecodeToGame(response.Body, test)
 
-		assert.Equal(map[string]domain.Player{}, got.Players)
+		assert.Equal(0, len(got.Players))
 	})
 
 	test.Run("join back unstarted game", func(test *testing.T) {
@@ -144,12 +145,15 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		assert.IsType(domain.Game{}, got)
 
+		assert.Equal(1, len(got.Players))
 		assert.Equal(map[string]domain.Player{"P1": {Hand: []domain.CardID{}}}, got.Players)
 	})
 
 	test.Run("other players join", func(test *testing.T) {
 		s.server2, s.connection2 = api.NewGameWebSocketServer(test, 1, "P2", s.hub)
+		time.Sleep(100 * time.Millisecond) // wait because if all players join at the same time, the IsFull never gets true in AddPlayer
 		s.server3, s.connection3 = api.NewGameWebSocketServer(test, 1, "P3", s.hub)
+		time.Sleep(100 * time.Millisecond)
 		s.server4, s.connection4 = api.NewGameWebSocketServer(test, 1, "P4", s.hub)
 		api.ReceiveMultipleGameOrFatal(s.connection1, test, 3)
 		api.ReceiveMultipleGameOrFatal(s.connection2, test, 3)
@@ -158,10 +162,12 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		assert.IsType(domain.Game{}, got)
 
-		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P1"])
-		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P2"])
-		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P3"])
-		assert.Equal(domain.Player{Hand: []domain.CardID{}}, got.Players["P4"])
+		assert.Equal(4, len(got.Players))
+		assert.Equal(0, len(got.Players["P1"].Hand))
+		assert.Equal(0, len(got.Players["P2"].Hand))
+		assert.Equal(0, len(got.Players["P3"].Hand))
+		assert.Equal(0, len(got.Players["P4"].Hand))
+		assert.Equal(domain.Teaming, got.Phase)
 	})
 
 	test.Run("start game should return error if team not ready", func(test *testing.T) {
@@ -209,17 +215,37 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		}
 
 		got := api.ReceiveGameOrFatal(s.connection1, test)
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection4, test, 1)
 
 		assert.Equal(1, got.ID)
 		assert.Equal("NEW GAME", got.Name)
-		assert.Equal(map[string]domain.Player{"P1": {Team: "Odd", Hand: []domain.CardID{}}, "P2": {Team: "Even", Hand: []domain.CardID{}}, "P3": {Team: "Odd", Hand: []domain.CardID{}}, "P4": {Team: "Even", Hand: []domain.CardID{}}}, got.Players)
 		assert.Equal(domain.Bidding, got.Phase)
 		assert.Equal(map[domain.BidValue]domain.Bid{}, got.Bids)
-		assert.Equal(32, len(got.Deck))
+		assert.Equal(0, len(got.Deck))
+		assert.Equal(8, len(got.Players["P1"].Hand))
+		assert.Equal(1, got.Players["P1"].Order)
+		assert.Equal(2, got.Players["P2"].Order)
+		assert.Equal(3, got.Players["P3"].Order)
+		assert.Equal(4, got.Players["P4"].Order)
 	})
 
-	// TODO: TEST PLACE SOME BIDS
+	test.Run("place some bids", func(test *testing.T) {
+		err := api.SendMessage(s.connection1, "bid: spade,80")
+		if err != nil {
+			test.Fatal(err)
+		}
 
+		got := api.ReceiveGameOrFatal(s.connection4, test)
+
+		assert.Equal(1, got.ID)
+		assert.Equal(1, len(got.Bids))
+		assert.Equal(0, got.Bids[domain.Eighty].Coinche)
+		assert.Equal(0, got.Bids[domain.Eighty].Pass)
+		assert.Equal(domain.Spade, got.Bids[domain.Eighty].Color)
+		assert.Equal("P1", got.Bids[domain.Eighty].Player)
+	})
 	// TODO: TEST PLAY CARDS
 
 	// TODO: TEST COUNTING

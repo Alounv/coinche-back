@@ -22,12 +22,14 @@ func (game *Game) StartBidding() error {
 	game.Phase = Bidding
 
 	shouldInitiateOrder := false
+
 	for _, player := range game.Players {
 		if player.InitialOrder == 0 {
 			shouldInitiateOrder = true
 		}
 		break
 	}
+
 	if shouldInitiateOrder {
 		game.initiateOrder()
 	} else {

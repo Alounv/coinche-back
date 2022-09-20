@@ -250,20 +250,6 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want[1].Players, got[1].Players)
 	})
 
-	test.Run("update players", func(test *testing.T) {
-		players := map[string]domain.Player{"P1": {Hand: []domain.CardID(nil)}, "P2": {Hand: []domain.CardID(nil)}, "P3": {Hand: []domain.CardID{}}, "P4": {Hand: []domain.CardID{}}}
-
-		err := repository.UpdatePlayers(2, players, domain.Teaming)
-		utilities.PanicIfErr(err)
-		game, err := repository.GetGame(2)
-		if err != nil {
-			test.Fatal(err)
-		}
-
-		assert.Equal(players, game.Players)
-		assert.Equal(domain.Teaming, game.Phase)
-	})
-
 	test.Run("update a player", func(test *testing.T) {
 		player := domain.Player{Team: "A Team"}
 
@@ -281,26 +267,34 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 
 	test.Run("update a game", func(test *testing.T) { // FIXME: should be progressively augmented
-		newGame := domain.Game{
+		want := domain.Game{
 			ID:    2,
 			Phase: domain.Bidding,
 			Bids: map[domain.BidValue]domain.Bid{
 				domain.Eighty: {Player: "P1", Color: domain.Spade, Coinche: 1},
 			},
+			Players: map[string]domain.Player{
+				"P1": {Hand: []domain.CardID{domain.C_7}, Order: 1, InitialOrder: 1, Team: "A Team"},
+				"P2": {Hand: []domain.CardID{}},
+				"P3": {Hand: []domain.CardID{}},
+				"P4": {Hand: []domain.CardID{}},
+			},
 		}
 
-		err := repository.UpdateGame(newGame)
+		err := repository.UpdateGame(want)
 		if err != nil {
 			test.Fatal(err)
 		}
 
-		game, err := repository.GetGame(2)
+		got, err := repository.GetGame(2)
 		if err != nil {
 			test.Fatal(err)
 		}
 
-		assert.Equal(domain.Bidding, game.Phase)
-		assert.Equal(newGame.Bids, game.Bids)
+		assert.Equal(want.ID, got.ID)
+		assert.Equal(want.Phase, got.Phase)
+		assert.Equal(want.Bids, got.Bids)
+		assert.Equal(want.Players, got.Players)
 	})
 
 	test.Cleanup(func() {

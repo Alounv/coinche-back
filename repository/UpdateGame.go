@@ -2,27 +2,38 @@ package repository
 
 import (
 	"coinche/domain"
+	"encoding/json"
 )
 
-func (s *GameRepository) UpdateGame(game domain.Game) error {
-	tx := s.db.MustBegin()
+func (r *GameRepository) UpdateGame(game domain.Game) error {
+	tx := r.db.MustBegin()
 
-	_, err := s.db.Exec(
+	deck, err := json.Marshal(game.Deck)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.Exec(
 		`
 		UPDATE game
-		SET phase = $1 
-		WHERE id = $2
+		SET phase = $2, Deck = $3
+		WHERE id = $1
 		`,
-		game.Phase,
 		game.ID,
+		game.Phase,
+		deck,
 	)
 
 	if err != nil {
 		return err
 	}
 
-	err = s.CreateBids(tx, game.ID, game.Bids)
+	err = r.CreateBids(tx, game.ID, game.Bids)
+	if err != nil {
+		return err
+	}
 
+	err = updatePlayers(tx, game.ID, game.Players)
 	if err != nil {
 		return err
 	}
