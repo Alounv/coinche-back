@@ -254,7 +254,7 @@ func (game *Game) checkPlayerTurn(playerName string) error {
 func (game *Game) checkTeamTurn(playerName string) error {
 	order := game.Players[playerName].Order
 	if order != 1 && order != 3 {
-		return errors.New(ErrNotYourTurn)
+		return errors.New(ErrNotYourTeamTurn)
 	}
 	return nil
 }

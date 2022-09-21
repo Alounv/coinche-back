@@ -7,7 +7,6 @@ import (
 	"coinche/usecases"
 	"coinche/utilities"
 	testUtilities "coinche/utilities/test"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -48,11 +47,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.connectionInfo = os.Getenv("SQLX_POSTGRES_INFO")
 	s.dbName = "testdb"
 
-	fmt.Println("AAAA")
-
 	s.db = testUtilities.CreateDb(s.connectionInfo, s.dbName)
-
-	fmt.Println("BBBB")
 
 	gameRepository, err := repository.NewGameRepositoryFromDb(s.db)
 	if err != nil {
@@ -151,10 +146,15 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 	test.Run("other players join", func(test *testing.T) {
 		s.server2, s.connection2 = api.NewGameWebSocketServer(test, 1, "P2", s.hub)
+
 		time.Sleep(50 * time.Millisecond) // wait because if all players join at the same time, the IsFull never gets true in AddPlayer
+
 		s.server3, s.connection3 = api.NewGameWebSocketServer(test, 1, "P3", s.hub)
+
 		time.Sleep(50 * time.Millisecond)
+
 		s.server4, s.connection4 = api.NewGameWebSocketServer(test, 1, "P4", s.hub)
+
 		api.ReceiveMultipleGameOrFatal(s.connection1, test, 3)
 		api.ReceiveMultipleGameOrFatal(s.connection2, test, 3)
 		api.ReceiveMultipleGameOrFatal(s.connection3, test, 2)
@@ -178,7 +178,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		got := api.ReceiveMessageOrFatal(s.connection1, test)
 
-		assert.Equal("Could not start the game: TEAMS ARE NOT EQUAL", got)
+		assert.Equal("Could not start game: TEAMS ARE NOT EQUAL", got)
 	})
 
 	test.Run("join team", func(test *testing.T) {
@@ -261,7 +261,56 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal("Could not bid: BID IS TOO SMALL", got)
 	})
 
-	// TODO: END OF BID
+	test.Run("can start playing", func(test *testing.T) {
+		err := api.SendMessage(s.connection2, "bid: pass")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		time.Sleep(50 * time.Millisecond) // wait to prevent submitting bid at the same time
+
+		err = api.SendMessage(s.connection3, "bid: spade,90")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		time.Sleep(50 * time.Millisecond)
+
+		err = api.SendMessage(s.connection2, "bid: coinche")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		time.Sleep(50 * time.Millisecond)
+
+		err = api.SendMessage(s.connection3, "bid: pass")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		time.Sleep(50 * time.Millisecond)
+
+		err = api.SendMessage(s.connection1, "bid: pass")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		api.ReceiveMultipleGameOrFatal(s.connection1, test, 5)
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 5)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 5)
+		api.ReceiveMultipleGameOrFatal(s.connection4, test, 4)
+
+		got := api.ReceiveGameOrFatal(s.connection4, test)
+
+		assert.Equal(1, got.ID)
+		assert.Equal(2, len(got.Bids))
+		assert.Equal(1, got.Bids[domain.Ninety].Coinche)
+		assert.Equal(2, got.Bids[domain.Ninety].Pass)
+		assert.Equal(domain.Spade, got.Bids[domain.Ninety].Color)
+		assert.Equal("P3", got.Bids[domain.Ninety].Player)
+
+		assert.Equal(domain.Playing, got.Phase)
+	})
 
 	// TODO: TEST PLAY CARDS
 

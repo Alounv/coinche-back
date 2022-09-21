@@ -139,7 +139,7 @@ func TestSocketTeaming(test *testing.T) {
 
 		reply := ReceiveMessageOrFatal(c3, test)
 
-		assert.Equal("Could not join this team: TEAM IS FULL", reply)
+		assert.Equal("Could not join team: TEAM IS FULL", reply)
 	})
 
 	test.Run("Ready to start when two teams ready", func(test *testing.T) {

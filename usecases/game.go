@@ -128,6 +128,35 @@ func (s *GameUsecases) Bid(gameID int, playerName string, value domain.BidValue,
 	return err
 }
 
+func (s *GameUsecases) Pass(gameID int, playerName string) error {
+	game, err := s.Repo.GetGame(gameID)
+	if err != nil {
+		return err
+	}
+
+	err = game.Pass(playerName)
+	if err != nil {
+		return err
+	}
+
+	err = s.Repo.UpdateGame(game)
+	return err
+}
+
+func (s *GameUsecases) Coinche(gameID int, playerName string) error {
+	game, err := s.Repo.GetGame(gameID)
+	if err != nil {
+		return err
+	}
+
+	err = game.Coinche(playerName)
+	if err != nil {
+		return err
+	}
+	err = s.Repo.UpdateGame(game)
+	return err
+}
+
 func NewGameUsecases(repository GameRepositoryInterface) *GameUsecases {
 	return &GameUsecases{Repo: repository}
 }

@@ -9,6 +9,7 @@ const (
 	ErrNotBidding         = "NOT IN BIDDING PHASE"
 	ErrBidTooSmall        = "BID IS TOO SMALL"
 	ErrNotYourTurn        = "NOT YOUR TURN"
+	ErrNotYourTeamTurn    = "NOT YOUR TEAM TURN"
 	ErrHasBeenCoinched    = "HAS BEEN COINCHED"
 	ErrBiddingItsOwnColor = "BIDDING ITS OWN COLOR"
 	ErrNoBidYet           = "NO BID YET"
@@ -168,6 +169,7 @@ func (game *Game) PlaceBid(player string, value BidValue, color Color) error {
 		Coinche: 0,
 	}
 
+	game.rotateOrder()
 	return nil
 }
 
@@ -176,12 +178,19 @@ func (game *Game) Pass(player string) error {
 		return errors.New(ErrNotBidding)
 	}
 
-	err := game.checkPlayerTurn(player)
-	if err != nil {
-		return err
-	}
-
 	lastBid, maxValue := game.getLastBid()
+
+	if lastBid.Coinche > 0 && lastBid.Pass == 0 { // In this case any player of the team can pass
+		err := game.checkTeamTurn(player)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := game.checkPlayerTurn(player)
+		if err != nil {
+			return err
+		}
+	}
 
 	game.Bids[maxValue] = Bid{
 		Player:  lastBid.Player,
@@ -193,18 +202,24 @@ func (game *Game) Pass(player string) error {
 	if lastBid.Coinche > 0 {
 		if lastBid.Pass+1 > 1 {
 			game.startPlaying()
+			return nil
 		}
 
-		game.rotateOrder()
-		game.rotateOrder()
-	} else {
-		if lastBid.Pass+1 > 3 {
-			game.startPlaying()
+		if game.Players[player].Order == 1 {
+			game.rotateOrder()
+			game.rotateOrder() // If the player to pass was the correct one (1) we rotate twice so the second player of the same team can play.
 		}
+		// If the player was other one (3) we do not rotate because the other player of the same team is already 1.
 
-		game.rotateOrder()
+		return nil
 	}
 
+	if lastBid.Pass+1 > 3 {
+		game.startPlaying()
+		return nil
+	}
+
+	game.rotateOrder()
 	return nil
 }
 

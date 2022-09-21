@@ -40,6 +40,12 @@ type socketHandler struct {
 	player       *player
 }
 
+func (s *socketHandler) SendErrorMessageOrPanic(message string, err error) {
+	errorMessage := fmt.Sprint(message, err)
+	err = SendMessage(s.connection, errorMessage)
+	utilities.PanicIfErr(err)
+}
+
 func (s *socketHandler) leave(game domain.Game) {
 	err := s.gameUsecases.LeaveGame(s.gameID, s.playerName)
 	if err != nil {
@@ -58,35 +64,30 @@ func (s *socketHandler) leave(game domain.Game) {
 func (s *socketHandler) joinTeam(content string) {
 	err := s.gameUsecases.JoinTeam(s.gameID, s.playerName, content)
 	if err != nil {
-		errorMessage := fmt.Sprint("Could not join this team: ", err)
-		err = SendMessage(s.connection, errorMessage)
-		utilities.PanicIfErr(err)
+		s.SendErrorMessageOrPanic("Could not join team: ", err)
 		return
 	}
+
 	game, err := s.gameUsecases.GetGame(s.gameID)
 	if err != nil {
-		errorMessage := fmt.Sprint("Could not get updated game: ", err)
-		err := SendMessage(s.connection, errorMessage)
-		utilities.PanicIfErr(err)
+		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
 		return
 	}
+
 	broadcastGameOrPanic(game, s.player.hub)
 }
 
 func (s socketHandler) startGame(content string) {
 	err := s.gameUsecases.StartGame(s.gameID)
 	if err != nil {
-		errorMessage := fmt.Sprint("Could not start the game: ", err)
-		err = SendMessage(s.connection, errorMessage)
-		utilities.PanicIfErr(err)
+		s.SendErrorMessageOrPanic("Could not start game: ", err)
 		return
 	}
+
 	game, err := s.gameUsecases.GetGame(s.gameID)
 
 	if err != nil {
-		errorMessage := fmt.Sprint("Could not get updated game: ", err)
-		err := SendMessage(s.connection, errorMessage)
-		utilities.PanicIfErr(err)
+		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
 		return
 	}
 
@@ -94,39 +95,48 @@ func (s socketHandler) startGame(content string) {
 }
 
 func (s socketHandler) bid(content string) {
-	array := strings.Split(content, ",")
-	if len(array) != 2 {
-		err := SendMessage(s.connection, "Invalid bid")
-		utilities.PanicIfErr(err)
-		return
+	if content == "pass" {
+		err := s.gameUsecases.Pass(s.gameID, s.playerName)
+		if err != nil {
+			s.SendErrorMessageOrPanic("Could not pass: ", err)
+			return
+		}
+	} else if content == "coinche" {
+		err := s.gameUsecases.Coinche(s.gameID, s.playerName)
+		if err != nil {
+			s.SendErrorMessageOrPanic("Could not coinche: ", err)
+			return
+		}
+	} else {
+
+		array := strings.Split(content, ",")
+		if len(array) != 2 {
+			err := SendMessage(s.connection, "Invalid bid")
+			utilities.PanicIfErr(err)
+			return
+		}
+
+		colorString := array[0]
+		valueString := array[1]
+		valueInt, err := strconv.Atoi(valueString)
+		if err != nil {
+			s.SendErrorMessageOrPanic("Could not parse bid value:", err)
+			return
+		}
+
+		bidColor := domain.Color(colorString)
+		bidValue := domain.BidValue(valueInt)
+
+		err = s.gameUsecases.Bid(s.gameID, s.playerName, bidValue, bidColor)
+		if err != nil {
+			s.SendErrorMessageOrPanic("Could not bid: ", err)
+			return
+		}
 	}
 
-	colorString := array[0]
-	valueString := array[1]
-	valueInt, err := strconv.Atoi(valueString)
-	if err != nil {
-		errorMessage := fmt.Sprint("Could not parse bid value: ", err)
-		err = SendMessage(s.connection, errorMessage)
-		utilities.PanicIfErr(err)
-		return
-	}
-
-	bidColor := domain.Color(colorString)
-	bidValue := domain.BidValue(valueInt)
-
-	err = s.gameUsecases.Bid(s.gameID, s.playerName, bidValue, bidColor)
-	if err != nil {
-		errorMessage := fmt.Sprint("Could not bid: ", err)
-		err = SendMessage(s.connection, errorMessage)
-		utilities.PanicIfErr(err)
-		return
-	}
 	game, err := s.gameUsecases.GetGame(s.gameID)
-
 	if err != nil {
-		errorMessage := fmt.Sprint("Could not get updated game: ", err)
-		err := SendMessage(s.connection, errorMessage)
-		utilities.PanicIfErr(err)
+		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
 		return
 	}
 

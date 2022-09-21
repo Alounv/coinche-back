@@ -180,12 +180,12 @@ func TestCoinche(test *testing.T) {
 		err := game.Coinche("P3")
 
 		assert.Error(err)
-		assert.Equal(ErrNotYourTurn, err.Error())
+		assert.Equal(ErrNotYourTeamTurn, err.Error())
 
 		err = game.Coinche("P1")
 
 		assert.Error(err)
-		assert.Equal(ErrNotYourTurn, err.Error())
+		assert.Equal(ErrNotYourTeamTurn, err.Error())
 	})
 
 	test.Run("should be able to coinche several times", func(t *testing.T) {

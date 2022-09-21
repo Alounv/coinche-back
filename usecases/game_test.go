@@ -108,9 +108,41 @@ func TestGameService(test *testing.T) {
 		game, err := gameUsecases.GetGame(0)
 
 		assert.NoError(err)
-		assert.Equal(0, game.Bids[80].Coinche)
 		assert.Equal(domain.Spade, game.Bids[80].Color)
 		assert.Equal("P1", game.Bids[80].Player)
+
 		assert.Equal(0, game.Bids[80].Pass)
+		assert.Equal(0, game.Bids[80].Coinche)
+
+		assert.Equal(1, game.Players["P3"].Order)
+		assert.Equal(2, game.Players["P2"].Order)
+		assert.Equal(3, game.Players["P4"].Order)
+		assert.Equal(4, game.Players["P1"].Order)
+	})
+
+	test.Run("can pass", func(test *testing.T) {
+		err := gameUsecases.Pass(0, "P3")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		game, err := gameUsecases.GetGame(0)
+
+		assert.NoError(err)
+		assert.Equal(1, game.Bids[80].Pass)
+		assert.Equal(0, game.Bids[80].Coinche)
+	})
+
+	test.Run("can coinche", func(test *testing.T) {
+		err := gameUsecases.Coinche(0, "P1")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		game, err := gameUsecases.GetGame(0)
+
+		assert.NoError(err)
+		assert.Equal(0, game.Bids[80].Pass)
+		assert.Equal(1, game.Bids[80].Coinche)
 	})
 }
