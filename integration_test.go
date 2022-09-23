@@ -7,6 +7,7 @@ import (
 	"coinche/usecases"
 	"coinche/utilities"
 	testUtilities "coinche/utilities/test"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -36,6 +37,7 @@ type IntegrationTestSuite struct {
 	connection3    *websocket.Conn
 	connection4    *websocket.Conn
 	hub            *api.Hub
+	lastTestGame   domain.Game
 }
 
 func TestIntegrationSuite(test *testing.T) {
@@ -310,6 +312,11 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal("P3", got.Bids[domain.Ninety].Player)
 
 		assert.Equal(domain.Playing, got.Phase)
+		assert.Equal(1, got.Players["P1"].Order)
+		assert.Equal(8, len(got.Players["P1"].Hand))
+		fmt.Println(got.Players["P1"].Hand)
+
+		s.lastTestGame = got
 	})
 
 	// TODO: TEST PLAY CARDS
@@ -320,4 +327,33 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 	// TODO: TEST SCORES ON MULTIPLE
 
+}
+
+func (s *IntegrationTestSuite) TestPlayGame() {
+	test := s.T()
+	assert := assert.New(test)
+	game := s.lastTestGame
+
+	test.Run("can play cards", func(test *testing.T) {
+		playerHand := game.Players["P1"].Hand
+		card := string(playerHand[0])
+
+		err := api.SendMessage(s.connection1, fmt.Sprint("play: ", card))
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		api.ReceiveMultipleGameOrFatal(s.connection1, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
+
+		got := api.ReceiveGameOrFatal(s.connection4, test)
+
+		// FIXME:	assert.Equal(1, len(got.Turns))
+
+		assert.Equal(7, len(got.Players["P1"].Hand))
+		assert.Equal(8, len(got.Players["P2"].Hand))
+		assert.Equal(8, len(got.Players["P3"].Hand))
+		assert.Equal(8, len(got.Players["P4"].Hand))
+	})
 }

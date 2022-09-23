@@ -145,4 +145,42 @@ func TestGameService(test *testing.T) {
 		assert.Equal(0, game.Bids[80].Pass)
 		assert.Equal(1, game.Bids[80].Coinche)
 	})
+
+	test.Run("can go to playing phase", func(test *testing.T) {
+		err := gameUsecases.Pass(0, "P3")
+		if err != nil {
+			test.Fatal(err)
+		}
+		err = gameUsecases.Pass(0, "P4")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		game, err := gameUsecases.GetGame(0)
+
+		assert.NoError(err)
+		assert.Equal(domain.Playing, game.Phase)
+		assert.Equal(0, len(game.Deck))
+		assert.Equal(8, len(game.Players["P1"].Hand))
+		assert.Equal(8, len(game.Players["P2"].Hand))
+		assert.Equal(8, len(game.Players["P3"].Hand))
+		assert.Equal(8, len(game.Players["P4"].Hand))
+	})
+
+	test.Run("can play a card", func(test *testing.T) {
+		playerHand := game.Players["P1"].Hand
+		card := playerHand[0]
+		err := gameUsecases.PlayCard(0, "P1", card)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		game, err := gameUsecases.GetGame(0)
+
+		assert.NoError(err)
+		assert.Equal(7, len(game.Players["P1"].Hand))
+		assert.Equal(8, len(game.Players["P2"].Hand))
+		assert.Equal(8, len(game.Players["P3"].Hand))
+		assert.Equal(8, len(game.Players["P4"].Hand))
+	})
 }

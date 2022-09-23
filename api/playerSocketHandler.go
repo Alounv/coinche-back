@@ -11,6 +11,43 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var (
+	cards = map[string]domain.CardID{
+		"7-club":        domain.C_7,
+		"8-club":        domain.C_8,
+		"9-club":        domain.C_9,
+		"10-club":       domain.C_10,
+		"jack-club":     domain.C_J,
+		"queen-club":    domain.C_Q,
+		"king-club":     domain.C_K,
+		"as-club":       domain.C_A,
+		"7-diamond":     domain.D_7,
+		"8-diamond":     domain.D_8,
+		"9-diamond":     domain.D_9,
+		"10-diamond":    domain.D_10,
+		"jack-diamond":  domain.D_J,
+		"queen-diamond": domain.D_Q,
+		"king-diamond":  domain.D_K,
+		"as-diamond":    domain.D_A,
+		"7-heart":       domain.H_7,
+		"8-heart":       domain.H_8,
+		"9-heart":       domain.H_9,
+		"10-heart":      domain.H_10,
+		"jack-heart":    domain.H_J,
+		"queen-heart":   domain.H_Q,
+		"king-heart":    domain.H_K,
+		"as-heart":      domain.H_A,
+		"7-spade":       domain.S_7,
+		"8-spade":       domain.S_8,
+		"9-spade":       domain.S_9,
+		"10-spade":      domain.S_10,
+		"jack-spade":    domain.S_J,
+		"queen-spade":   domain.S_Q,
+		"king-spade":    domain.S_K,
+		"as-spade":      domain.S_A,
+	}
+)
+
 func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, gameID int, playerName string) domain.Game {
 	game, err := usecases.JoinGame(gameID, playerName)
 	if err != nil {
@@ -143,6 +180,29 @@ func (s socketHandler) bid(content string) {
 	broadcastGameOrPanic(game, s.player.hub)
 }
 
+func (s socketHandler) play(content string) {
+	card, ok := cards[content]
+	if !ok {
+		err := SendMessage(s.connection, "Invalid card")
+		utilities.PanicIfErr(err)
+		return
+	}
+
+	err := s.gameUsecases.PlayCard(s.gameID, s.playerName, card)
+	if err != nil {
+		s.SendErrorMessageOrPanic("Could not play: ", err)
+		return
+	}
+
+	game, err := s.gameUsecases.GetGame(s.gameID)
+	if err != nil {
+		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
+		return
+	}
+
+	broadcastGameOrPanic(game, s.player.hub)
+}
+
 func PlayerSocketHandler(
 	connection *websocket.Conn,
 	gameID int,
@@ -189,6 +249,11 @@ func PlayerSocketHandler(
 		case "bid":
 			{
 				socketHandler.bid(content)
+				break
+			}
+		case "play":
+			{
+				socketHandler.play(content)
 				break
 			}
 		default:

@@ -24,6 +24,7 @@ func (repo *MockGameRepo) GetGame(gameID int) (domain.Game, error) {
 	if !ok {
 		return domain.Game{}, errors.New("GAME NOT FOUND")
 	}
+
 	return game, nil
 }
 

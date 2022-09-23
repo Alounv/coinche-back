@@ -157,6 +157,20 @@ func (s *GameUsecases) Coinche(gameID int, playerName string) error {
 	return err
 }
 
+func (s *GameUsecases) PlayCard(gameID int, playerName string, card domain.CardID) error {
+	game, err := s.Repo.GetGame(gameID)
+	if err != nil {
+		return err
+	}
+
+	err = game.Play(playerName, card)
+	if err != nil {
+		return err
+	}
+	err = s.Repo.UpdateGame(game)
+	return err
+}
+
 func NewGameUsecases(repository GameRepositoryInterface) *GameUsecases {
 	return &GameUsecases{Repo: repository}
 }

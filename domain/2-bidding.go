@@ -89,11 +89,8 @@ func (game *Game) rotateInitialOrder() {
 
 func (game *Game) resetOrderAsInitialOrder() {
 	for name, player := range game.Players {
-		game.Players[name] = Player{
-			Team:         player.Team,
-			Order:        player.InitialOrder,
-			InitialOrder: player.InitialOrder,
-		}
+		player.Order = player.InitialOrder
+		game.Players[name] = player
 	}
 }
 
