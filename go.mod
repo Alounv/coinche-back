@@ -3,6 +3,7 @@ module coinche
 go 1.17
 
 require (
+	github.com/fergusstrange/embedded-postgres v1.18.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jmoiron/sqlx v1.3.4
@@ -10,7 +11,10 @@ require (
 	github.com/stretchr/testify v1.7.0
 )
 
-require github.com/lib/pq v1.10.4 // indirect
+require (
+	github.com/lib/pq v1.10.7 // indirect
+	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
+)
 
 require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
@@ -37,7 +41,6 @@ require (
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect

@@ -4,7 +4,6 @@ import (
 	"coinche/domain"
 	"coinche/utilities"
 	testUtilities "coinche/utilities/test"
-	"os"
 	"testing"
 	"time"
 
@@ -113,9 +112,8 @@ func TestGameRepo(test *testing.T) {
 	assert := assert.New(test)
 	dbName := "testgamerepodb"
 	utilities.LoadEnv("../.env")
-	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
 
-	db := testUtilities.CreateDb(connectionInfo, dbName)
+	db, postgres := testUtilities.CreateDb(dbName)
 
 	repository, err := NewGameRepositoryFromDb(db)
 	if err != nil {
@@ -190,17 +188,14 @@ func TestGameRepo(test *testing.T) {
 	})
 
 	test.Cleanup(func() {
-		testUtilities.DropDb(connectionInfo, dbName, db)
+		testUtilities.DropDb(postgres, dbName, db)
 	})
 }
 
 func TestGameRepoWithInitialData(test *testing.T) {
 	assert := assert.New(test)
 	dbName := "testgamerepowithinitialdatadb"
-	utilities.LoadEnv("../.env")
-	connectionInfo := os.Getenv("SQLX_POSTGRES_INFO")
-
-	db := testUtilities.CreateDb(connectionInfo, dbName)
+	db, postgres := testUtilities.CreateDb(dbName)
 
 	repository, err := NewGameRepositoryWithData(db)
 	if err != nil {
@@ -332,7 +327,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 	})
 
 	test.Cleanup(func() {
-		testUtilities.DropDb(connectionInfo, dbName, db)
+		testUtilities.DropDb(postgres, dbName, db)
 	})
 }
 

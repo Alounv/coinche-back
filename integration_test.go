@@ -5,15 +5,14 @@ import (
 	"coinche/domain"
 	repository "coinche/repository"
 	"coinche/usecases"
-	"coinche/utilities"
 	testUtilities "coinche/utilities/test"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 
+	epg "github.com/fergusstrange/embedded-postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/jmoiron/sqlx"
@@ -23,21 +22,21 @@ import (
 
 type IntegrationTestSuite struct {
 	suite.Suite
-	db             *sqlx.DB
-	connectionInfo string
-	dbName         string
-	router         *gin.Engine
-	gameUsecases   *usecases.GameUsecases
-	server1        *httptest.Server
-	server2        *httptest.Server
-	server3        *httptest.Server
-	server4        *httptest.Server
-	connection1    *websocket.Conn
-	connection2    *websocket.Conn
-	connection3    *websocket.Conn
-	connection4    *websocket.Conn
-	hub            *api.Hub
-	lastTestGame   domain.Game
+	db           *sqlx.DB
+	dbName       string
+	router       *gin.Engine
+	gameUsecases *usecases.GameUsecases
+	server1      *httptest.Server
+	server2      *httptest.Server
+	server3      *httptest.Server
+	server4      *httptest.Server
+	connection1  *websocket.Conn
+	connection2  *websocket.Conn
+	connection3  *websocket.Conn
+	connection4  *websocket.Conn
+	hub          *api.Hub
+	lastTestGame domain.Game
+	postgres     *epg.EmbeddedPostgres
 }
 
 func TestIntegrationSuite(test *testing.T) {
@@ -45,11 +44,8 @@ func TestIntegrationSuite(test *testing.T) {
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
-	utilities.LoadEnv("")
-	s.connectionInfo = os.Getenv("SQLX_POSTGRES_INFO")
 	s.dbName = "testdb"
-
-	s.db = testUtilities.CreateDb(s.connectionInfo, s.dbName)
+	s.db, s.postgres = testUtilities.CreateDb(s.dbName)
 
 	gameRepository, err := repository.NewGameRepositoryFromDb(s.db)
 	if err != nil {
@@ -62,7 +58,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	testUtilities.DropDb(s.connectionInfo, s.dbName, s.db)
+	testUtilities.DropDb(s.postgres, s.dbName, s.db)
 	s.server1.Close()
 	s.server2.Close()
 	s.server3.Close()
@@ -71,6 +67,9 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.connection2.Close()
 	s.connection3.Close()
 	s.connection4.Close()
+
+	err := s.postgres.Stop()
+	fmt.Println(err)
 }
 
 func (s *IntegrationTestSuite) TestCreateGame() {
