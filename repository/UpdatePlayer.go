@@ -14,8 +14,9 @@ func updatePlayer(tx *sqlx.Tx, gameID int, playerName string, player domain.Play
 
 	_, err = tx.Exec(
 		`
-    INSERT INTO player (gameid, name, team, initialOrder, cOrder, hand) 
-    VALUES ($1, $2, $3, $4, $5, $6)
+    UPDATE player
+    SET gameid =$1, name = $2, team = $3, initialOrder = $4, cOrder = $5, hand = $6
+    WHERE gameid = $1 AND name = $2
     `,
 		gameID,
 		playerName,

@@ -279,9 +279,35 @@ func TestGameRepoWithInitialData(test *testing.T) {
 				"P3": {Hand: []domain.CardID{}},
 				"P4": {Hand: []domain.CardID{}},
 			},
+			Turns: []domain.Turn{
+				{Plays: []domain.Play{
+					{PlayerName: "P1", Card: domain.C_7},
+					{PlayerName: "P2", Card: domain.C_10},
+				}, Winner: "P4"},
+			},
 		}
 
 		err := repository.UpdateGame(want)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		want.Turns = []domain.Turn{
+			{Plays: []domain.Play{
+				{PlayerName: "P1", Card: domain.C_7},
+				{PlayerName: "P2", Card: domain.C_10},
+				{PlayerName: "P3", Card: domain.C_K},
+				{PlayerName: "P4", Card: domain.H_9},
+			}, Winner: "P4"},
+			{Plays: []domain.Play{
+				{PlayerName: "P4", Card: domain.D_8},
+				{PlayerName: "P1", Card: domain.D_J},
+				{PlayerName: "P2", Card: domain.D_K},
+				{PlayerName: "P3", Card: domain.D_7},
+			}, Winner: "P2"},
+		}
+
+		err = repository.UpdateGame(want)
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -295,6 +321,14 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want.Phase, got.Phase)
 		assert.Equal(want.Bids, got.Bids)
 		assert.Equal(want.Players, got.Players)
+		assert.Equal(want.Deck, got.Deck)
+		assert.Equal(want.Bids, got.Bids)
+		assert.Equal(want.Turns[0], got.Turns[0])
+		assert.Equal(want.Turns[1], got.Turns[1])
+		/*
+			assert.Equal(want.Points, got.Points)
+			assert.Equal(want.Scores, got.Scores)
+		*/
 	})
 
 	test.Cleanup(func() {

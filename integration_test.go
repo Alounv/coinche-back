@@ -349,7 +349,7 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 
 		got := api.ReceiveGameOrFatal(s.connection4, test)
 
-		// FIXME:	assert.Equal(1, len(got.Turns))
+		assert.Equal(1, len(got.Turns))
 
 		assert.Equal(7, len(got.Players["P1"].Hand))
 		assert.Equal(8, len(got.Players["P2"].Hand))

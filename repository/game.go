@@ -42,6 +42,7 @@ CREATE TABLE bid (
 var turnSchema = `
 CREATE TABLE turn (
 	id serial PRIMARY KEY NOT NULL,
+  position integer NOT NULL,
 	gameid integer NOT NULL REFERENCES game(id),
 	winner  text NOT NULL,
 	plays json NOT NULL DEFAULT '[]'

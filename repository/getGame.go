@@ -73,7 +73,7 @@ func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 		game.Bids[bidValue] = bid
 	}
 
-	rows, err = tx.Query(`SELECT winner, plays FROM turn WHERE gameid=$1`, gameID)
+	rows, err = tx.Query(`SELECT winner, plays FROM turn WHERE gameid=$1 ORDER BY position`, gameID)
 	if err != nil {
 		return domain.Game{}, err
 	}

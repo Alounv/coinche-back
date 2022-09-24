@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func (s *GameRepository) CreateBids(tx *sqlx.Tx, gameID int, bids map[domain.BidValue]domain.Bid) error {
+func createBids(tx *sqlx.Tx, gameID int, bids map[domain.BidValue]domain.Bid) error {
 	for bidValue, bid := range bids {
 		_, err := tx.Exec(
 			`
@@ -22,6 +22,33 @@ func (s *GameRepository) CreateBids(tx *sqlx.Tx, gameID int, bids map[domain.Bid
 			bid.Color,
 			bid.Pass,
 		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func createTurn(turn domain.Turn, tx *sqlx.Tx, gameID int, position int) error {
+	var plays []byte
+	plays, err := json.Marshal(turn.Plays)
+	utilities.PanicIfErr(err)
+	_, err = tx.Exec(
+		`
+			INSERT INTO turn (gameid, winner, plays, position)
+			VALUES ($1, $2, $3, $4)
+			`,
+		gameID,
+		turn.Winner,
+		plays,
+		position,
+	)
+	return err
+}
+
+func createTurns(tx *sqlx.Tx, gameID int, turns []domain.Turn) error {
+	for position, turn := range turns {
+		err := createTurn(turn, tx, gameID, position)
 		if err != nil {
 			return err
 		}
@@ -81,28 +108,14 @@ func (s *GameRepository) createAGame(game domain.Game, tx *sqlx.Tx) (int, error)
 		}
 	}
 
-	err = s.CreateBids(tx, gameID, game.Bids)
+	err = createBids(tx, gameID, game.Bids)
 	if err != nil {
 		return 0, err
 	}
 
-	for _, turn := range game.Turns {
-		var plays []byte
-		plays, err = json.Marshal(turn.Plays)
-		utilities.PanicIfErr(err)
-		_, err = tx.Exec(
-			`
-			INSERT INTO turn (gameid, winner, plays) 
-			VALUES ($1, $2, $3)
-			`,
-			gameID,
-			turn.Winner,
-			plays,
-		)
-
-		if err != nil {
-			return 0, err
-		}
+	err = createTurns(tx, gameID, game.Turns)
+	if err != nil {
+		return 0, err
 	}
 
 	for team, points := range game.Points {
