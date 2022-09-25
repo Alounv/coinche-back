@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sort"
+	"strconv"
 	"testing"
 
 	epg "github.com/fergusstrange/embedded-postgres"
@@ -44,7 +46,7 @@ func CreateDb(dbName string) (*sqlx.DB, *epg.EmbeddedPostgres) {
 
 	err := postgres.Start()
 	if err != nil {
-		panic(err)
+		fmt.Println("Could not start postgres: ", err)
 	}
 
 	userDb := sqlx.MustOpen("pgx", connectionInfo)
@@ -88,4 +90,34 @@ func DecodeToGame(buf *bytes.Buffer, test *testing.T) domain.Game {
 		test.Fatalf("Unable to parse response from gameAPIs %q into %q, '%v'", buf, "Game", err)
 	}
 	return got
+}
+
+func GetSortedPlayersNameByOrder(players map[string]domain.Player) []string {
+	type nameOrder struct {
+		name  string
+		order int
+	}
+
+	ss := []nameOrder{}
+	for name, player := range players {
+		ss = append(ss, nameOrder{name, player.Order})
+	}
+
+	sort.Slice(ss, func(i, j int) bool {
+		return ss[i].order < ss[j].order
+	})
+
+	sortedPlayerNames := []string{}
+	for _, pair := range ss {
+		sortedPlayerNames = append(sortedPlayerNames, pair.name)
+	}
+	return sortedPlayerNames
+}
+
+func GetPlayerIndexFromNameOrFatal(name string, test *testing.T) int {
+	playerNb, err := strconv.Atoi(name[1:2])
+	if err != nil {
+		test.Fatal(err)
+	}
+	return playerNb - 1
 }

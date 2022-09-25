@@ -133,7 +133,7 @@ func TestBidding(test *testing.T) {
 		err := game.PlaceBid("P2", Hundred, Club)
 
 		assert.Error(err)
-		assert.Equal(ErrNotYourTurn, err.Error())
+		assert.Equal(ErrNotYourTurn+" P2 2", err.Error())
 	})
 
 	test.Run("order should rotate correctly", func(test *testing.T) {

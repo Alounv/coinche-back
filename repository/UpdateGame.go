@@ -4,7 +4,6 @@ import (
 	"coinche/domain"
 	"coinche/utilities"
 	"encoding/json"
-	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -13,7 +12,6 @@ func getCurrentTurnsCount(tx *sqlx.Tx, gameID int) (int, error) {
 	currentTurnsCount := 0
 	row := tx.QueryRow(`SELECT COUNT (*) FROM turn WHERE gameid=$1`, gameID)
 	err := row.Scan(&currentTurnsCount)
-	fmt.Println("GET COUNT", currentTurnsCount, err)
 	return currentTurnsCount, err
 }
 

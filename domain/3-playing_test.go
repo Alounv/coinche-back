@@ -74,7 +74,7 @@ func TestPlaying(test *testing.T) {
 		err := game.Play("P2", C_10)
 
 		assert.Error(err)
-		assert.Equal(ErrNotYourTurn, err.Error())
+		assert.Equal(ErrNotYourTurn+" P2 2", err.Error())
 	})
 	test.Run("should be able to play a card", func(test *testing.T) {
 		game := newPlayingGame()

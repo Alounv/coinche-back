@@ -51,7 +51,7 @@ var (
 func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, gameID int, playerName string) domain.Game {
 	game, err := usecases.JoinGame(gameID, playerName)
 	if err != nil {
-		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err))
+		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err), "S")
 		utilities.PanicIfErr(err)
 		connection.Close()
 		return domain.Game{}
@@ -79,7 +79,7 @@ type socketHandler struct {
 
 func (s *socketHandler) SendErrorMessageOrPanic(message string, err error) {
 	errorMessage := fmt.Sprint(message, err)
-	err = SendMessage(s.connection, errorMessage)
+	err = SendMessage(s.connection, errorMessage, "S")
 	utilities.PanicIfErr(err)
 }
 
@@ -89,7 +89,7 @@ func (s *socketHandler) leave(game domain.Game) {
 		fmt.Println("Could not leave this game: ", err)
 		return
 	}
-	err = SendMessage(s.connection, "Has left the game")
+	err = SendMessage(s.connection, "Has left the game", "S")
 	utilities.PanicIfErr(err)
 	broadcastGameOrPanic(game, s.player.hub)
 
@@ -148,7 +148,7 @@ func (s socketHandler) bid(content string) {
 
 		array := strings.Split(content, ",")
 		if len(array) != 2 {
-			err := SendMessage(s.connection, "Invalid bid")
+			err := SendMessage(s.connection, "Invalid bid", "S")
 			utilities.PanicIfErr(err)
 			return
 		}
@@ -183,7 +183,7 @@ func (s socketHandler) bid(content string) {
 func (s socketHandler) play(content string) {
 	card, ok := cards[content]
 	if !ok {
-		err := SendMessage(s.connection, "Invalid card")
+		err := SendMessage(s.connection, "Invalid card", "S")
 		utilities.PanicIfErr(err)
 		return
 	}
@@ -258,7 +258,7 @@ func PlayerSocketHandler(
 			}
 		default:
 			{
-				err = SendMessage(connection, "Message not understood by the server")
+				err = SendMessage(connection, "Message not understood by the server", "S")
 				utilities.PanicIfErr(err)
 				break
 			}

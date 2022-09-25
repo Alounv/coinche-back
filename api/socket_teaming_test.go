@@ -108,14 +108,14 @@ func TestSocketTeaming(test *testing.T) {
 	c1, c2, c3, c4, s1, s2, s3, s4 := CreateConnections(test, gameUsecases, 0)
 
 	test.Run("Join a team", func(test *testing.T) {
-		err := SendMessage(c1, "joinTeam: AAA")
+		err := SendMessage(c1, "joinTeam: AAA", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
 
 		time.Sleep(50 * time.Millisecond) // prevents concurrent map read and map write
 
-		err = SendMessage(c2, "joinTeam: AAA")
+		err = SendMessage(c2, "joinTeam: AAA", "P2")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -132,7 +132,7 @@ func TestSocketTeaming(test *testing.T) {
 	})
 
 	test.Run("Should fail when joining a team already full", func(test *testing.T) {
-		err := SendMessage(c3, "joinTeam: AAA")
+		err := SendMessage(c3, "joinTeam: AAA", "P3")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -143,14 +143,14 @@ func TestSocketTeaming(test *testing.T) {
 	})
 
 	test.Run("Ready to start when two teams ready", func(test *testing.T) {
-		err := SendMessage(c3, "joinTeam: BBB")
+		err := SendMessage(c3, "joinTeam: BBB", "P3")
 		if err != nil {
 			test.Fatal(err)
 		}
 
 		time.Sleep(50 * time.Millisecond) // prevents concurent map read and map write
 
-		err = SendMessage(c4, "joinTeam: BBB")
+		err = SendMessage(c4, "joinTeam: BBB", "P4")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -167,7 +167,7 @@ func TestSocketTeaming(test *testing.T) {
 	})
 
 	test.Run("Can start the game", func(test *testing.T) {
-		err := SendMessage(c3, "start")
+		err := SendMessage(c3, "start", "P3")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -180,7 +180,7 @@ func TestSocketTeaming(test *testing.T) {
 	})
 
 	test.Run("Can place a bid", func(test *testing.T) {
-		err := SendMessage(c1, "bid: spade,80")
+		err := SendMessage(c1, "bid: spade,80", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}

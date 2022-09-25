@@ -32,7 +32,7 @@ func TestFailingSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Close the connection when failing to join", func(test *testing.T) {
-		err := SendMessage(connection, "hello")
+		err := SendMessage(connection, "hello", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -126,7 +126,7 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Can send a message", func(test *testing.T) {
-		err := SendMessage(c1, "hello")
+		err := SendMessage(c1, "hello", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -136,7 +136,7 @@ func TestSocketHandler(test *testing.T) {
 	})
 
 	test.Run("Can leave the game", func(test *testing.T) {
-		err := SendMessage(c1, "leave")
+		err := SendMessage(c1, "leave", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -147,7 +147,7 @@ func TestSocketHandler(test *testing.T) {
 
 	test.Run("Can close the connection", func(test *testing.T) {
 		c1.Close()
-		err := SendMessage(c1, "hello")
+		err := SendMessage(c1, "hello", "P1")
 
 		assert.NotNil(err)
 	})

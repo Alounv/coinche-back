@@ -20,6 +20,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const testLogPrefix = "\n\n ****** TEST: "
+
 type IntegrationTestSuite struct {
 	suite.Suite
 	db           *sqlx.DB
@@ -78,12 +80,14 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	response := httptest.NewRecorder()
 
 	test.Run("create game", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "create game")
 		s.router.ServeHTTP(httptest.NewRecorder(), testUtilities.NewCreateGameRequest(test, "NEW GAME"))
 
 		assert.Equal(http.StatusOK, response.Code)
 	})
 
 	test.Run("get game", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "get game")
 		s.router.ServeHTTP(response, testUtilities.NewGetGameRequest(test, 1))
 
 		got := testUtilities.DecodeToGame(response.Body, test)
@@ -97,6 +101,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("list game", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "list game")
 		request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)
 		s.router.ServeHTTP(response, request)
 
@@ -110,6 +115,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("join game", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "join game")
 		s.server1, s.connection1 = api.NewGameWebSocketServer(test, 1, "P1", s.hub)
 		receivedGame := api.ReceiveGameOrFatal(s.connection1, test)
 
@@ -120,7 +126,8 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("leave unstarted game", func(test *testing.T) {
-		err := api.SendMessage(s.connection1, "leave")
+		fmt.Println(testLogPrefix, "leave unstarted game")
+		err := api.SendMessage(s.connection1, "leave", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -136,6 +143,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("join back unstarted game", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "join back unstarted game")
 		s.server1, s.connection1 = api.NewGameWebSocketServer(test, 1, "P1", s.hub)
 		got := api.ReceiveGameOrFatal(s.connection1, test)
 
@@ -146,6 +154,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("other players join", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "other players join")
 		s.server2, s.connection2 = api.NewGameWebSocketServer(test, 1, "P2", s.hub)
 
 		time.Sleep(50 * time.Millisecond) // wait because if all players join at the same time, the IsFull never gets true in AddPlayer
@@ -172,7 +181,8 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("start game should return error if team not ready", func(test *testing.T) {
-		err := api.SendMessage(s.connection1, "start")
+		fmt.Println(testLogPrefix, "start game should return error if team not ready")
+		err := api.SendMessage(s.connection1, "start", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -183,19 +193,20 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("join team", func(test *testing.T) {
-		err := api.SendMessage(s.connection1, "joinTeam: Odd")
+		fmt.Println(testLogPrefix, "join game")
+		err := api.SendMessage(s.connection1, "joinTeam: Odd", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
-		err = api.SendMessage(s.connection2, "joinTeam: Even")
+		err = api.SendMessage(s.connection2, "joinTeam: Even", "P2")
 		if err != nil {
 			test.Fatal(err)
 		}
-		err = api.SendMessage(s.connection3, "joinTeam: Odd")
+		err = api.SendMessage(s.connection3, "joinTeam: Odd", "P3")
 		if err != nil {
 			test.Fatal(err)
 		}
-		err = api.SendMessage(s.connection4, "joinTeam: Even")
+		err = api.SendMessage(s.connection4, "joinTeam: Even", "P4")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -210,7 +221,8 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("start game", func(test *testing.T) {
-		err := api.SendMessage(s.connection1, "start")
+		fmt.Println(testLogPrefix, "start game")
+		err := api.SendMessage(s.connection1, "start", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -233,7 +245,8 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("place some bids", func(test *testing.T) {
-		err := api.SendMessage(s.connection1, "bid: spade,80")
+		fmt.Println(testLogPrefix, "place some bids")
+		err := api.SendMessage(s.connection1, "bid: spade,80", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -252,7 +265,8 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("place some bids with error", func(test *testing.T) {
-		err := api.SendMessage(s.connection2, "bid: heart,80")
+		fmt.Println(testLogPrefix, "place some bids with error")
+		err := api.SendMessage(s.connection2, "bid: heart,80", "P2")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -263,35 +277,36 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 	})
 
 	test.Run("can start playing", func(test *testing.T) {
-		err := api.SendMessage(s.connection2, "bid: pass")
+		fmt.Println(testLogPrefix, "can start playing")
+		err := api.SendMessage(s.connection2, "bid: pass", "P2")
 		if err != nil {
 			test.Fatal(err)
 		}
 
 		time.Sleep(50 * time.Millisecond) // wait to prevent submitting bid at the same time
 
-		err = api.SendMessage(s.connection3, "bid: spade,90")
+		err = api.SendMessage(s.connection3, "bid: spade,90", "P3")
 		if err != nil {
 			test.Fatal(err)
 		}
 
 		time.Sleep(50 * time.Millisecond)
 
-		err = api.SendMessage(s.connection2, "bid: coinche")
+		err = api.SendMessage(s.connection2, "bid: coinche", "P2")
 		if err != nil {
 			test.Fatal(err)
 		}
 
 		time.Sleep(50 * time.Millisecond)
 
-		err = api.SendMessage(s.connection3, "bid: pass")
+		err = api.SendMessage(s.connection3, "bid: pass", "P3")
 		if err != nil {
 			test.Fatal(err)
 		}
 
 		time.Sleep(50 * time.Millisecond)
 
-		err = api.SendMessage(s.connection1, "bid: pass")
+		err = api.SendMessage(s.connection1, "bid: pass", "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -334,10 +349,11 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 	game := s.lastTestGame
 
 	test.Run("can play cards", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "can play cards")
 		playerHand := game.Players["P1"].Hand
 		card := string(playerHand[0])
 
-		err := api.SendMessage(s.connection1, fmt.Sprint("play: ", card))
+		err := api.SendMessage(s.connection1, fmt.Sprint("play: ", card), "P1")
 		if err != nil {
 			test.Fatal(err)
 		}
@@ -354,5 +370,52 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 		assert.Equal(8, len(got.Players["P2"].Hand))
 		assert.Equal(8, len(got.Players["P3"].Hand))
 		assert.Equal(8, len(got.Players["P4"].Hand))
+
+		s.lastTestGame = got
+	})
+
+	test.Run("can play all cards", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "can play all cards")
+		game := s.lastTestGame
+		connections := []*websocket.Conn{s.connection1, s.connection2, s.connection3, s.connection4}
+
+		for t := 0; t < 8; t++ {
+			fmt.Println("\n TURN ", t)
+			sortedPlayerNames := testUtilities.GetSortedPlayersNameByOrder(game.Players)
+
+			for _, playerName := range sortedPlayerNames {
+				p := testUtilities.GetPlayerIndexFromNameOrFatal(playerName, test)
+				playerHand := game.Players[playerName].Hand
+
+				for c := 0; c < len(playerHand); c++ {
+					card := string(playerHand[c])
+
+					err := api.SendMessage(connections[p], fmt.Sprint("play: ", card), playerName)
+					if err != nil {
+						test.Fatal(err)
+					}
+
+					message, newGame := api.ReceiveMessageOrGameOrFatal(connections[p], test)
+
+					if message == "" { // We did not receive an error message, so we can update the game
+						api.EmtpyGamesForOtherPlayersOrFatal(sortedPlayerNames, playerName, 1, test, connections)
+						game = newGame
+						break
+					}
+				}
+			}
+		}
+
+		assert.Equal(0, len(game.Players["P1"].Hand))
+		assert.Equal(0, len(game.Players["P2"].Hand))
+		assert.Equal(0, len(game.Players["P3"].Hand))
+		assert.Equal(0, len(game.Players["P4"].Hand))
+
+		assert.Equal(8, len(game.Turns))
+
+		assert.Equal(domain.Counting, game.Phase)
+
+		s.lastTestGame = game
+		// FIXME: EMPTY MESSAGES
 	})
 }

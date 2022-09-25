@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -245,8 +246,9 @@ func NewGame(name string) Game {
 }
 
 func (game *Game) checkPlayerTurn(playerName string) error {
-	if game.Players[playerName].Order != 1 {
-		return errors.New(ErrNotYourTurn)
+	order := game.Players[playerName].Order
+	if order != 1 {
+		return errors.New(fmt.Sprint(ErrNotYourTurn, " ", playerName, " ", order))
 	}
 	return nil
 }
