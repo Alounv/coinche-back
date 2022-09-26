@@ -411,6 +411,7 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 	})
 
 	test.Run("can count points", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "can count points")
 		game := s.lastTestGame
 
 		assert.Equal(162, game.Points["Odd"]+game.Points["Even"])

@@ -14,7 +14,7 @@ func newNormalGame() Game {
 			"P1": {Team: "odd", Order: 2, InitialOrder: 1, Hand: []CardID{}},
 			"P2": {Team: "even", Order: 3, InitialOrder: 2, Hand: []CardID{}},
 			"P3": {Team: "odd", Order: 4, InitialOrder: 3, Hand: []CardID{}},
-			"P4": {Team: "even", Order: 1, InitialOrder: 4, Hand: []CardID{S_A}},
+			"P4": {Team: "even", Order: 1, InitialOrder: 4, Hand: []CardID{SA}},
 		},
 		Phase: Counting,
 		Bids: map[BidValue]Bid{
@@ -31,52 +31,52 @@ func newNormalGame() Game {
 		},
 		Turns: []Turn{
 			{[]Play{
-				{"P1", C_7},
-				{"P2", C_10},
-				{"P3", C_K},
-				{"P4", H_9},
+				{"P1", C7},
+				{"P2", C10},
+				{"P3", CK},
+				{"P4", H9},
 			}, "P4"},
 			{[]Play{
-				{"P4", D_8},
-				{"P1", D_J},
-				{"P2", D_K},
-				{"P3", D_7},
+				{"P4", D8},
+				{"P1", DJ},
+				{"P2", DK},
+				{"P3", D7},
 			}, "P2"},
 			{[]Play{
-				{"P2", C_J},
-				{"P3", C_A},
-				{"P4", H_10},
-				{"P1", C_8},
+				{"P2", CJ},
+				{"P3", CA},
+				{"P4", H10},
+				{"P1", C8},
 			}, "P4"},
 			{[]Play{
-				{"P4", D_9},
-				{"P1", D_Q},
-				{"P2", D_A},
-				{"P3", H_7},
+				{"P4", D9},
+				{"P1", DQ},
+				{"P2", DA},
+				{"P3", H7},
 			}, "P3"},
 			{[]Play{
-				{"P3", H_8},
-				{"P4", D_10},
-				{"P1", H_J},
-				{"P2", H_A},
+				{"P3", H8},
+				{"P4", D10},
+				{"P1", HJ},
+				{"P2", HA},
 			}, "P1"},
 			{[]Play{
-				{"P1", C_9},
-				{"P2", C_Q},
-				{"P3", S_9},
-				{"P4", S_Q},
+				{"P1", C9},
+				{"P2", CQ},
+				{"P3", S9},
+				{"P4", SQ},
 			}, "P2"},
 			{[]Play{
-				{"P2", S_7},
-				{"P3", S_10},
-				{"P4", S_K},
-				{"P1", H_Q},
+				{"P2", S7},
+				{"P3", S10},
+				{"P4", SK},
+				{"P1", HQ},
 			}, "P1"},
 			{[]Play{
-				{"P1", S_8},
-				{"P2", H_K},
-				{"P3", S_J},
-				{"P4", S_A},
+				{"P1", S8},
+				{"P2", HK},
+				{"P3", SJ},
+				{"P4", SA},
 			}, "P2"},
 		},
 	}
@@ -86,10 +86,10 @@ func newGameWithBelote() Game {
 	game := newNormalGame()
 	game.Turns = game.Turns[:len(game.Turns)-1]
 	game.Turns = append(game.Turns, Turn{[]Play{
-		{"P1", H_K}, // belote with H_Q
-		{"P2", S_8},
-		{"P3", S_J},
-		{"P4", S_A},
+		{"P1", HK}, // belote with H_Q
+		{"P2", S8},
+		{"P3", SJ},
+		{"P4", SA},
 	}, "P1"})
 	return game
 }
@@ -106,52 +106,52 @@ func newGameWithNoTrump() Game {
 	}
 	game.Turns = []Turn{
 		{[]Play{
-			{"P1", C_7},
-			{"P2", C_10},
-			{"P3", C_K},
-			{"P4", H_9},
+			{"P1", C7},
+			{"P2", C10},
+			{"P3", CK},
+			{"P4", H9},
 		}, "P2"},
 		{[]Play{
-			{"P4", D_8},
-			{"P1", D_J},
-			{"P2", D_K},
-			{"P3", D_7},
+			{"P4", D8},
+			{"P1", DJ},
+			{"P2", DK},
+			{"P3", D7},
 		}, "P2"},
 		{[]Play{
-			{"P2", C_J},
-			{"P3", C_A},
-			{"P4", H_10},
-			{"P1", C_8},
+			{"P2", CJ},
+			{"P3", CA},
+			{"P4", H10},
+			{"P1", C8},
 		}, "P3"},
 		{[]Play{
-			{"P4", D_9},
-			{"P1", D_Q},
-			{"P2", D_A},
-			{"P3", H_7},
+			{"P4", D9},
+			{"P1", DQ},
+			{"P2", DA},
+			{"P3", H7},
 		}, "P2"},
 		{[]Play{
-			{"P3", H_8},
-			{"P4", D_10},
-			{"P1", H_J},
-			{"P2", H_A},
+			{"P3", H8},
+			{"P4", D10},
+			{"P1", HJ},
+			{"P2", HA},
 		}, "P2"},
 		{[]Play{
-			{"P1", C_9},
-			{"P2", C_Q},
-			{"P3", S_9},
-			{"P4", S_Q},
+			{"P1", C9},
+			{"P2", CQ},
+			{"P3", S9},
+			{"P4", SQ},
 		}, "P2"},
 		{[]Play{
-			{"P2", S_7},
-			{"P3", S_10},
-			{"P4", S_K},
-			{"P1", H_Q},
+			{"P2", S7},
+			{"P3", S10},
+			{"P4", SK},
+			{"P1", HQ},
 		}, "P3"},
 		{[]Play{
-			{"P1", S_8},
-			{"P2", H_K},
-			{"P3", S_J},
-			{"P4", S_A},
+			{"P1", S8},
+			{"P2", HK},
+			{"P3", SJ},
+			{"P4", SA},
 		}, "P4"},
 	}
 	return game
@@ -169,52 +169,52 @@ func newGameWithAllTrump() Game {
 	}
 	game.Turns = []Turn{
 		{[]Play{
-			{"P1", C_7},
-			{"P2", C_10},
-			{"P3", C_K}, // first belote with C_Q
-			{"P4", H_9},
+			{"P1", C7},
+			{"P2", C10},
+			{"P3", CK}, // first belote with C_Q
+			{"P4", H9},
 		}, "P2"},
 		{[]Play{
-			{"P4", D_8},
-			{"P1", D_J},
-			{"P2", D_K}, // could be a belote but too late
-			{"P3", D_7},
+			{"P4", D8},
+			{"P1", DJ},
+			{"P2", DK}, // could be a belote but too late
+			{"P3", D7},
 		}, "P1"},
 		{[]Play{
-			{"P2", C_J},
-			{"P3", C_A},
-			{"P4", H_10},
-			{"P1", C_8},
+			{"P2", CJ},
+			{"P3", CA},
+			{"P4", H10},
+			{"P1", C8},
 		}, "P2"},
 		{[]Play{
-			{"P4", D_9},
-			{"P1", D_A},
-			{"P2", D_Q}, // could be a rebelote but too late
-			{"P3", H_7},
+			{"P4", D9},
+			{"P1", DA},
+			{"P2", DQ}, // could be a rebelote but too late
+			{"P3", H7},
 		}, "P4"},
 		{[]Play{
-			{"P3", H_8},
-			{"P4", D_10},
-			{"P1", H_J},
-			{"P2", H_A},
+			{"P3", H8},
+			{"P4", D10},
+			{"P1", HJ},
+			{"P2", HA},
 		}, "P2"},
 		{[]Play{
-			{"P1", C_9},
-			{"P2", C_Q}, // rebelote
-			{"P3", S_9},
-			{"P4", S_Q},
+			{"P1", C9},
+			{"P2", CQ}, // rebelote
+			{"P3", S9},
+			{"P4", SQ},
 		}, "P1"},
 		{[]Play{
-			{"P2", S_7},
-			{"P3", S_10},
-			{"P4", S_K},
-			{"P1", H_Q},
+			{"P2", S7},
+			{"P3", S10},
+			{"P4", SK},
+			{"P1", HQ},
 		}, "P3"},
 		{[]Play{
-			{"P1", S_8},
-			{"P2", H_K},
-			{"P3", S_J},
-			{"P4", S_A},
+			{"P1", S8},
+			{"P2", HK},
+			{"P3", SJ},
+			{"P4", SA},
 		}, "P3"},
 	}
 	return game
@@ -232,52 +232,52 @@ func newGameWithCapotLost() Game {
 	}
 	game.Turns = []Turn{
 		{[]Play{
-			{"P1", C_7},
-			{"P2", C_10},
-			{"P3", C_K},
-			{"P4", H_9},
+			{"P1", C7},
+			{"P2", C10},
+			{"P3", CK},
+			{"P4", H9},
 		}, "P4"},
 		{[]Play{
-			{"P4", D_8},
-			{"P1", D_J},
-			{"P2", D_K},
-			{"P3", D_7},
+			{"P4", D8},
+			{"P1", DJ},
+			{"P2", DK},
+			{"P3", D7},
 		}, "P2"},
 		{[]Play{
-			{"P2", C_J},
-			{"P3", C_A},
-			{"P4", H_10},
-			{"P1", C_8},
+			{"P2", CJ},
+			{"P3", CA},
+			{"P4", H10},
+			{"P1", C8},
 		}, "P4"},
 		{[]Play{
-			{"P4", D_9},
-			{"P1", D_Q},
-			{"P2", H_7},
-			{"P3", D_A},
+			{"P4", D9},
+			{"P1", DQ},
+			{"P2", H7},
+			{"P3", DA},
 		}, "P2"},
 		{[]Play{
-			{"P3", H_8},
-			{"P4", D_10},
-			{"P1", H_A},
-			{"P2", H_J},
+			{"P3", H8},
+			{"P4", D10},
+			{"P1", HA},
+			{"P2", HJ},
 		}, "P2"},
 		{[]Play{
-			{"P1", C_9},
-			{"P2", C_Q},
-			{"P3", S_9},
-			{"P4", S_Q},
+			{"P1", C9},
+			{"P2", CQ},
+			{"P3", S9},
+			{"P4", SQ},
 		}, "P2"},
 		{[]Play{
-			{"P1", S_8},
-			{"P2", H_K},
-			{"P3", S_J},
-			{"P4", S_A},
+			{"P1", S8},
+			{"P2", HK},
+			{"P3", SJ},
+			{"P4", SA},
 		}, "P2"},
 		{[]Play{
-			{"P2", S_7},
-			{"P3", S_10},
-			{"P4", S_K},
-			{"P1", H_Q},
+			{"P2", S7},
+			{"P3", S10},
+			{"P4", SK},
+			{"P1", HQ},
 		}, "P1"},
 	}
 	return game
@@ -287,10 +287,10 @@ func newGameWithCapotWon() Game {
 	game := newGameWithCapotLost()
 	game.Turns = game.Turns[:len(game.Turns)-1]
 	game.Turns = append(game.Turns, Turn{[]Play{
-		{"P2", S_7},
-		{"P3", S_10},
-		{"P4", H_Q},
-		{"P1", S_K},
+		{"P2", S7},
+		{"P3", S10},
+		{"P4", HQ},
+		{"P1", SK},
 	}, "P4"},
 	)
 	return game
@@ -304,13 +304,13 @@ func TestCountingPhase(test *testing.T) {
 		game.Phase = Playing
 		game.Turns = game.Turns[:len(game.Turns)-1]
 		game.Turns = append(game.Turns, Turn{[]Play{
-			{"P1", S_8},
-			{"P2", H_K},
-			{"P3", S_J},
+			{"P1", S8},
+			{"P2", HK},
+			{"P3", SJ},
 		}, ""},
 		)
 
-		err := game.Play("P4", S_A)
+		err := game.Play("P4", SA)
 		assert.NoError(err)
 
 		assert.Equal(Counting, game.Phase)
@@ -332,20 +332,20 @@ func TestPlayersCards(test *testing.T) {
 		game := newNormalGame()
 
 		playerCards := game.getPlayersCards()
-		assert.Equal([]CardID{H_8, D_10, H_J, H_A, S_7, S_10, S_K, H_Q}, playerCards["P1"])
-		assert.Equal([]CardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q, S_8, H_K, S_J, S_A}, playerCards["P2"])
-		assert.Equal([]CardID{D_9, D_Q, D_A, H_7}, playerCards["P3"])
-		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
+		assert.Equal([]CardID{H8, D10, HJ, HA, S7, S10, SK, HQ}, playerCards["P1"])
+		assert.Equal([]CardID{D8, DJ, DK, D7, C9, CQ, S9, SQ, S8, HK, SJ, SA}, playerCards["P2"])
+		assert.Equal([]CardID{D9, DQ, DA, H7}, playerCards["P3"])
+		assert.Equal([]CardID{C7, C10, CK, H9, CJ, CA, H10, C8}, playerCards["P4"])
 	})
 
 	test.Run("should count correctly in a game with BELOTE", func(test *testing.T) {
 		game := newGameWithBelote()
 
 		playerCards := game.getPlayersCards()
-		assert.Equal([]CardID{H_8, D_10, H_J, H_A, S_7, S_10, S_K, H_Q, H_K, S_8, S_J, S_A}, playerCards["P1"])
-		assert.Equal([]CardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q}, playerCards["P2"])
-		assert.Equal([]CardID{D_9, D_Q, D_A, H_7}, playerCards["P3"])
-		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8}, playerCards["P4"])
+		assert.Equal([]CardID{H8, D10, HJ, HA, S7, S10, SK, HQ, HK, S8, SJ, SA}, playerCards["P1"])
+		assert.Equal([]CardID{D8, DJ, DK, D7, C9, CQ, S9, SQ}, playerCards["P2"])
+		assert.Equal([]CardID{D9, DQ, DA, H7}, playerCards["P3"])
+		assert.Equal([]CardID{C7, C10, CK, H9, CJ, CA, H10, C8}, playerCards["P4"])
 	})
 
 	test.Run("should count correctly in a game with NO-TRUMP", func(test *testing.T) {
@@ -353,19 +353,19 @@ func TestPlayersCards(test *testing.T) {
 
 		playerCards := game.getPlayersCards()
 		assert.Equal([]CardID(nil), playerCards["P1"])
-		assert.Equal([]CardID{C_7, C_10, C_K, H_9, D_8, D_J, D_K, D_7, D_9, D_Q, D_A, H_7, H_8, D_10, H_J, H_A, C_9, C_Q, S_9, S_Q}, playerCards["P2"])
-		assert.Equal([]CardID{C_J, C_A, H_10, C_8, S_7, S_10, S_K, H_Q}, playerCards["P3"])
-		assert.Equal([]CardID{S_8, H_K, S_J, S_A}, playerCards["P4"])
+		assert.Equal([]CardID{C7, C10, CK, H9, D8, DJ, DK, D7, D9, DQ, DA, H7, H8, D10, HJ, HA, C9, CQ, S9, SQ}, playerCards["P2"])
+		assert.Equal([]CardID{CJ, CA, H10, C8, S7, S10, SK, HQ}, playerCards["P3"])
+		assert.Equal([]CardID{S8, HK, SJ, SA}, playerCards["P4"])
 	})
 
 	test.Run("should count correctly in a game with ALL-TRUMP and BELOTE (for odd team)", func(test *testing.T) {
 		game := newGameWithAllTrump()
 
 		playerCards := game.getPlayersCards()
-		assert.Equal([]CardID{D_8, D_J, D_K, D_7, C_9, C_Q, S_9, S_Q}, playerCards["P1"])
-		assert.Equal([]CardID{C_7, C_10, C_K, H_9, C_J, C_A, H_10, C_8, H_8, D_10, H_J, H_A}, playerCards["P2"])
-		assert.Equal([]CardID{S_7, S_10, S_K, H_Q, S_8, H_K, S_J, S_A}, playerCards["P3"])
-		assert.Equal([]CardID{D_9, D_A, D_Q, H_7}, playerCards["P4"])
+		assert.Equal([]CardID{D8, DJ, DK, D7, C9, CQ, S9, SQ}, playerCards["P1"])
+		assert.Equal([]CardID{C7, C10, CK, H9, CJ, CA, H10, C8, H8, D10, HJ, HA}, playerCards["P2"])
+		assert.Equal([]CardID{S7, S10, SK, HQ, S8, HK, SJ, SA}, playerCards["P3"])
+		assert.Equal([]CardID{D9, DA, DQ, H7}, playerCards["P4"])
 	})
 }
 

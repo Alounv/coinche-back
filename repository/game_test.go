@@ -19,10 +19,10 @@ func newTeamingGame() domain.Game {
 		Phase:   domain.Teaming,
 		Bids:    map[domain.BidValue]domain.Bid{},
 		Deck: []domain.CardID{
-			domain.C_7, domain.C_8, domain.C_9, domain.C_10, domain.C_J, domain.C_Q, domain.C_K, domain.C_A,
-			domain.D_7, domain.D_8, domain.D_9, domain.D_10, domain.D_J, domain.D_Q, domain.D_K, domain.D_A,
-			domain.H_7, domain.H_8, domain.H_9, domain.H_10, domain.H_J, domain.H_Q, domain.H_K, domain.H_A,
-			domain.S_7, domain.S_8, domain.S_9, domain.S_10, domain.S_J, domain.S_Q, domain.S_K, domain.S_A,
+			domain.C7, domain.C8, domain.C9, domain.C10, domain.CJ, domain.CQ, domain.CK, domain.CA,
+			domain.D7, domain.D8, domain.D9, domain.D10, domain.DJ, domain.DQ, domain.DK, domain.DA,
+			domain.H7, domain.H8, domain.H9, domain.H10, domain.HJ, domain.HQ, domain.HK, domain.HA,
+			domain.S7, domain.S8, domain.S9, domain.S10, domain.SJ, domain.SQ, domain.SK, domain.SA,
 		},
 	}
 }
@@ -57,52 +57,52 @@ func newCompleteGame() domain.Game {
 	}
 	game.Turns = []domain.Turn{
 		{Plays: []domain.Play{
-			{PlayerName: "P1", Card: domain.C_7},
-			{PlayerName: "P2", Card: domain.C_10},
-			{PlayerName: "P3", Card: domain.C_K},
-			{PlayerName: "P4", Card: domain.H_9},
+			{PlayerName: "P1", Card: domain.C7},
+			{PlayerName: "P2", Card: domain.C10},
+			{PlayerName: "P3", Card: domain.CK},
+			{PlayerName: "P4", Card: domain.H9},
 		}, Winner: "P4"},
 		{Plays: []domain.Play{
-			{PlayerName: "P4", Card: domain.D_8},
-			{PlayerName: "P1", Card: domain.D_J},
-			{PlayerName: "P2", Card: domain.D_K},
-			{PlayerName: "P3", Card: domain.D_7},
+			{PlayerName: "P4", Card: domain.D8},
+			{PlayerName: "P1", Card: domain.DJ},
+			{PlayerName: "P2", Card: domain.DK},
+			{PlayerName: "P3", Card: domain.D7},
 		}, Winner: "P2"},
 		{Plays: []domain.Play{
-			{PlayerName: "P2", Card: domain.C_J},
-			{PlayerName: "P3", Card: domain.C_A},
-			{PlayerName: "P4", Card: domain.H_10},
-			{PlayerName: "P1", Card: domain.C_8},
+			{PlayerName: "P2", Card: domain.CJ},
+			{PlayerName: "P3", Card: domain.CA},
+			{PlayerName: "P4", Card: domain.H10},
+			{PlayerName: "P1", Card: domain.C8},
 		}, Winner: "P4"},
 		{Plays: []domain.Play{
-			{PlayerName: "P4", Card: domain.D_9},
-			{PlayerName: "P1", Card: domain.D_Q},
-			{PlayerName: "P2", Card: domain.D_A},
-			{PlayerName: "P3", Card: domain.H_7},
+			{PlayerName: "P4", Card: domain.D9},
+			{PlayerName: "P1", Card: domain.DQ},
+			{PlayerName: "P2", Card: domain.DA},
+			{PlayerName: "P3", Card: domain.H7},
 		}, Winner: "P3"},
 		{Plays: []domain.Play{
-			{PlayerName: "P3", Card: domain.H_8},
-			{PlayerName: "P4", Card: domain.D_10},
-			{PlayerName: "P1", Card: domain.H_J},
-			{PlayerName: "P2", Card: domain.H_A},
+			{PlayerName: "P3", Card: domain.H8},
+			{PlayerName: "P4", Card: domain.D10},
+			{PlayerName: "P1", Card: domain.HJ},
+			{PlayerName: "P2", Card: domain.HA},
 		}, Winner: "P1"},
 		{Plays: []domain.Play{
-			{PlayerName: "P1", Card: domain.C_9},
-			{PlayerName: "P2", Card: domain.C_Q},
-			{PlayerName: "P3", Card: domain.S_9},
-			{PlayerName: "P4", Card: domain.S_Q},
+			{PlayerName: "P1", Card: domain.C9},
+			{PlayerName: "P2", Card: domain.CQ},
+			{PlayerName: "P3", Card: domain.S9},
+			{PlayerName: "P4", Card: domain.SQ},
 		}, Winner: "P2"},
 		{Plays: []domain.Play{
-			{PlayerName: "P2", Card: domain.S_7},
-			{PlayerName: "P3", Card: domain.S_10},
-			{PlayerName: "P4", Card: domain.S_K},
-			{PlayerName: "P1", Card: domain.H_Q},
+			{PlayerName: "P2", Card: domain.S7},
+			{PlayerName: "P3", Card: domain.S10},
+			{PlayerName: "P4", Card: domain.SK},
+			{PlayerName: "P1", Card: domain.HQ},
 		}, Winner: "P1"},
 		{Plays: []domain.Play{
-			{PlayerName: "P1", Card: domain.S_8},
-			{PlayerName: "P2", Card: domain.H_K},
-			{PlayerName: "P3", Card: domain.S_J},
-			{PlayerName: "P4", Card: domain.S_A},
+			{PlayerName: "P1", Card: domain.S8},
+			{PlayerName: "P2", Card: domain.HK},
+			{PlayerName: "P3", Card: domain.SJ},
+			{PlayerName: "P4", Card: domain.SA},
 		}, Winner: "P2"},
 	}
 	return game
@@ -269,15 +269,15 @@ func TestGameRepoWithInitialData(test *testing.T) {
 				domain.Eighty: {Player: "P1", Color: domain.Spade, Coinche: 1},
 			},
 			Players: map[string]domain.Player{
-				"P1": {Hand: []domain.CardID{domain.C_7}, Order: 1, InitialOrder: 1, Team: "A Team"},
+				"P1": {Hand: []domain.CardID{domain.C7}, Order: 1, InitialOrder: 1, Team: "A Team"},
 				"P2": {Hand: []domain.CardID{}},
 				"P3": {Hand: []domain.CardID{}},
 				"P4": {Hand: []domain.CardID{}},
 			},
 			Turns: []domain.Turn{
 				{Plays: []domain.Play{
-					{PlayerName: "P1", Card: domain.C_7},
-					{PlayerName: "P2", Card: domain.C_10},
+					{PlayerName: "P1", Card: domain.C7},
+					{PlayerName: "P2", Card: domain.C10},
 				}, Winner: "P4"},
 			},
 			Points: map[string]int{
@@ -297,16 +297,16 @@ func TestGameRepoWithInitialData(test *testing.T) {
 
 		want.Turns = []domain.Turn{
 			{Plays: []domain.Play{
-				{PlayerName: "P1", Card: domain.C_7},
-				{PlayerName: "P2", Card: domain.C_10},
-				{PlayerName: "P3", Card: domain.C_K},
-				{PlayerName: "P4", Card: domain.H_9},
+				{PlayerName: "P1", Card: domain.C7},
+				{PlayerName: "P2", Card: domain.C10},
+				{PlayerName: "P3", Card: domain.CK},
+				{PlayerName: "P4", Card: domain.H9},
 			}, Winner: "P4"},
 			{Plays: []domain.Play{
-				{PlayerName: "P4", Card: domain.D_8},
-				{PlayerName: "P1", Card: domain.D_J},
-				{PlayerName: "P2", Card: domain.D_K},
-				{PlayerName: "P3", Card: domain.D_7},
+				{PlayerName: "P4", Card: domain.D8},
+				{PlayerName: "P1", Card: domain.DJ},
+				{PlayerName: "P2", Card: domain.DK},
+				{PlayerName: "P3", Card: domain.D7},
 			}, Winner: "P2"},
 		}
 

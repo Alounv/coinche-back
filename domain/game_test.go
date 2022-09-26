@@ -17,16 +17,16 @@ func TestGetCardValue(test *testing.T) {
 	assert := assert.New(test)
 
 	cardTests := []cardTest{
-		{S_10, NoTrump, S_10, Ten},
-		{S_10, NoTrump, S_9, Ten},
-		{S_10, NoTrump, C_9, 0},
-		{S_10, AllTrump, C_9, TTen},
-		{S_10, Spade, C_9, TTen},
-		{C_8, NoTrump, C_8, Eight},
-		{C_8, NoTrump, C_9, Eight},
-		{C_8, NoTrump, H_9, 0},
-		{C_8, AllTrump, H_9, TEight},
-		{C_8, Club, H_9, TEight},
+		{S10, NoTrump, S10, Ten},
+		{S10, NoTrump, S9, Ten},
+		{S10, NoTrump, C9, 0},
+		{S10, AllTrump, C9, TTen},
+		{S10, Spade, C9, TTen},
+		{C8, NoTrump, C8, Eight},
+		{C8, NoTrump, C9, Eight},
+		{C8, NoTrump, H9, 0},
+		{C8, AllTrump, H9, TEight},
+		{C8, Club, H9, TEight},
 	}
 
 	for _, t := range cardTests {

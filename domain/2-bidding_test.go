@@ -44,10 +44,10 @@ func TestBidding(test *testing.T) {
 	test.Run("should distribute as expected", func(test *testing.T) {
 		game := newTeamingGame()
 		game.Deck = []CardID{
-			C_7, C_8, C_9, C_10, C_J, C_Q, C_K, C_A,
-			D_7, D_8, D_9, D_10, D_J, D_Q, D_K, D_A,
-			H_7, H_8, H_9, H_10, H_J, H_Q, H_K, H_A,
-			S_7, S_8, S_9, S_10, S_J, S_Q, S_K, S_A,
+			C7, C8, C9, C10, CJ, CQ, CK, CA,
+			D7, D8, D9, D10, DJ, DQ, DK, DA,
+			H7, H8, H9, H10, HJ, HQ, HK, HA,
+			S7, S8, S9, S10, SJ, SQ, SK, SA,
 		}
 
 		err := game.StartBidding()
@@ -56,10 +56,10 @@ func TestBidding(test *testing.T) {
 		}
 
 		assert.Equal([]CardID{}, game.Deck)
-		assert.Equal([]CardID{C_7, C_8, C_9, D_J, D_Q, H_J, H_Q, H_K}, game.Players["P1"].Hand)
-		assert.Equal([]CardID{C_10, C_J, C_Q, D_K, D_A, H_A, S_7, S_8}, game.Players["P2"].Hand)
-		assert.Equal([]CardID{C_K, C_A, D_7, H_7, H_8, S_9, S_10, S_J}, game.Players["P3"].Hand)
-		assert.Equal([]CardID{D_8, D_9, D_10, H_9, H_10, S_Q, S_K, S_A}, game.Players["P4"].Hand)
+		assert.Equal([]CardID{C7, C8, C9, DJ, DQ, HJ, HQ, HK}, game.Players["P1"].Hand)
+		assert.Equal([]CardID{C10, CJ, CQ, DK, DA, HA, S7, S8}, game.Players["P2"].Hand)
+		assert.Equal([]CardID{CK, CA, D7, H7, H8, S9, S10, SJ}, game.Players["P3"].Hand)
+		assert.Equal([]CardID{D8, D9, D10, H9, H10, SQ, SK, SA}, game.Players["P4"].Hand)
 	})
 
 	test.Run("should fail if not in bidding", func(test *testing.T) {
