@@ -1,9 +1,5 @@
 package domain
 
-import (
-	"fmt"
-)
-
 const (
 	CAPO_WON_SCORE  = 500
 	CAPO_LOST_SCORE = 320
@@ -13,8 +9,6 @@ func (game *Game) end() {
 	game.Phase = Counting
 
 	game.calculatesTeamPointsAndScores()
-
-	fmt.Println(game.Points, game.Scores)
 }
 
 func (game Game) getPotentialBelotes() map[Color]string {

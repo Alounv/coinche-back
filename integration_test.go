@@ -333,14 +333,6 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		s.lastTestGame = got
 	})
 
-	// TODO: TEST PLAY CARDS
-
-	// TODO: TEST COUNTING
-
-	// TODO: TEST RESTART
-
-	// TODO: TEST SCORES ON MULTIPLE
-
 }
 
 func (s *IntegrationTestSuite) TestPlayGame() {
@@ -412,10 +404,20 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 		assert.Equal(0, len(game.Players["P4"].Hand))
 
 		assert.Equal(8, len(game.Turns))
-
 		assert.Equal(domain.Counting, game.Phase)
 
 		s.lastTestGame = game
-		// FIXME: EMPTY MESSAGES
+		fmt.Println("TEST", game.Points["Odd"], game.Scores)
+	})
+
+	test.Run("can count points", func(test *testing.T) {
+		game := s.lastTestGame
+
+		assert.Equal(162, game.Points["Odd"]+game.Points["Even"])
+		assert.Equal(500, game.Scores["Odd"]+game.Scores["Even"])
 	})
 }
+
+// TODO: TEST RESTART
+
+// TODO: TEST SCORES ON MULTIPLE

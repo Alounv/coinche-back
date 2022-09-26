@@ -167,6 +167,7 @@ func (s *GameUsecases) PlayCard(gameID int, playerName string, card domain.CardI
 	if err != nil {
 		return err
 	}
+
 	err = s.Repo.UpdateGame(game)
 	return err
 }

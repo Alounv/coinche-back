@@ -280,6 +280,14 @@ func TestGameRepoWithInitialData(test *testing.T) {
 					{PlayerName: "P2", Card: domain.C_10},
 				}, Winner: "P4"},
 			},
+			Points: map[string]int{
+				"A Team": 80,
+				"B Team": 82,
+			},
+			Scores: map[string]int{
+				"A Team": 1000,
+				"B Team": 500,
+			},
 		}
 
 		err := repository.UpdateGame(want)
@@ -320,10 +328,8 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want.Bids, got.Bids)
 		assert.Equal(want.Turns[0], got.Turns[0])
 		assert.Equal(want.Turns[1], got.Turns[1])
-		/*
-			assert.Equal(want.Points, got.Points)
-			assert.Equal(want.Scores, got.Scores)
-		*/
+		assert.Equal(want.Points, got.Points)
+		assert.Equal(want.Scores, got.Scores)
 	})
 
 	test.Cleanup(func() {

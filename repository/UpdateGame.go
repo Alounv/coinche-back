@@ -4,15 +4,22 @@ import (
 	"coinche/domain"
 	"coinche/utilities"
 	"encoding/json"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
 
-func getCurrentTurnsCount(tx *sqlx.Tx, gameID int) (int, error) {
-	currentTurnsCount := 0
-	row := tx.QueryRow(`SELECT COUNT (*) FROM turn WHERE gameid=$1`, gameID)
-	err := row.Scan(&currentTurnsCount)
-	return currentTurnsCount, err
+func countDocumentsInGame(tx *sqlx.Tx, gameID int, collection string) (int, error) {
+	count := 0
+	query := fmt.Sprintf(`SELECT COUNT (*) FROM %s WHERE gameid=$1`, collection)
+	row := tx.QueryRow(query, gameID)
+	err := row.Scan(&count)
+	return count, err
+}
+
+func getTurnsCount(tx *sqlx.Tx, gameID int) (int, error) {
+	turnsCount, err := countDocumentsInGame(tx, gameID, "turn")
+	return turnsCount, err
 }
 
 func updateTurn(turn domain.Turn, tx *sqlx.Tx, gameID int, position int) error {
@@ -33,8 +40,23 @@ func updateTurn(turn domain.Turn, tx *sqlx.Tx, gameID int, position int) error {
 	return err
 }
 
+func createPointsOrScore(tx *sqlx.Tx, gameID int, collection string, team string, value int) error {
+	query := fmt.Sprintf(`
+			INSERT INTO %s (gameid, team, value)
+			VALUES ($1, $2, $3)
+			`, collection)
+
+	_, err := tx.Exec(
+		query,
+		gameID,
+		team,
+		value,
+	)
+	return err
+}
+
 func updateTurns(tx *sqlx.Tx, gameID int, turns []domain.Turn) error {
-	count, err := getCurrentTurnsCount(tx, gameID)
+	count, err := getTurnsCount(tx, gameID)
 	if err != nil {
 		return err
 	}
@@ -48,6 +70,28 @@ func updateTurns(tx *sqlx.Tx, gameID int, turns []domain.Turn) error {
 
 	for position, turn := range turns[:count] {
 		err := updateTurn(turn, tx, gameID, position)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func createScores(tx *sqlx.Tx, gameID int, scores map[string]int) error {
+	for team, teamScore := range scores {
+		err := createPointsOrScore(tx, gameID, "score", team, teamScore)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func createPoints(tx *sqlx.Tx, gameID int, points map[string]int) error {
+	for team, teamPoints := range points {
+		err := createPointsOrScore(tx, gameID, "point", team, teamPoints)
 		if err != nil {
 			return err
 		}
@@ -93,5 +137,16 @@ func (r *GameRepository) UpdateGame(game domain.Game) error {
 	if err != nil {
 		return err
 	}
+
+	err = createPoints(tx, game.ID, game.Points)
+	if err != nil {
+		return err
+	}
+
+	err = createScores(tx, game.ID, game.Scores)
+	if err != nil {
+		return err
+	}
+
 	return tx.Commit()
 }
