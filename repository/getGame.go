@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
-	tx := s.db.MustBegin()
-
+func getGame(tx *sqlx.Tx, gameID int) (domain.Game, error) {
 	var game domain.Game
 	var deck []byte
 
@@ -30,108 +30,60 @@ func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 		return domain.Game{}, errors.New(fmt.Sprint(err, "Deck: ", deck))
 	}
 
-	rows, err := tx.Query(`SELECT name, team, initialOrder, cOrder, hand FROM player WHERE gameid=$1`, gameID)
+	game.Players, err = getPlayers(tx, gameID)
 	if err != nil {
 		return domain.Game{}, err
 	}
 
-	game.Players = map[string]domain.Player{}
-
-	for rows.Next() {
-		var player domain.Player
-		var playerName string
-		var hand []byte
-		err := rows.Scan(&playerName, &player.Team, &player.InitialOrder, &player.Order, &hand)
-		if err != nil {
-			return domain.Game{}, err
-		}
-
-		err = json.Unmarshal(hand, &player.Hand)
-		if err != nil {
-			return domain.Game{}, errors.New(fmt.Sprint(err, "Hand: ", hand, "Player: ", playerName))
-		}
-
-		game.Players[playerName] = player
-	}
-
-	rows, err = tx.Query(`SELECT value, coinche, color, pass, player FROM bid WHERE gameid=$1`, gameID)
+	game.Bids, err = getBids(tx, gameID)
 	if err != nil {
 		return domain.Game{}, err
 	}
 
-	game.Bids = map[domain.BidValue]domain.Bid{}
-
-	for rows.Next() {
-		var bid domain.Bid
-		var bidValue domain.BidValue
-
-		err := rows.Scan(&bidValue, &bid.Coinche, &bid.Color, &bid.Pass, &bid.Player)
-		if err != nil {
-			return domain.Game{}, err
-		}
-
-		game.Bids[bidValue] = bid
-	}
-
-	rows, err = tx.Query(`SELECT winner, plays FROM turn WHERE gameid=$1 ORDER BY position`, gameID)
-	if err != nil {
-		return domain.Game{}, err
-	}
-	game.Turns = []domain.Turn{}
-
-	for rows.Next() {
-		var turn domain.Turn
-		var plays []byte
-
-		err := rows.Scan(&turn.Winner, &plays)
-		if err != nil {
-			return domain.Game{}, err
-		}
-
-		err = json.Unmarshal(plays, &turn.Plays)
-		if err != nil {
-			return domain.Game{}, errors.New(fmt.Sprint(err, "Plays: ", plays))
-		}
-		game.Turns = append(game.Turns, turn)
-	}
-
-	rows, err = tx.Query(`SELECT value, team FROM point WHERE gameid=$1`, gameID)
+	game.Turns, err = getTurns(tx, gameID)
 	if err != nil {
 		return domain.Game{}, err
 	}
 
-	game.Points = map[string]int{}
-
-	for rows.Next() {
-		var value int
-		var team string
-
-		err := rows.Scan(&value, &team)
-		if err != nil {
-			return domain.Game{}, err
-		}
-
-		game.Points[team] = value
-	}
-
-	rows, err = tx.Query(`SELECT value, team FROM score WHERE gameid=$1`, gameID)
+	game.Scores, err = getScoresOrPoints(tx, gameID, "score")
 	if err != nil {
 		return domain.Game{}, err
 	}
 
-	game.Scores = map[string]int{}
+	game.Points, err = getScoresOrPoints(tx, gameID, "point")
 
-	for rows.Next() {
-		var value int
-		var team string
+	return game, err
+}
 
-		err := rows.Scan(&value, &team)
-		if err != nil {
-			return domain.Game{}, err
-		}
+func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
+	tx := s.db.MustBegin()
 
-		game.Scores[team] = value
+	game, err := getGame(tx, gameID)
+	if err != nil {
+		return domain.Game{}, err
 	}
+
 	return game, tx.Commit()
+}
 
+func (s *GameRepository) ListGames() ([]domain.Game, error) {
+	var games []domain.Game
+	gamesIds := []int{}
+
+	tx := s.db.MustBegin()
+
+	err := tx.Select(&gamesIds, "SELECT id FROM game")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, gameId := range gamesIds {
+		game, err := getGame(tx, gameId)
+		if err != nil {
+			return nil, err
+		}
+		games = append(games, game)
+	}
+
+	return games, tx.Commit()
 }

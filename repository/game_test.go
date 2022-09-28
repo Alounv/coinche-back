@@ -343,12 +343,21 @@ func NewGameRepositoryWithData(db *sqlx.DB) (*GameRepository, error) {
 		return nil, err
 	}
 
-	err = repository.CreateGames([]domain.Game{
+	games := []domain.Game{
 		{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}},
 		{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}},
 		newTeamingGame(),
 		newCompleteGame(),
-	})
+	}
 
-	return repository, err
+	tx := repository.db.MustBegin()
+
+	for _, game := range games {
+		_, err := createGame(game, tx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return repository, tx.Commit()
 }
