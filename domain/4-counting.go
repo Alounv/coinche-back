@@ -223,9 +223,9 @@ func (game *Game) calculatesTeamPointsAndScores() {
 func (card card) getStrength(trump Color) Strength {
 	if trump == card.color || trump == AllTrump {
 		return card.TrumpStrength
-	} else {
-		return card.strength
 	}
+
+	return card.strength
 }
 
 func (game Game) getPlayersCards() map[string][]CardID {
@@ -243,7 +243,7 @@ func (game Game) getPlayersCards() map[string][]CardID {
 func getScoreWithCoinche(score int, coinche int) int {
 	if coinche > 0 {
 		return score * 2 * coinche
-	} else {
-		return score
 	}
+
+	return score
 }

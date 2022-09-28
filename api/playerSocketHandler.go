@@ -145,7 +145,6 @@ func (s socketHandler) bid(content string) {
 			return
 		}
 	} else {
-
 		array := strings.Split(content, ",")
 		if len(array) != 2 {
 			err := SendMessage(s.connection, "Invalid bid", "S")

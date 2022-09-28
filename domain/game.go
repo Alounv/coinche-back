@@ -75,9 +75,9 @@ type card struct {
 func (card card) getValue(trump Color) int {
 	if trump == card.color || trump == AllTrump {
 		return card.trumpValue
-	} else {
-		return card.value
 	}
+
+	return card.value
 }
 
 type CardID string

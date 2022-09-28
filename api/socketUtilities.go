@@ -61,10 +61,11 @@ func decodeGame(message []byte) (domain.Game, error) {
 		reply, err := decodeMessage(message)
 		if err != nil {
 			return game, err
-		} else {
-			return game, errors.New(fmt.Sprint(err, "Could not decode game: ", reply))
 		}
+
+		return game, errors.New(fmt.Sprint(err, "Could not decode game: ", reply))
 	}
+
 	return game, nil
 }
 

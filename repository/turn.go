@@ -2,7 +2,6 @@ package repository
 
 import (
 	"coinche/domain"
-	"coinche/utilities"
 	"encoding/json"
 	"fmt"
 
@@ -21,7 +20,10 @@ CREATE TABLE turn (
 func createTurn(turn domain.Turn, tx *sqlx.Tx, gameID int, position int) error {
 	var plays []byte
 	plays, err := json.Marshal(turn.Plays)
-	utilities.PanicIfErr(err)
+	if err != nil {
+		return err
+	}
+
 	_, err = tx.Exec(
 		`
 			INSERT INTO turn (gameid, winner, plays, position)
@@ -61,7 +63,10 @@ func getTurnsCount(tx *sqlx.Tx, gameID int) (int, error) {
 func updateTurn(turn domain.Turn, tx *sqlx.Tx, gameID int, position int) error {
 	var plays []byte
 	plays, err := json.Marshal(turn.Plays)
-	utilities.PanicIfErr(err)
+	if err != nil {
+		return err
+	}
+
 	_, err = tx.Exec(
 		`
 			UPDATE turn
