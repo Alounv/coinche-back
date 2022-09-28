@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"testing"
-	"time"
 )
 
 func send(connection *websocket.Conn, message []byte) error {
@@ -117,34 +116,12 @@ func ReceiveMessage(connection *websocket.Conn) (string, error) {
 func ReceiveMessageOrGame(connection *websocket.Conn) (string, domain.Game, error) {
 	message, err := receive(connection)
 	if err != nil {
-		return "", domain.Game{
-			ID:        0,
-			Name:      "",
-			CreatedAt: time.Time{},
-			Players:   map[string]domain.Player{},
-			Phase:     0,
-			Bids:      map[domain.BidValue]domain.Bid{},
-			Deck:      []domain.CardID{},
-			Turns:     []domain.Turn{},
-			Scores:    map[string]int{},
-			Points:    map[string]int{},
-		}, err
+		return "", domain.Game{}, err
 	}
 
 	reply, err := decodeMessage(message)
 	if err == nil {
-		return reply, domain.Game{
-			ID:        0,
-			Name:      "",
-			CreatedAt: time.Time{},
-			Players:   map[string]domain.Player{},
-			Phase:     0,
-			Bids:      map[domain.BidValue]domain.Bid{},
-			Deck:      []domain.CardID{},
-			Turns:     []domain.Turn{},
-			Scores:    map[string]int{},
-			Points:    map[string]int{},
-		}, nil
+		return reply, domain.Game{}, nil
 	}
 
 	game, err := decodeGame(message)
@@ -152,18 +129,7 @@ func ReceiveMessageOrGame(connection *websocket.Conn) (string, domain.Game, erro
 		return "", game, nil
 	}
 
-	return "", domain.Game{
-		ID:        0,
-		Name:      "",
-		CreatedAt: time.Time{},
-		Players:   map[string]domain.Player{},
-		Phase:     0,
-		Bids:      map[domain.BidValue]domain.Bid{},
-		Deck:      []domain.CardID{},
-		Turns:     []domain.Turn{},
-		Scores:    map[string]int{},
-		Points:    map[string]int{},
-	}, err
+	return "", domain.Game{}, err
 }
 
 func ReceiveMessageOrFatal(connection *websocket.Conn, test *testing.T) string {

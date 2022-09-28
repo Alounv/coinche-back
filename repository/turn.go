@@ -18,7 +18,6 @@ CREATE TABLE turn (
 )`
 
 func createTurn(turn domain.Turn, tx *sqlx.Tx, gameID int, position int) error {
-	var plays []byte
 	plays, err := json.Marshal(turn.Plays)
 	if err != nil {
 		return err
@@ -61,7 +60,6 @@ func getTurnsCount(tx *sqlx.Tx, gameID int) (int, error) {
 }
 
 func updateTurn(turn domain.Turn, tx *sqlx.Tx, gameID int, position int) error {
-	var plays []byte
 	plays, err := json.Marshal(turn.Plays)
 	if err != nil {
 		return err

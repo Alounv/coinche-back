@@ -68,17 +68,17 @@ func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 
 func (s *GameRepository) ListGames() ([]domain.Game, error) {
 	var games []domain.Game
-	gamesIds := []int{}
+	gamesIDs := []int{}
 
 	tx := s.db.MustBegin()
 
-	err := tx.Select(&gamesIds, "SELECT id FROM game")
+	err := tx.Select(&gamesIDs, "SELECT id FROM game")
 	if err != nil {
 		return nil, err
 	}
 
-	for _, gameId := range gamesIds {
-		game, err := getGame(tx, gameId)
+	for _, gameID := range gamesIDs {
+		game, err := getGame(tx, gameID)
 		if err != nil {
 			return nil, err
 		}
