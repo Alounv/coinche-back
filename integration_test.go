@@ -414,8 +414,16 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 		fmt.Println(testLogPrefix, "can count points")
 		game := s.lastTestGame
 
-		assert.Equal(162, game.Points["Odd"]+game.Points["Even"])
-		assert.Equal(500, game.Scores["Odd"]+game.Scores["Even"])
+		totalPoints := game.Points["Odd"] + game.Points["Even"]
+		totalScores := game.Scores["Odd"] + game.Scores["Even"]
+
+		if totalPoints == 162 {
+			assert.Equal(true, totalScores == 500 || totalScores == 540)
+		} else if totalPoints == 182 {
+			assert.Equal(540, totalScores)
+		} else {
+			test.Fatal("Points and scores are not equal to 162 or 182")
+		}
 	})
 }
 
