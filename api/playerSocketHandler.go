@@ -214,6 +214,7 @@ func PlayerSocketHandler(
 	for {
 		message, err := ReceiveMessage(connection)
 		if err != nil {
+			fmt.Println("< Error receiving message: ", err)
 			break
 		}
 
