@@ -328,11 +328,49 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal(domain.Playing, got.Phase)
 		assert.Equal(1, got.Players["P1"].Order)
 		assert.Equal(8, len(got.Players["P1"].Hand))
-		fmt.Println(got.Players["P1"].Hand)
+
+	})
+
+	test.Run("other players are notified when a player leaves", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "other players are notified when a player leaves")
+		// SHOULD WORK ALSO WITH 	s.connection1.Close()
+
+		err := api.SendMessage(s.connection1, "leave", "P1")
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		message := api.ReceiveMessageOrFatal(s.connection1, test)
+		assert.Equal("Has left the game", message)
+
+		api.ReceiveMultipleGameOrFatal(s.connection1, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection4, test, 1)
+	})
+
+	test.Run("player can go back in the game", func(test *testing.T) {
+		fmt.Println(testLogPrefix, "player can go back in the game")
+		s.server1, s.connection1 = api.NewGameWebSocketServer(test, 1, "P1", s.hub)
+
+		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
+		api.ReceiveMultipleGameOrFatal(s.connection4, test, 1)
+		got := api.ReceiveGameOrFatal(s.connection1, test)
+
+		assert.Equal(1, got.ID)
+		assert.Equal(2, len(got.Bids))
+		assert.Equal(1, got.Bids[domain.Ninety].Coinche)
+		assert.Equal(2, got.Bids[domain.Ninety].Pass)
+		assert.Equal(domain.Spade, got.Bids[domain.Ninety].Color)
+		assert.Equal("P3", got.Bids[domain.Ninety].Player)
+
+		assert.Equal(domain.Playing, got.Phase)
+		assert.Equal(1, got.Players["P1"].Order)
+		assert.Equal(8, len(got.Players["P1"].Hand))
 
 		s.lastTestGame = got
 	})
-
 }
 
 func (s *IntegrationTestSuite) TestPlayGame() {
@@ -407,7 +445,6 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 		assert.Equal(domain.Counting, game.Phase)
 
 		s.lastTestGame = game
-		fmt.Println("TEST", game.Points["Odd"], game.Scores)
 	})
 
 	test.Run("can count points", func(test *testing.T) {
@@ -430,5 +467,3 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 // TODO: TEST RESTART
 
 // TODO: TEST DISCONNECTION IN GAME
-
-// TODO: TEST SCORES ON MULTIPLE
