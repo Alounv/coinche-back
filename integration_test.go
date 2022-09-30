@@ -228,9 +228,9 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		}
 
 		got := api.ReceiveGameOrFatal(s.connection1, test)
-		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection4, test, 1)
+		api.ReceiveGameOrFatal(s.connection2, test)
+		api.ReceiveGameOrFatal(s.connection3, test)
+		api.ReceiveGameOrFatal(s.connection4, test)
 
 		assert.Equal(1, got.ID)
 		assert.Equal("NEW GAME", got.Name)
@@ -252,9 +252,9 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		}
 
 		got := api.ReceiveGameOrFatal(s.connection4, test)
-		api.ReceiveMultipleGameOrFatal(s.connection1, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
+		api.ReceiveGameOrFatal(s.connection1, test)
+		api.ReceiveGameOrFatal(s.connection2, test)
+		api.ReceiveGameOrFatal(s.connection3, test)
 
 		assert.Equal(1, got.ID)
 		assert.Equal(1, len(got.Bids))
@@ -343,19 +343,19 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		message := api.ReceiveMessageOrFatal(s.connection1, test)
 		assert.Equal("Has left the game", message)
 
-		api.ReceiveMultipleGameOrFatal(s.connection1, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection4, test, 1)
+		api.ReceiveGameOrFatal(s.connection1, test)
+		api.ReceiveGameOrFatal(s.connection2, test)
+		api.ReceiveGameOrFatal(s.connection3, test)
+		api.ReceiveGameOrFatal(s.connection4, test)
 	})
 
 	test.Run("player can go back in the game", func(test *testing.T) {
 		fmt.Println(testLogPrefix, "player can go back in the game")
 		s.server1, s.connection1 = api.NewGameWebSocketServer(test, 1, "P1", s.hub)
 
-		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection4, test, 1)
+		api.ReceiveGameOrFatal(s.connection2, test)
+		api.ReceiveGameOrFatal(s.connection3, test)
+		api.ReceiveGameOrFatal(s.connection4, test)
 		got := api.ReceiveGameOrFatal(s.connection1, test)
 
 		assert.Equal(1, got.ID)
@@ -388,9 +388,9 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 			test.Fatal(err)
 		}
 
-		api.ReceiveMultipleGameOrFatal(s.connection1, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection2, test, 1)
-		api.ReceiveMultipleGameOrFatal(s.connection3, test, 1)
+		api.ReceiveGameOrFatal(s.connection1, test)
+		api.ReceiveGameOrFatal(s.connection2, test)
+		api.ReceiveGameOrFatal(s.connection3, test)
 
 		got := api.ReceiveGameOrFatal(s.connection4, test)
 
