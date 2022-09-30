@@ -38,7 +38,7 @@ func TestListGames(test *testing.T) {
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
-	router, _ := SetupRouter(gameUsecases)
+	router, _ := SetupRouter(gameUsecases, []string{})
 
 	test.Run("list games", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)

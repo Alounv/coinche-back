@@ -25,7 +25,7 @@ func TestGetGame(test *testing.T) {
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
-	router, _ := SetupRouter(gameUsecases)
+	router, _ := SetupRouter(gameUsecases, []string{})
 
 	test.Run("get a game 1", func(test *testing.T) {
 		want := domain.Game(domain.Game{Name: "GAME ONE"})

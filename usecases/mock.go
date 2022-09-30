@@ -60,6 +60,11 @@ func (repo *MockGameRepo) UpdateGame(game domain.Game) error {
 	return nil
 }
 
+func (repo *MockGameRepo) DeleteGame(gameID int) error {
+	delete(repo.games, gameID)
+	return nil
+}
+
 func NewMockGameRepo(games map[int]domain.Game) MockGameRepo {
 	return MockGameRepo{
 		games:         games,

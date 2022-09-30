@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"coinche/domain"
-	"fmt"
 	"time"
 )
 
@@ -12,6 +11,7 @@ type GameUsecasesInterface interface {
 	CreateGame(name string) int
 	JoinGame(gameID int, playerName string) (domain.Game, error)
 	LeaveGame(gameID int, playerName string) error
+	DeleteGame(gameID int) error
 }
 
 type GameRepositoryInterface interface {
@@ -20,6 +20,7 @@ type GameRepositoryInterface interface {
 	CreateGame(game domain.Game) (int, error)
 	UpdatePlayer(gameID int, playerName string, players domain.Player) error
 	UpdateGame(game domain.Game) error
+	DeleteGame(gameID int) error
 }
 
 type GameUsecases struct {
@@ -59,8 +60,6 @@ func (s *GameUsecases) ListGames() ([]GamePreview, error) {
 		}
 	}
 
-	fmt.Println(previews)
-
 	return previews, nil
 }
 
@@ -71,6 +70,10 @@ func (s *GameUsecases) GetGame(gameID int) (domain.Game, error) {
 func (s *GameUsecases) CreateGame(name string) (int, error) {
 	game := domain.NewGame(name)
 	return s.Repo.CreateGame(game)
+}
+
+func (s *GameUsecases) DeleteGame(gameID int) error {
+	return s.Repo.DeleteGame(gameID)
 }
 
 func (s *GameUsecases) JoinGame(gameID int, playerName string) (domain.Game, error) {

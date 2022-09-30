@@ -56,7 +56,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	s.gameUsecases = &usecases.GameUsecases{Repo: gameRepository}
 
-	s.router, s.hub = api.SetupRouter(s.gameUsecases)
+	s.router, s.hub = api.SetupRouter(s.gameUsecases, []string{})
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
