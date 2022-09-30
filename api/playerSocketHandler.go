@@ -89,8 +89,8 @@ func (s *socketHandler) leave(game domain.Game) {
 		fmt.Println("Could not leave this game: ", err)
 		return
 	}
-	err = SendMessage(s.connection, "Has left the game", "S")
-	utilities.PanicIfErr(err)
+	msg := fmt.Sprint(s.playerName, " has left the game")
+	broadcastMessageOrPanic(msg, game.ID, s.player.hub)
 	broadcastGameOrPanic(game, s.player.hub)
 
 	s.player.hub.unregister <- subscription{player: s.player, gameID: s.gameID}

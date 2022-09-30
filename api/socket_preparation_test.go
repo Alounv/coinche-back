@@ -145,7 +145,7 @@ func TestSocketHandler(test *testing.T) {
 		}
 		reply := ReceiveMessageOrFatal(c1, test)
 
-		assert.Equal("Has left the game", reply)
+		assert.Equal("P1 has left the game", reply)
 	})
 
 	test.Run("Can close the connection", func(test *testing.T) {

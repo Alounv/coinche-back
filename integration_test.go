@@ -134,7 +134,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 
 		message := api.ReceiveMessageOrFatal(s.connection1, test)
 
-		assert.Equal("Has left the game", message)
+		assert.Equal("P1 has left the game", message)
 
 		s.router.ServeHTTP(response, testUtilities.NewGetGameRequest(test, 1))
 		got := testUtilities.DecodeToGame(response.Body, test)
@@ -341,7 +341,11 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		}
 
 		message := api.ReceiveMessageOrFatal(s.connection1, test)
-		assert.Equal("Has left the game", message)
+		assert.Equal("P1 has left the game", message)
+
+		api.ReceiveMessageOrFatal(s.connection2, test)
+		api.ReceiveMessageOrFatal(s.connection3, test)
+		api.ReceiveMessageOrFatal(s.connection4, test)
 
 		api.ReceiveGameOrFatal(s.connection1, test)
 		api.ReceiveGameOrFatal(s.connection2, test)
