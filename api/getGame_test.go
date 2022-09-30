@@ -28,7 +28,7 @@ func TestGetGame(test *testing.T) {
 	router, _ := SetupRouter(gameUsecases, []string{})
 
 	test.Run("get a game 1", func(test *testing.T) {
-		want := domain.Game(domain.Game{Name: "GAME ONE"})
+		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE"})
 
 		request := testUtilities.NewGetGameRequest(test, 1)
 		response := httptest.NewRecorder()

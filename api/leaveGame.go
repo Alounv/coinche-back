@@ -1,13 +1,14 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (gameAPIs *GameAPIs) deleteGame(context *gin.Context) {
+func (gameAPIs *GameAPIs) leaveGame(context *gin.Context) {
 	stringID := context.Param("id")
 	gameID, err := strconv.Atoi(stringID)
 	if err != nil {
@@ -15,7 +16,10 @@ func (gameAPIs *GameAPIs) deleteGame(context *gin.Context) {
 		return
 	}
 
-	err = gameAPIs.Usecases.DeleteGame(gameID)
+	playerName := context.Query("playerName")
+
+	err = gameAPIs.Usecases.LeaveGame(gameID, playerName)
+	fmt.Println(err)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -21,6 +21,7 @@ func (repo *MockGameRepo) ListGames() ([]domain.Game, error) {
 
 func (repo *MockGameRepo) GetGame(gameID int) (domain.Game, error) {
 	game, ok := repo.games[gameID]
+	game.ID = gameID
 	if !ok {
 		return domain.Game{}, errors.New("GAME NOT FOUND")
 	}
@@ -29,8 +30,15 @@ func (repo *MockGameRepo) GetGame(gameID int) (domain.Game, error) {
 }
 
 func (repo *MockGameRepo) CreateGame(game domain.Game) (int, error) {
-	gameID := len(repo.games)
+	var gameID int
+	if game.ID == 0 {
+		gameID = len(repo.games)
+	} else {
+		gameID = game.ID
+	}
+
 	repo.creationCalls = repo.creationCalls + 1
+	repo.games[gameID] = game
 	return gameID, nil
 }
 
@@ -54,8 +62,10 @@ func (repo *MockGameRepo) UpdateGame(game domain.Game) error {
 	repoGame.Bids = game.Bids
 	repoGame.Deck = game.Deck
 	repoGame.Players = game.Players
+	repoGame.Turns = game.Turns
+	repoGame.Points = game.Points
+	repoGame.Scores = game.Scores
 
-	// FIXME: update other fields progressively
 	repo.games[game.ID] = repoGame
 	return nil
 }
