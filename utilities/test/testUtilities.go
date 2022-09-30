@@ -3,6 +3,7 @@ package testUtilities
 import (
 	"bytes"
 	"coinche/domain"
+	"coinche/usecases"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -74,11 +75,11 @@ func DropDb(postgres *epg.EmbeddedPostgres, dbName string, db *sqlx.DB) {
 	fmt.Println(err)
 }
 
-func DecodeToGames(buf *bytes.Buffer, test *testing.T) []domain.Game {
-	var got []domain.Game
+func DecodeToGamePreviews(buf *bytes.Buffer, test *testing.T) []usecases.GamePreview {
+	var got []usecases.GamePreview
 	err := json.NewDecoder(buf).Decode(&got)
 	if err != nil {
-		test.Fatalf("Unable to parse response from gameAPIs %q into %q, '%v'", buf, "slice of Game", err)
+		test.Fatalf("Unable to parse response from gameAPIs %q into %q, '%v'", buf, "slice of game previews", err)
 	}
 	return got
 }

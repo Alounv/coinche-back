@@ -105,7 +105,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		request, _ := http.NewRequest(http.MethodGet, "/games/all", nil)
 		s.router.ServeHTTP(response, request)
 
-		got := testUtilities.DecodeToGames(response.Body, test)
+		got := testUtilities.DecodeToGamePreviews(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
 		assert.Equal(1, len(got))

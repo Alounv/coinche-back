@@ -15,8 +15,26 @@ func TestListGames(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]domain.Game{
-			1: {Name: "GAME ONE"},
-			2: {Name: "GAME TWO"},
+			1: {
+				Name:  "GAME ONE",
+				Phase: domain.Teaming,
+				Players: map[string]domain.Player{
+					"P1": {},
+					"P2": {},
+					"P3": {},
+				},
+				Turns: []domain.Turn{{}, {}},
+			},
+			2: {
+				Name:  "GAME TWO",
+				Phase: domain.Teaming,
+				Players: map[string]domain.Player{
+					"P1": {},
+					"P2": {},
+					"P3": {},
+				},
+				Turns: []domain.Turn{{}, {}},
+			},
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
@@ -27,10 +45,12 @@ func TestListGames(test *testing.T) {
 		response := httptest.NewRecorder()
 
 		router.ServeHTTP(response, request)
-		got := testUtilities.DecodeToGames(response.Body, test)
+		got := testUtilities.DecodeToGamePreviews(response.Body, test)
 
 		assert.Equal(http.StatusOK, response.Code)
-		assert.Contains(got, domain.Game{ID: 1, Name: "GAME ONE"})
-		assert.Contains(got, domain.Game{ID: 2, Name: "GAME TWO"})
+		assert.Equal(2, len(got))
+		assert.Equal(3, len(got[1].Players))
+		assert.Equal(domain.Teaming, got[1].Phase)
+		assert.Equal(2, got[1].TurnsCount)
 	})
 }
