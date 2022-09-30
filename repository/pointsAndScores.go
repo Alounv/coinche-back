@@ -7,7 +7,7 @@ import (
 )
 
 var pointSchema = `
-CREATE TABLE point (
+CREATE TABLE IF NOT EXISTS point (
 	id serial PRIMARY KEY NOT NULL,
 	gameid integer NOT NULL REFERENCES game(id),
 	team  text NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE point (
 )`
 
 var scoreSchema = `
-CREATE TABLE score (
+CREATE TABLE IF NOT EXISTS score (
 	id serial PRIMARY KEY NOT NULL,
 	gameid integer NOT NULL REFERENCES game(id),
 	team  text NOT NULL,

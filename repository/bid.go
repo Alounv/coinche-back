@@ -7,7 +7,7 @@ import (
 )
 
 var bidSchema = `
-CREATE TABLE bid (
+CREATE TABLE IF NOT EXISTS bid (
 	id serial PRIMARY KEY NOT NULL,
 	gameid integer NOT NULL REFERENCES game(id),
 	value integer NOT NULL,

@@ -9,7 +9,7 @@ import (
 )
 
 var turnSchema = `
-CREATE TABLE turn (
+CREATE TABLE IF NOT EXISTS turn (
 	id serial PRIMARY KEY NOT NULL,
   position integer NOT NULL,
 	gameid integer NOT NULL REFERENCES game(id),

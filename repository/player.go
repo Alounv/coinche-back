@@ -8,7 +8,7 @@ import (
 )
 
 var playerSchema = `
-CREATE TABLE player (
+CREATE TABLE IF NOT EXISTS player (
 	id serial PRIMARY KEY NOT NULL,
 	name text NOT NULL,
 	team text,

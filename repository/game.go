@@ -8,7 +8,7 @@ import (
 )
 
 var gameSchema = `
-CREATE TABLE game (
+CREATE TABLE IF NOT EXISTS game (
 	id serial PRIMARY KEY NOT NULL,
 	name text NOT NULL,
 	createdAt timestamp NOT NULL DEFAULT now(),
