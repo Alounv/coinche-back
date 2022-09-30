@@ -90,11 +90,11 @@ func TestSocketTeaming(test *testing.T) {
 	assert := assert.New(test)
 
 	gameOne := domain.NewGame("GAME ONE")
-	gameOne.Phase = domain.Preparation
+	gameOne.Phase = domain.Teaming
 	gameOne.ID = 0
 
 	gameTwo := domain.NewGame("GAME TWO")
-	gameTwo.Phase = domain.Preparation
+	gameTwo.Phase = domain.Teaming
 	gameTwo.ID = 1
 
 	mockRepository := usecases.NewMockGameRepo(

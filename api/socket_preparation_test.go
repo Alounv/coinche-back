@@ -14,8 +14,8 @@ func TestFailingSocketHandler(test *testing.T) {
 	assert := assert.New(test)
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]domain.Game{
-			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
-			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
+			1: {ID: 1, Name: "GAME ONE", Phase: domain.Teaming, Players: map[string]domain.Player{}},
+			2: {ID: 2, Name: "GAME TWO", Phase: domain.Teaming, Players: map[string]domain.Player{}},
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
@@ -51,8 +51,8 @@ func TestSocketHandler(test *testing.T) {
 
 	mockRepository := usecases.NewMockGameRepo(
 		map[int]domain.Game{
-			1: {ID: 1, Name: "GAME ONE", Phase: domain.Preparation, Players: map[string]domain.Player{}},
-			2: {ID: 2, Name: "GAME TWO", Phase: domain.Preparation, Players: map[string]domain.Player{}},
+			1: {ID: 1, Name: "GAME ONE", Phase: domain.Teaming, Players: map[string]domain.Player{}},
+			2: {ID: 2, Name: "GAME TWO", Phase: domain.Teaming, Players: map[string]domain.Player{}},
 		},
 	)
 	gameUsecases := usecases.NewGameUsecases(&mockRepository)
@@ -75,9 +75,12 @@ func TestSocketHandler(test *testing.T) {
 	go hub.run()
 
 	test.Run("Can connect and receive the game", func(test *testing.T) {
-		want := domain.Game(domain.Game{ID: 1, Name: "GAME ONE", Players: map[string]domain.Player{
-			"P1": {},
-		}})
+		want := domain.Game(domain.Game{
+			ID:      1,
+			Name:    "GAME ONE",
+			Players: map[string]domain.Player{"P1": {}},
+			Phase:   domain.Teaming,
+		})
 
 		s1, c1 = NewGameWebSocketServer(test, 1, "P1", &hub)
 

@@ -62,6 +62,7 @@ func (s *GameUsecases) LeaveGame(gameID int, playerName string) error {
 	if err != nil {
 		return err
 	}
+
 	err = game.RemovePlayer(playerName)
 	if err != nil {
 		return err

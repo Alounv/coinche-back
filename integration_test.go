@@ -429,4 +429,6 @@ func (s *IntegrationTestSuite) TestPlayGame() {
 
 // TODO: TEST RESTART
 
+// TODO: TEST DISCONNECTION IN GAME
+
 // TODO: TEST SCORES ON MULTIPLE

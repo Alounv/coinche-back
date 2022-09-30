@@ -7,48 +7,96 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newGameWith3Players() Game {
+func newGameWith2Players() Game {
 	return Game{
 		ID:      2,
 		Name:    "GAME TWO",
-		Players: map[string]Player{"P1": {}, "P2": {}, "P3": {}},
+		Players: map[string]Player{"P1": {}, "P2": {}},
+		Phase:   Teaming,
 	}
 }
 
-func TestGamePhases(test *testing.T) {
+func newGameWith4Players() Game {
+	return Game{
+		ID:      2,
+		Name:    "GAME TWO",
+		Players: map[string]Player{"P1": {}, "P2": {}, "P3": {}, "P4": {}},
+		Phase:   Teaming,
+	}
+}
+
+func TestAddPlayer(test *testing.T) {
 	assert := assert.New(test)
 
-	test.Run("should be in preparation phase", func(test *testing.T) {
-		game := newGameWith3Players()
-
-		assert.Equal(Preparation, game.Phase)
-	})
-
-	test.Run("should be in teaming phase when full", func(test *testing.T) {
-		game := newGameWith3Players()
-
-		err := game.AddPlayer("P4")
-
-		assert.NoError(err)
-		assert.Equal(Teaming, game.Phase)
-	})
-
-	test.Run("should stay in teaming if trying to add existing player", func(test *testing.T) {
+	test.Run("full game should be full", func(test *testing.T) {
 		game := newGameWith4Players()
 
-		err := game.AddPlayer("P4")
+		got := game.IsFull()
+
+		assert.Equal(true, got)
+	})
+
+	test.Run("game not full should not be full", func(test *testing.T) {
+		game := newGameWith2Players()
+
+		got := game.IsFull()
+
+		assert.Equal(false, got)
+	})
+
+	test.Run("should add player", func(test *testing.T) {
+		game := newGameWith2Players()
+
+		err := game.AddPlayer("P3")
+
+		assert.Equal(3, len(game.Players))
+		assert.NoError(err)
+	})
+
+	test.Run("should fail to add player when full", func(test *testing.T) {
+		game := newGameWith4Players()
+
+		err := game.AddPlayer("P5")
+
+		assert.Equal(err.Error(), ErrGameFull)
+	})
+
+	test.Run("should fail to add player already in game", func(test *testing.T) {
+		game := newGameWith2Players()
+
+		err := game.AddPlayer("P2")
+
+		assert.Equal(2, len(game.Players))
+		assert.Equal(err.Error(), ErrAlreadyInGame)
+	})
+
+	test.Run("should return AlreadyInGame error if game is full and player is already in game", func(test *testing.T) {
+		game := newGameWith4Players()
+
+		err := game.AddPlayer("P3")
+
+		assert.Equal(err.Error(), ErrAlreadyInGame)
+	})
+}
+
+func TestRemovePlayer(test *testing.T) {
+	assert := assert.New(test)
+
+	test.Run("should remove player", func(test *testing.T) {
+		game := newGameWith4Players()
+
+		err := game.RemovePlayer("P2")
+
+		assert.NoError(err)
+		assert.Equal(3, len(game.Players))
+	})
+
+	test.Run("should fail to remove player not in game", func(test *testing.T) {
+		game := newGameWith2Players()
+
+		err := game.RemovePlayer("P3")
 
 		assert.Error(err)
-		assert.Equal(Teaming, game.Phase)
-	})
-
-	test.Run("should go in pause phase is players go less than 4 after preparation", func(test *testing.T) {
-		game := newGameWith4Players()
-
-		err := game.RemovePlayer("P4")
-
-		assert.NoError(err)
-		assert.Equal(Pause, game.Phase)
 	})
 }
 

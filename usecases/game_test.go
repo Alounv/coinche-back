@@ -38,7 +38,7 @@ func TestGameService(test *testing.T) {
 
 		assert.NoError(err)
 		assert.Equal(3, len(game.Players))
-		assert.Equal(domain.Pause, game.Phase)
+		assert.Equal(domain.Teaming, game.Phase)
 
 		game, err = gameUsecases.JoinGame(0, "P4")
 

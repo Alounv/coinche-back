@@ -10,12 +10,10 @@ import (
 type Phase int
 
 const (
-	Preparation Phase = 0
-	Teaming     Phase = 1
-	Bidding     Phase = 2
-	Playing     Phase = 3
-	Counting    Phase = 4
-	Pause       Phase = 5
+	Teaming  Phase = 1
+	Bidding  Phase = 2
+	Playing  Phase = 3
+	Counting Phase = 4
 )
 
 type BidValue int
@@ -239,7 +237,7 @@ func NewGame(name string) Game {
 	return Game{
 		Name:    name,
 		Players: map[string]Player{},
-		Phase:   Preparation,
+		Phase:   Teaming,
 		Bids:    map[BidValue]Bid{},
 		Deck:    NewDeck(),
 	}

@@ -5,11 +5,58 @@ import (
 )
 
 const (
-	ErrNotTeaming    = "NOT IN TEAMING PHASE"
-	ErrTeamFull      = "TEAM IS FULL"
-	ErrStartGame     = "GAME CANNOT START"
-	ErrTeamsNotEqual = "TEAMS ARE NOT EQUAL"
+	ErrAlreadyInGame   = "ALREADY IN GAME"
+	ErrEmptyPlayerName = "EMPTY PLAYER NAME"
+	ErrGameFull        = "GAME IS FULL"
+	ErrPlayerNotFound  = "PLAYER NOT FOUND"
+	ErrNotTeaming      = "NOT IN TEAMING PHASE"
+	ErrTeamFull        = "TEAM IS FULL"
+	ErrStartGame       = "GAME CANNOT START"
+	ErrTeamsNotEqual   = "TEAMS ARE NOT EQUAL"
 )
+
+func (game Game) IsFull() bool {
+	return len(game.Players) == 4
+}
+
+func (game *Game) AddPlayer(playerName string) error {
+	if game.Phase != Teaming {
+		return errors.New(ErrNotTeaming)
+	}
+
+	if playerName == "" {
+		return errors.New(ErrEmptyPlayerName)
+	}
+
+	if _, ok := game.Players[playerName]; ok {
+		return errors.New(ErrAlreadyInGame)
+	}
+
+	if game.IsFull() {
+		return errors.New(ErrGameFull)
+	}
+
+	game.Players[playerName] = Player{}
+
+	if game.IsFull() && game.Phase == Teaming {
+		game.Phase = Teaming
+	}
+	return nil
+}
+
+func (game *Game) RemovePlayer(playerName string) error {
+	if game.Phase != Teaming {
+		return errors.New(ErrNotTeaming)
+	}
+
+	if _, ok := game.Players[playerName]; !ok {
+		return errors.New(ErrPlayerNotFound)
+	}
+
+	delete(game.Players, playerName)
+
+	return nil
+}
 
 func (game Game) CanStartBidding() error {
 	if game.Phase != Teaming {
