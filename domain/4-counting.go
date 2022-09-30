@@ -1,5 +1,9 @@
 package domain
 
+import (
+	"math/rand"
+)
+
 const (
 	CAPO_WON_SCORE  = 500
 	CAPO_LOST_SCORE = 320
@@ -193,10 +197,9 @@ func (game *Game) applyCoinche(coinche int) {
 }
 
 func (game *Game) calculatesTeamScores(contractTeamPointsWithoutBelote int, otherTeamPointsWithoutBelote int) {
-	contractTeam, otherTeam := game.getTeams()
-	game.Scores = map[string]int{
-		contractTeam: 0,
-		otherTeam:    0,
+	contractTeam, _ := game.getTeams()
+	if game.Scores == nil {
+		game.Scores = map[string]int{}
 	}
 
 	lastBid, contract := game.getLastBid()
@@ -246,4 +249,33 @@ func getScoreWithCoinche(score int, coinche int) int {
 	}
 
 	return score
+}
+
+func getNewDeck(turns []Turn) []CardID {
+	heap := []CardID{}
+	for _, turn := range turns {
+		for _, play := range turn.Plays {
+			heap = append(heap, play.Card)
+		}
+	}
+
+	cutPoint := rand.Intn(len(heap))
+	return append(heap[cutPoint:], heap[:cutPoint]...)
+}
+
+func (game *Game) resetForNextGame() {
+	game.Points = map[string]int{}
+	game.Phase = Teaming
+	game.Bids = map[BidValue]Bid{}
+	game.Deck = getNewDeck(game.Turns)
+	game.Turns = []Turn{}
+}
+
+func (game *Game) Start() error {
+	if game.Phase == Counting {
+		game.resetForNextGame()
+	}
+
+	err := game.startBidding()
+	return err
 }

@@ -11,6 +11,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func NewGameRepositoryWithData(db *sqlx.DB) (*GameRepository, error) {
+	repository, err := NewGameRepositoryFromDb(db)
+	if err != nil {
+		return nil, err
+	}
+
+	games := []domain.Game{
+		{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}},
+		{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}},
+		newTeamingGame(),
+		newCompleteGame(),
+	}
+
+	tx := repository.db.MustBegin()
+
+	for _, game := range games {
+		_, err := createGame(game, tx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return repository, tx.Commit()
+}
+
 func newTeamingGame() domain.Game {
 	return domain.Game{
 		ID:      3,
@@ -261,7 +286,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal("A Team", game.Players["P2"].Team)
 	})
 
-	test.Run("update a game", func(test *testing.T) { // FIXME: should be progressively augmented
+	test.Run("update a game", func(test *testing.T) {
 		want := domain.Game{
 			ID:    2,
 			Phase: domain.Bidding,
@@ -332,32 +357,32 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want.Scores, got.Scores)
 	})
 
+	test.Run("reset a game", func(test *testing.T) {
+		want := domain.Game{
+			ID:     2,
+			Phase:  domain.Bidding,
+			Bids:   map[domain.BidValue]domain.Bid{},
+			Turns:  []domain.Turn{},
+			Points: map[string]int{},
+		}
+
+		err := repository.UpdateGame(want)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		got, err := repository.GetGame(2)
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal(0, len(got.Bids))
+		assert.Equal(0, len(got.Turns))
+		assert.Equal(0, len(got.Points))
+		assert.Equal(0, len(got.Deck))
+	})
+
 	test.Cleanup(func() {
 		testUtilities.DropDb(postgres, dbName, db)
 	})
-}
-
-func NewGameRepositoryWithData(db *sqlx.DB) (*GameRepository, error) {
-	repository, err := NewGameRepositoryFromDb(db)
-	if err != nil {
-		return nil, err
-	}
-
-	games := []domain.Game{
-		{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}},
-		{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}},
-		newTeamingGame(),
-		newCompleteGame(),
-	}
-
-	tx := repository.db.MustBegin()
-
-	for _, game := range games {
-		_, err := createGame(game, tx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return repository, tx.Commit()
 }

@@ -44,6 +44,13 @@ func broadcastMessageOrPanic(msg string, gameID int, hub *Hub) {
 	hub.broadcast <- m
 }
 
+func SendMessageOrFatal(connection *websocket.Conn, msg string, origin string, test *testing.T) {
+	err := SendMessage(connection, msg, origin)
+	if err != nil {
+		test.Fatal(err)
+	}
+}
+
 func SendMessage(connection *websocket.Conn, msg string, origin string) error {
 	fmt.Println(origin, "> sending message:", msg)
 	message, err := json.Marshal(msg)

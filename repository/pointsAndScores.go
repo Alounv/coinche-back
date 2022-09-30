@@ -37,14 +37,54 @@ func createPointsOrScore(tx *sqlx.Tx, gameID int, collection string, team string
 	return err
 }
 
-func createScores(tx *sqlx.Tx, gameID int, scores map[string]int) error {
-	for team, teamScore := range scores {
-		err := createPointsOrScore(tx, gameID, "score", team, teamScore)
-		if err != nil {
-			return err
+func updatePointsOrScore(tx *sqlx.Tx, gameID int, collection string, team string, value int) error {
+	query := fmt.Sprintf(`
+      UPDATE %s
+      SET value = $3
+      WHERE gameid = $1 AND team = $2
+			`, collection)
+
+	_, err := tx.Exec(
+		query,
+		gameID,
+		team,
+		value,
+	)
+	return err
+}
+
+func createAndUpdatePointsOrScores(tx *sqlx.Tx, gameID int, collection string, current map[string]int, values map[string]int) error {
+	for team, value := range values {
+		shouldCreate := false
+		if _, ok := current[team]; !ok {
+			shouldCreate = true
+		}
+
+		if shouldCreate {
+			err := createPointsOrScore(tx, gameID, collection, team, value)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := updatePointsOrScore(tx, gameID, collection, team, value)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
+}
 
+func createAndUpdateScores(tx *sqlx.Tx, gameID int, scores map[string]int) error {
+	currentScores, err := getScoresOrPoints(tx, gameID, "score")
+	if err != nil {
+		return err
+	}
+
+	err = createAndUpdatePointsOrScores(tx, gameID, "score", currentScores, scores)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -50,7 +50,7 @@ func TestBidding(test *testing.T) {
 			S7, S8, S9, S10, SJ, SQ, SK, SA,
 		}
 
-		err := game.StartBidding()
+		err := game.Start()
 		if err != nil {
 			test.Fatal(err)
 		}

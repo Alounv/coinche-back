@@ -185,7 +185,7 @@ func TestCanStart(test *testing.T) {
 			"P4": {Team: "B"},
 		}
 
-		assert.NoError(game.CanStartBidding())
+		assert.NoError(game.canStartBidding())
 	})
 
 	test.Run("should not be ready with on team of one", func(test *testing.T) {
@@ -197,7 +197,7 @@ func TestCanStart(test *testing.T) {
 			"P4": {Team: "B"},
 		}
 
-		assert.Error(game.CanStartBidding())
+		assert.Error(game.canStartBidding())
 	})
 
 	test.Run("should not be ready with on team of three", func(test *testing.T) {
@@ -209,7 +209,7 @@ func TestCanStart(test *testing.T) {
 			"P4": {Team: "B"},
 		}
 
-		assert.Error(game.CanStartBidding())
+		assert.Error(game.canStartBidding())
 	})
 }
 
@@ -225,7 +225,7 @@ func TestStart(test *testing.T) {
 			"P4": {Team: "B"},
 		}
 
-		err := game.StartBidding()
+		err := game.Start()
 
 		assert.NoError(err)
 		assert.Equal(Bidding, game.Phase)
@@ -243,7 +243,7 @@ func TestStart(test *testing.T) {
 		}
 
 		game.Phase = Teaming
-		err := game.StartBidding()
+		err := game.Start()
 
 		assert.NoError(err)
 		assert.Equal(Bidding, game.Phase)

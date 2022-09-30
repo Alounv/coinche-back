@@ -11,7 +11,6 @@ const (
 	ErrPlayerNotFound  = "PLAYER NOT FOUND"
 	ErrNotTeaming      = "NOT IN TEAMING PHASE"
 	ErrTeamFull        = "TEAM IS FULL"
-	ErrStartGame       = "GAME CANNOT START"
 	ErrTeamsNotEqual   = "TEAMS ARE NOT EQUAL"
 )
 
@@ -58,7 +57,7 @@ func (game *Game) RemovePlayer(playerName string) error {
 	return nil
 }
 
-func (game Game) CanStartBidding() error {
+func (game Game) canStartBidding() error {
 	if game.Phase != Teaming {
 		return errors.New(ErrNotTeaming)
 	}
@@ -127,7 +126,7 @@ func (game *Game) AssignTeam(playerName string, teamName string) error {
 
 	game.Players[playerName] = newPlayer
 
-	if game.CanStartBidding() == nil {
+	if game.canStartBidding() == nil {
 		game.Deck = NewDeck()
 	}
 

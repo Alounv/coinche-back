@@ -315,14 +315,6 @@ func TestCountingPhase(test *testing.T) {
 
 		assert.Equal(Counting, game.Phase)
 	})
-
-	/*test.Run("should restart a new game on restart", func(test *testing.T) {
-		game := newNormalGame()
-		assert.Equal(Counting, game.Phase)
-
-		err := game.Restart()
-		assert.NoError(err)
-	})*/ // TODO: implement restart
 }
 
 func TestPlayersCards(test *testing.T) {
@@ -476,5 +468,50 @@ func TestCounting(test *testing.T) {
 		assert.Equal(162, game.Points["even"])
 		assert.Equal(0, game.Scores["odd"])
 		assert.Equal(500, game.Scores["even"])
+	})
+}
+
+func TestRestarting(test *testing.T) {
+	assert := assert.New(test)
+
+	test.Run("should be able to restart by reinitializing everything but the score", func(test *testing.T) {
+		game := newNormalGame()
+		game.calculatesTeamPointsAndScores()
+
+		err := game.Start()
+		if err != nil {
+			test.Fatal(err)
+		}
+
+		assert.Equal(Bidding, game.Phase)
+		assert.Equal(0, len(game.Bids))
+		assert.Equal(0, len(game.Turns))
+		assert.Equal(0, len(game.Points))
+		assert.Equal(0, len(game.Deck))
+
+		assert.Equal(72, game.Scores["odd"])
+		assert.Equal(160+80, game.Scores["even"])
+
+		assert.Equal(8, len(game.Players["P1"].Hand))
+		assert.Equal(8, len(game.Players["P2"].Hand))
+		assert.Equal(8, len(game.Players["P3"].Hand))
+		assert.Equal(8, len(game.Players["P4"].Hand))
+
+		assert.Equal(1, game.Players["P2"].Order)
+		assert.Equal(1, game.Players["P2"].InitialOrder)
+	})
+
+	test.Run("should be able to add to score without reinitializing", func(test *testing.T) {
+		game := newNormalGame()
+		game.Scores["even"] = 1000
+		game.Scores["odd"] = 2000
+
+		game.calculatesTeamPointsAndScores()
+
+		assert.Equal(72, game.Points["odd"])
+		assert.Equal(90, game.Points["even"])
+
+		assert.Equal(2000+72, game.Scores["odd"])
+		assert.Equal(1000+160+80, game.Scores["even"])
 	})
 }

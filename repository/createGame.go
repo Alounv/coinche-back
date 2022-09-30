@@ -46,7 +46,7 @@ func createGame(game domain.Game, tx *sqlx.Tx) (int, error) {
 		return 0, err
 	}
 
-	err = createScores(tx, gameID, game.Scores)
+	err = createAndUpdateScores(tx, gameID, game.Scores)
 	if err != nil {
 		return 0, err
 	}

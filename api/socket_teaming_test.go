@@ -162,7 +162,6 @@ func TestSocketTeaming(test *testing.T) {
 		EmptyMessages([]*websocket.Conn{c2, c3, c4}, 2)
 
 		assert.Equal("GAME ONE", got.Name)
-		assert.NoError(got.CanStartBidding())
 		assert.Equal(32, len(got.Deck))
 	})
 

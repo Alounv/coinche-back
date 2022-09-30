@@ -15,8 +15,8 @@ const (
 	ErrNoBidYet           = "NO BID YET"
 )
 
-func (game *Game) StartBidding() error {
-	err := game.CanStartBidding()
+func (game *Game) startBidding() error {
+	err := game.canStartBidding()
 	if err != nil {
 		return err
 	}
