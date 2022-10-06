@@ -1,9 +1,11 @@
-# coinche
-A simple multiplayer coinche game
+# Coinche SERVER
 
-Personal project to learn:
+A simple multiplayer coinche game.
+This is the server part, the client part can be found here https://github.com/Alounv/coinche-front.
+
+This is a personal project to learn:
 - Golang
-- TDD
+- Test Driven Development
 - Clean Architecture
 - PostgreSQL
 - WebSockets
