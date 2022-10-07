@@ -102,7 +102,7 @@ func (game *Game) canPlayCard(card CardID, playerName string) error {
 	lastTurn := game.Turns[len(game.Turns)-1]
 	playCount := len(lastTurn.Plays)
 
-	if playCount == 0 {
+	if playCount == 0 || playCount == 4 {
 		return nil
 	}
 
