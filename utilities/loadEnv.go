@@ -1,6 +1,8 @@
 package utilities
 
 import (
+	"fmt"
+
 	"github.com/joho/godotenv"
 )
 
@@ -11,6 +13,6 @@ func LoadEnv(path string) {
 
 	err := godotenv.Load(path)
 	if err != nil {
-		panic("Error loading .env file")
+		fmt.Println("Error loading .env file")
 	}
 }
