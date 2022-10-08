@@ -50,10 +50,11 @@ func NewHub(gameUsecases *usecases.GameUsecases) Hub {
 	}
 }
 
-func sendToPlayer(connection *websocket.Conn, data []byte) {
-	err := send(connection, data)
+func sendToPlayerOrUnregister(h *Hub, player *player, data []byte, gameID int) {
+	err := send(player.connection, data)
 	if err != nil {
-		fmt.Println("Error sending message to player:", err)
+		fmt.Println("Error sending message to player: (", err, "). Closing connection")
+		deletePlayerAndGameIfNeeded(h.games, h.games[gameID], player, gameID)
 	}
 }
 
@@ -88,7 +89,7 @@ func broadcast(h *Hub, message message) {
 	for player := range players {
 		select {
 		case player.send <- message.data:
-			sendToPlayer(player.connection, message.data)
+			sendToPlayerOrUnregister(h, player, message.data, message.gameID)
 		default:
 			deletePlayerAndGameIfNeeded(h.games, players, player, message.gameID)
 		}
@@ -100,12 +101,12 @@ func single(h *Hub, private private) {
 	player := private.player
 	if _, ok := players[player]; !ok {
 		data, _ := json.Marshal("Player not in game")
-		sendToPlayer(private.player.connection, data)
+		sendToPlayerOrUnregister(h, private.player, data, private.gameID)
 	}
 
 	select {
 	case player.send <- private.data:
-		sendToPlayer(player.connection, private.data)
+		sendToPlayerOrUnregister(h, player, private.data, private.gameID)
 	default:
 		deletePlayerAndGameIfNeeded(h.games, players, player, private.gameID)
 	}
