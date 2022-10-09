@@ -17,22 +17,60 @@ CREATE TABLE IF NOT EXISTS bid (
 	pass integer DEFAULT 0
 )`
 
-func createBids(tx *sqlx.Tx, gameID int, bids map[domain.BidValue]domain.Bid) error {
-	for bidValue, bid := range bids {
-		_, err := tx.Exec(
-			`
+func updateBid(tx *sqlx.Tx, gameID int, bidValue domain.BidValue, bid domain.Bid) error {
+	_, err := tx.Exec(
+		`
+    UPDATE bid
+    SET  player = $3, coinche = $4, color = $5, pass = $6
+    WHERE gameid = $1 AND value = $2
+    `,
+		gameID,
+		bidValue,
+		bid.Player,
+		bid.Coinche,
+		bid.Color,
+		bid.Pass,
+	)
+	return err
+}
+
+func createBid(tx *sqlx.Tx, gameID int, bidValue domain.BidValue, bid domain.Bid) error {
+	_, err := tx.Exec(
+		`
 			INSERT INTO bid (gameid, value, player, coinche, color, pass) 
 			VALUES ($1, $2, $3, $4, $5, $6)
 			`,
-			gameID,
-			bidValue,
-			bid.Player,
-			bid.Coinche,
-			bid.Color,
-			bid.Pass,
-		)
-		if err != nil {
-			return err
+		gameID,
+		bidValue,
+		bid.Player,
+		bid.Coinche,
+		bid.Color,
+		bid.Pass,
+	)
+	return err
+}
+
+func updateBids(tx *sqlx.Tx, gameID int, bids map[domain.BidValue]domain.Bid) error {
+	currentBids, err := getBids(tx, gameID)
+	if err != nil {
+		return err
+	}
+	for bidValue, bid := range bids {
+		shouldCreate := false
+		if _, ok := currentBids[bidValue]; !ok {
+			shouldCreate = true
+		}
+
+		if shouldCreate {
+			err := createBid(tx, gameID, bidValue, bid)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := updateBid(tx, gameID, bidValue, bid)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

@@ -37,7 +37,7 @@ func (r *GameRepository) UpdateGame(game domain.Game) error {
 			return err
 		}
 	} else {
-		err = createBids(tx, game.ID, game.Bids)
+		err = updateBids(tx, game.ID, game.Bids)
 		if err != nil {
 			return err
 		}
