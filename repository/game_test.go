@@ -335,6 +335,10 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			}, Winner: "P2"},
 		}
 
+		want.Bids = map[domain.BidValue]domain.Bid{
+			domain.Eighty: {Player: "P1", Color: domain.Spade, Coinche: 2, Pass: 3},
+		}
+
 		err = repository.UpdateGame(want)
 		if err != nil {
 			test.Fatal(err)
