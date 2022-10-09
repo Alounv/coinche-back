@@ -18,3 +18,47 @@ This is a personal project to learn:
 - Clean Architecture
 - PostgreSQL
 - WebSockets
+
+## Developing
+
+```bash
+go run main.go
+```
+
+## Building
+
+To create a production version of your app:
+
+```bash
+go run build
+```
+
+You can preview the production build with `./coinche`.
+
+## Environment variables
+```bash
+## Developing
+
+```bash
+bun run dev
+
+# or start the server and open the app in a new browser tab
+bun run dev -- --open
+```
+
+## Building
+
+To create a production version of your app:
+
+```bash
+bun run build
+```
+
+You can preview the production build with `bun run preview`.
+
+## Environment variables
+```bash
+PORT=:5000
+SQLX_POSTGRES_INFO="host=localhost user=aloun password=ILovePostgres port=5432"
+DB_NAME=coincheDb
+```
