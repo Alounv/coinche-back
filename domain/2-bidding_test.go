@@ -234,17 +234,24 @@ func TestEndOfBidding(test *testing.T) {
 
 	test.Run("should start playing after 4 passes", func(t *testing.T) {
 		game := newBiddingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 3, InitialOrder: 1},
+			"P2": {Team: "even", Order: 4, InitialOrder: 2},
+			"P3": {Team: "odd", Order: 1, InitialOrder: 3},
+			"P4": {Team: "even", Order: 2, InitialOrder: 4},
+		}
 		game.Bids = map[BidValue]Bid{
-			Eighty: {Player: "P4", Color: Spade},
+			Eighty:        {Player: "P1", Color: Club},
+			HundredAndTen: {Player: "P2", Color: Spade},
 		}
 
-		err := game.Pass("P1")
-		assert.NoError(err)
-		err = game.Pass("P2")
-		assert.NoError(err)
-		err = game.Pass("P3")
+		err := game.Pass("P3")
 		assert.NoError(err)
 		err = game.Pass("P4")
+		assert.NoError(err)
+		err = game.Pass("P1")
+		assert.NoError(err)
+		err = game.Pass("P2")
 		assert.NoError(err)
 
 		assert.Equal(Playing, game.Phase)
