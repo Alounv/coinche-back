@@ -73,7 +73,7 @@ func (turn Turn) getBiggestTrumpStrength(trump Color) Strength {
 }
 
 func (turn Turn) isTheBiggestTrump(card CardID, trump Color) bool {
-	isTrump := cards[card].color == trump
+	isTrump := cards[card].color == trump || trump == AllTrump
 
 	if isTrump && cards[card].TrumpStrength > turn.getBiggestTrumpStrength(trump) {
 		return true
@@ -85,7 +85,8 @@ func (turn Turn) isTheBiggestTrump(card CardID, trump Color) bool {
 func (player Player) hasNoBiggerTrump(trump Color, turn Turn) bool {
 	for _, CardID := range player.Hand {
 		card := cards[CardID]
-		if card.color == trump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
+		isTrump := card.color == trump || trump == AllTrump
+		if isTrump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
 			return false
 		}
 	}
