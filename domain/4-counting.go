@@ -185,7 +185,6 @@ func (game *Game) addRealizedPoints(isCapot bool, isContractWon bool, coinche in
 		game.Scores[contractTeam] += contractTeamPointsWithoutBelote
 		game.Scores[otherTeam] += otherTeamPointsWithoutBelote
 	} else {
-		game.Scores[contractTeam] += contractTeamPointsWithoutBelote
 		game.Scores[otherTeam] += 160
 	}
 }

@@ -370,7 +370,7 @@ func TestCounting(test *testing.T) {
 		game.calculatesTeamPointsAndScores()
 		assert.Equal(72, game.Points["odd"])
 		assert.Equal(90, game.Points["even"])
-		assert.Equal(72, game.Scores["odd"])
+		assert.Equal(0, game.Scores["odd"])
 		assert.Equal(160+80, game.Scores["even"])
 
 		assert.Equal(162, game.Points["odd"]+game.Points["even"])
@@ -414,7 +414,7 @@ func TestCounting(test *testing.T) {
 		game.calculatesTeamPointsAndScores()
 		assert.Equal(49, game.Points["odd"])
 		assert.Equal(113, game.Points["even"])
-		assert.Equal(49, game.Scores["odd"])
+		assert.Equal(0, game.Scores["odd"])
 		assert.Equal(160+80, game.Scores["even"])
 
 		assert.Equal(162, game.Points["odd"]+game.Points["even"])
@@ -489,7 +489,7 @@ func TestRestarting(test *testing.T) {
 		assert.Equal(0, len(game.Points))
 		assert.Equal(0, len(game.Deck))
 
-		assert.Equal(72, game.Scores["odd"])
+		assert.Equal(0, game.Scores["odd"])
 		assert.Equal(160+80, game.Scores["even"])
 
 		assert.Equal(8, len(game.Players["P1"].Hand))
@@ -511,7 +511,7 @@ func TestRestarting(test *testing.T) {
 		assert.Equal(72, game.Points["odd"])
 		assert.Equal(90, game.Points["even"])
 
-		assert.Equal(2000+72, game.Scores["odd"])
+		assert.Equal(2000, game.Scores["odd"])
 		assert.Equal(1000+160+80, game.Scores["even"])
 	})
 }
