@@ -20,13 +20,14 @@ func TestGetCardValue(test *testing.T) {
 		{S10, NoTrump, S10, Ten},
 		{S10, NoTrump, S9, Ten},
 		{S10, NoTrump, C9, 0},
-		{S10, AllTrump, C9, TTen},
+		{S10, AllTrump, C9, 0},
 		{S10, Spade, C9, TTen},
 		{C8, NoTrump, C8, Eight},
 		{C8, NoTrump, C9, Eight},
 		{C8, NoTrump, H9, 0},
-		{C8, AllTrump, H9, TEight},
+		{C8, AllTrump, H9, 0},
 		{C8, Club, H9, TEight},
+		{C8, AllTrump, C9, TEight},
 	}
 
 	for _, t := range cardTests {

@@ -178,6 +178,7 @@ func (turn Turn) getWinner(trump Color) string {
 	var winner string
 	var strongerValue Strength
 	var firstCard CardID
+
 	for _, play := range turn.Plays {
 		if firstCard == "" {
 			firstCard = play.Card
@@ -200,13 +201,19 @@ func getCardValue(card CardID, trump Color, firstCard CardID) Strength {
 	color := cards[card].color
 	colorAsked := cards[firstCard].color
 
-	if trump == color || trump == AllTrump {
-		return cards[card].TrumpStrength
-	} else if color == colorAsked {
+	if color == colorAsked {
+		if trump == color || trump == AllTrump {
+			return cards[card].TrumpStrength
+		}
+
 		return cards[card].strength
-	} else {
-		return 0
 	}
+
+	if trump == color {
+		return cards[card].TrumpStrength
+	}
+
+	return 0
 }
 
 type Game struct {
