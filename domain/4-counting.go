@@ -15,11 +15,11 @@ func (game *Game) end() {
 	game.calculatesTeamPointsAndScores()
 }
 
-func (game Game) getPotentialBelotes() map[Color]string {
+func (game Game) getPlayersWithTrumpQueenAndKing() map[Color]string {
 	potentialBelotes := map[Color]string{}
 
 	trump := game.trump()
-	playersCards := game.getPlayersCards()
+	playersCards := game.getPlayersPlayedCards()
 
 	for player, playerCards := range playersCards {
 		potentialPlayerBelotes := map[Color]int{}
@@ -45,7 +45,7 @@ func (game Game) getPotentialBelotes() map[Color]string {
 func (game Game) getPlayerWithBelote() string {
 	playerWithBelote := ""
 
-	potentialBelotes := game.getPotentialBelotes()
+	potentialBelotes := game.getPlayersWithTrumpQueenAndKing()
 
 	if len(potentialBelotes) > 0 {
 		for _, turn := range game.Turns {
@@ -81,7 +81,7 @@ func (game Game) getTeams() (string, string) {
 
 func (game *Game) calculateBasePoints() {
 	trump := game.trump()
-	playersCards := game.getPlayersCards()
+	playersCards := game.getPlayersWonCards()
 
 	for player, playerCards := range playersCards {
 		team := game.Players[player].Team
@@ -230,12 +230,24 @@ func (card card) getStrength(trump Color) Strength {
 	return card.strength
 }
 
-func (game Game) getPlayersCards() map[string][]CardID {
+func (game Game) getPlayersWonCards() map[string][]CardID {
 	playersCards := map[string][]CardID{}
 
 	for _, turn := range game.Turns {
 		for _, play := range turn.Plays {
 			playersCards[turn.Winner] = append(playersCards[turn.Winner], play.Card)
+		}
+	}
+
+	return playersCards
+}
+
+func (game Game) getPlayersPlayedCards() map[string][]CardID {
+	playersCards := map[string][]CardID{}
+
+	for _, turn := range game.Turns {
+		for _, play := range turn.Plays {
+			playersCards[play.PlayerName] = append(playersCards[play.PlayerName], play.Card)
 		}
 	}
 
