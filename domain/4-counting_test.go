@@ -514,4 +514,28 @@ func TestRestarting(test *testing.T) {
 		assert.Equal(2000, game.Scores["odd"])
 		assert.Equal(1000+160+80, game.Scores["even"])
 	})
+
+	test.Run("should be able to add to score without reinitializing with coinche", func(test *testing.T) {
+		game := newGameWithBelote()
+		game.Scores["even"] = 1000
+		game.Scores["odd"] = 2000
+
+		game.Bids = map[BidValue]Bid{
+			Eighty: {
+				Player:  "P1",
+				Color:   Heart,
+				Coinche: 1,
+				Pass:    0,
+			},
+		}
+
+		game.calculatesTeamPointsAndScores()
+
+		assert.Equal(99+20, game.Points["odd"])
+		assert.Equal(63, game.Points["even"])
+
+		assert.Equal(2000+(80+160+20)*2, game.Scores["odd"])
+		assert.Equal(1000, game.Scores["even"])
+
+	})
 }

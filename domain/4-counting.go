@@ -196,10 +196,11 @@ func (game *Game) applyCoinche(coinche int) {
 }
 
 func (game *Game) calculatesTeamScores(contractTeamPointsWithoutBelote int, otherTeamPointsWithoutBelote int) {
-	contractTeam, _ := game.getTeams()
-	if game.Scores == nil {
-		game.Scores = map[string]int{}
-	}
+	contractTeam, otherTeam := game.getTeams()
+	previousContractScore := game.Scores[contractTeam]
+	previousOtherScore := game.Scores[otherTeam]
+
+	game.Scores = map[string]int{}
 
 	lastBid, contract := game.getLastBid()
 	contractPoints := int(contract)
@@ -215,6 +216,9 @@ func (game *Game) calculatesTeamScores(contractTeamPointsWithoutBelote int, othe
 	game.addRealizedPoints(isCapot, isContractWon, coinche, contractTeamPointsWithoutBelote, otherTeamPointsWithoutBelote)
 
 	game.applyCoinche(coinche)
+
+	game.Scores[contractTeam] += previousContractScore
+	game.Scores[otherTeam] += previousOtherScore
 }
 
 func (game *Game) calculatesTeamPointsAndScores() {
