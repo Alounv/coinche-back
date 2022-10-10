@@ -402,8 +402,9 @@ func TestCounting(test *testing.T) {
 		game.calculatesTeamPointsAndScores()
 		assert.Equal(99+20, game.Points["odd"])
 		assert.Equal(63, game.Points["even"])
-		assert.Equal((80 + 99 + 20), game.Scores["odd"])
-		assert.Equal(63, game.Scores["even"])
+
+		assert.Equal((80 + 100 + 20), game.Scores["odd"])
+		assert.Equal(60, game.Scores["even"])
 
 		assert.Equal(182, game.Points["odd"]+game.Points["even"])
 	})
@@ -426,8 +427,8 @@ func TestCounting(test *testing.T) {
 		game.calculatesTeamPointsAndScores()
 		assert.Equal(76, game.Points["odd"])
 		assert.Equal(20+86, game.Points["even"])
-		assert.Equal(76, game.Scores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
-		assert.Equal(80+20+86, game.Scores["even"])
+		assert.Equal(70, game.Scores["odd"]) // the belote was taken by the odd team but the even team had taken the bid
+		assert.Equal(80+20+90, game.Scores["even"])
 
 		assert.Equal(182, game.Points["odd"]+game.Points["even"])
 	})

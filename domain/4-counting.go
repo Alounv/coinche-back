@@ -162,6 +162,10 @@ func (game *Game) addContractPoints(isCapot bool, isContractWon bool, contractPo
 	}
 }
 
+func roundToClosestMultipleOfTen(number int) int {
+	return (number + 5) / 10 * 10
+}
+
 func (game *Game) addRealizedPoints(isCapot bool, isContractWon bool, coinche int, contractTeamPointsWithoutBelote int, otherTeamPointsWithoutBelote int) {
 	contractTeam, otherTeam := game.getTeams()
 
@@ -182,8 +186,9 @@ func (game *Game) addRealizedPoints(isCapot bool, isContractWon bool, coinche in
 	} else if isNormalContractLostWithCoinche {
 		game.Scores[otherTeam] += 160
 	} else if isNormalContractWon {
-		game.Scores[contractTeam] += contractTeamPointsWithoutBelote
-		game.Scores[otherTeam] += otherTeamPointsWithoutBelote
+		roundedContractTeamPoints := roundToClosestMultipleOfTen(contractTeamPointsWithoutBelote)
+		game.Scores[contractTeam] += roundedContractTeamPoints
+		game.Scores[otherTeam] += (160 - roundedContractTeamPoints)
 	} else {
 		game.Scores[otherTeam] += 160
 	}
