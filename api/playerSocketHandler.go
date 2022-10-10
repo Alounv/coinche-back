@@ -64,6 +64,8 @@ func subscribeAndBroadcast(gameID int, connection *websocket.Conn, game domain.G
 	p := &player{hub: hub, connection: connection, send: make(chan []byte, 256)}
 	p.hub.register <- subscription{player: p, gameID: gameID}
 
+	fmt.Println("---> subscription", gameID)
+
 	broadcastGameOrPanic(game, p.hub)
 
 	return p
