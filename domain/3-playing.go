@@ -82,15 +82,27 @@ func (turn Turn) isTheBiggestTrump(card CardID, trump Color) bool {
 	return false
 }
 
-func (player Player) hasNoBiggerTrump(trump Color, turn Turn) bool {
+func (game Game) isPartnerWinner(team string) bool {
+	lastTurn := game.Turns[len(game.Turns)-1]
+	playCount := len(lastTurn.Plays)
+	trump := game.trump()
+
+	if playCount < 2 {
+		return false
+	}
+	winnerTeam := game.Players[lastTurn.getWinner(trump)].Team
+	return winnerTeam == team
+}
+
+func (player Player) hasBiggerTrump(trump Color, turn Turn) bool {
 	for _, CardID := range player.Hand {
 		card := cards[CardID]
 		isTrump := card.color == trump || trump == AllTrump
 		if isTrump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func (game *Game) canPlayCard(card CardID, playerName string) error {
@@ -109,37 +121,40 @@ func (game *Game) canPlayCard(card CardID, playerName string) error {
 
 	askedColor := lastTurn.askedColor()
 	color := cards[card].color
+	trump := game.trump()
 
-	if color == askedColor {
+	if player.hasColor(askedColor) {
+		if color != askedColor {
+			return errors.New(ErrShouldPlayAskedColor)
+		}
+
+		if askedColor != trump && trump != AllTrump {
+			return nil
+		}
+
+		if !lastTurn.isTheBiggestTrump(card, trump) && player.hasBiggerTrump(trump, lastTurn) {
+			return errors.New(ErrShouldPlayBiggerTrump)
+		}
+
 		return nil
 	}
 
-	if player.hasColor(askedColor) {
-		return errors.New(ErrShouldPlayAskedColor)
-	}
-
-	trump := game.trump()
+	// --- does not have asked color ---
 
 	if player.hasNoTrump(trump) {
 		return nil
 	}
 
-	if playCount > 1 {
-		winnerTeam := game.Players[lastTurn.getWinner(trump)].Team
-		if winnerTeam == player.Team {
-			return nil
-		}
-	}
-
-	if color != trump {
-		return errors.New(ErrShouldPlayTrump)
-	}
-
-	if lastTurn.isTheBiggestTrump(card, trump) || player.hasNoBiggerTrump(trump, lastTurn) {
+	if color == trump {
 		return nil
 	}
 
-	return errors.New(ErrShouldPlayBiggerTrump)
+	isPartnerWinner := game.isPartnerWinner(player.Team)
+	if isPartnerWinner {
+		return nil
+	}
+
+	return errors.New(ErrShouldPlayTrump)
 }
 
 func (game *Game) createTurn(newPlay Play) {

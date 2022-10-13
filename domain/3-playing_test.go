@@ -149,8 +149,6 @@ func TestCanPlay(test *testing.T) {
 		game.Players = map[string]Player{
 			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{C7}},
 			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{DK}},
-			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{CK}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D8}},
 		}
 
 		err := game.Play("P1", C7)
@@ -165,8 +163,6 @@ func TestCanPlay(test *testing.T) {
 		game.Players = map[string]Player{
 			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{C7}},
 			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{DK, H10}},
-			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{CK}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D8}},
 		}
 
 		err := game.Play("P1", C7)
@@ -178,13 +174,12 @@ func TestCanPlay(test *testing.T) {
 		assert.Equal(ErrShouldPlayTrump, err.Error())
 	})
 
-	test.Run("should be able to play no trump if partner is winner", func(test *testing.T) {
+	test.Run("should be able to play no trump if partner is winner and trump not asked", func(test *testing.T) {
 		game := newPlayingGame()
 		game.Players = map[string]Player{
 			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{C10}},
 			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{C7}},
 			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{D7, H8}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D8}},
 		}
 
 		err := game.Play("P1", C10)
@@ -197,13 +192,31 @@ func TestCanPlay(test *testing.T) {
 		assert.NoError(err)
 	})
 
+	test.Run("should fail to play no trump if partner is winner and trump is asked", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{HJ}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{C7}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{D7, H8}},
+		}
+
+		err := game.Play("P1", HJ)
+		assert.NoError(err)
+
+		err = game.Play("P2", C7)
+		assert.NoError(err)
+
+		err = game.Play("P3", D7)
+		assert.Error(err)
+		assert.Equal(ErrShouldPlayAskedColor, err.Error())
+	})
+
 	test.Run("should be able to play a bigger trump", func(test *testing.T) {
 		game := newPlayingGame()
 		game.Players = map[string]Player{
 			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{C10}},
 			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{H9}},
 			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{HJ, H8}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D8}},
 		}
 
 		err := game.Play("P1", C10)
@@ -216,13 +229,12 @@ func TestCanPlay(test *testing.T) {
 		assert.NoError(err)
 	})
 
-	test.Run("should be able to play a lower trump if has not bigger trump", func(test *testing.T) {
+	test.Run("if trump is asked, should be able to play a lower trump if has NO bigger trump", func(test *testing.T) {
 		game := newPlayingGame()
 		game.Players = map[string]Player{
 			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{C10}},
 			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{H9}},
 			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{D7, H8}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D8}},
 		}
 
 		err := game.Play("P1", C10)
@@ -235,13 +247,12 @@ func TestCanPlay(test *testing.T) {
 		assert.NoError(err)
 	})
 
-	test.Run("should fail to play a lower trump if has a bigger trump", func(test *testing.T) {
+	test.Run("if trump is NOT asked, should be able to play a lower trump while having a bigger trump", func(test *testing.T) {
 		game := newPlayingGame()
 		game.Players = map[string]Player{
 			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{C10}},
 			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{H9}},
 			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{HJ, H8}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D8}},
 		}
 
 		err := game.Play("P1", C10)
@@ -251,18 +262,15 @@ func TestCanPlay(test *testing.T) {
 		assert.NoError(err)
 
 		err = game.Play("P3", H8)
-
-		assert.Error(err)
-		assert.Equal(ErrShouldPlayBiggerTrump, err.Error())
+		assert.NoError(err)
 	})
 
-	test.Run("should be able to play a lower while having a bigger trump if partner is winner", func(test *testing.T) {
+	test.Run("if trump IS asked, should fail to play a lower trump while having a bigger trump", func(test *testing.T) {
 		game := newPlayingGame()
 		game.Players = map[string]Player{
 			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{H9}},
 			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{C10}},
 			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{HJ, H8}},
-			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{D8}},
 		}
 
 		err := game.Play("P1", H9)
@@ -272,7 +280,9 @@ func TestCanPlay(test *testing.T) {
 		assert.NoError(err)
 
 		err = game.Play("P3", H8)
-		assert.NoError(err)
+		assert.Error(err)
+
+		assert.Equal(ErrShouldPlayBiggerTrump, err.Error())
 	})
 }
 
