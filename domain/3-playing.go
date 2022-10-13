@@ -57,13 +57,13 @@ func (player Player) hasNoTrump(trump Color) bool {
 	return true
 }
 
-func (turn Turn) getBiggestTrumpStrength(trump Color) Strength {
+func (turn Turn) getBiggestTrumpStrength(askedTrump Color) Strength {
 	var biggestTrumpStrength Strength
 	for _, play := range turn.Plays {
 		card := cards[play.Card]
 		color := card.color
 		strength := card.TrumpStrength
-		if color == trump {
+		if color == askedTrump {
 			if strength > biggestTrumpStrength {
 				biggestTrumpStrength = strength
 			}
@@ -72,10 +72,10 @@ func (turn Turn) getBiggestTrumpStrength(trump Color) Strength {
 	return biggestTrumpStrength
 }
 
-func (turn Turn) isTheBiggestTrump(card CardID, trump Color) bool {
-	isTrump := cards[card].color == trump || trump == AllTrump
+func (turn Turn) isTheBiggestTrump(card CardID, askedTrump Color) bool {
+	isTrump := cards[card].color == askedTrump
 
-	if isTrump && cards[card].TrumpStrength > turn.getBiggestTrumpStrength(trump) {
+	if isTrump && cards[card].TrumpStrength > turn.getBiggestTrumpStrength(askedTrump) {
 		return true
 	}
 
@@ -94,11 +94,11 @@ func (game Game) isPartnerWinner(team string) bool {
 	return winnerTeam == team
 }
 
-func (player Player) hasBiggerTrump(trump Color, turn Turn) bool {
+func (player Player) hasBiggerTrump(askedTrump Color, turn Turn) bool {
 	for _, CardID := range player.Hand {
 		card := cards[CardID]
-		isTrump := card.color == trump || trump == AllTrump
-		if isTrump && card.TrumpStrength > turn.getBiggestTrumpStrength(trump) {
+		isAskedTrump := card.color == askedTrump
+		if isAskedTrump && card.TrumpStrength > turn.getBiggestTrumpStrength(askedTrump) {
 			return true
 		}
 	}
@@ -132,7 +132,8 @@ func (game *Game) canPlayCard(card CardID, playerName string) error {
 			return nil
 		}
 
-		if !lastTurn.isTheBiggestTrump(card, trump) && player.hasBiggerTrump(trump, lastTurn) {
+		// color is now the asked trump
+		if !lastTurn.isTheBiggestTrump(card, color) && player.hasBiggerTrump(color, lastTurn) {
 			return errors.New(ErrShouldPlayBiggerTrump)
 		}
 

@@ -284,6 +284,54 @@ func TestCanPlay(test *testing.T) {
 
 		assert.Equal(ErrShouldPlayBiggerTrump, err.Error())
 	})
+
+	test.Run("in All trump, should fail to play a lower trump while having a bigger trump", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P1", Color: AllTrump},
+		}
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{H9}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{C10}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{HJ, H8}},
+		}
+
+		err := game.Play("P1", H9)
+		assert.NoError(err)
+
+		err = game.Play("P2", C10)
+		assert.NoError(err)
+
+		err = game.Play("P3", H8)
+		assert.Error(err)
+
+		assert.Equal(ErrShouldPlayBiggerTrump, err.Error())
+	})
+
+	test.Run("in All trump, should be able to play a lower trump if no bigger trump", func(test *testing.T) {
+		game := newPlayingGame()
+		game.Bids = map[BidValue]Bid{
+			Eighty: {Player: "P1", Color: AllTrump},
+		}
+		game.Players = map[string]Player{
+			"P1": {Team: "odd", Order: 1, InitialOrder: 1, Hand: []CardID{H9}},
+			"P2": {Team: "even", Order: 2, InitialOrder: 2, Hand: []CardID{H8}},
+			"P3": {Team: "odd", Order: 3, InitialOrder: 3, Hand: []CardID{HQ}},
+			"P4": {Team: "even", Order: 4, InitialOrder: 4, Hand: []CardID{CJ, H10}},
+		}
+
+		err := game.Play("P1", H9)
+		assert.NoError(err)
+
+		err = game.Play("P2", H8)
+		assert.NoError(err)
+
+		err = game.Play("P3", HQ)
+		assert.NoError(err)
+
+		err = game.Play("P4", H10)
+		assert.NoError(err)
+	})
 }
 
 func TestEndOfPlayingPhase(test *testing.T) {
