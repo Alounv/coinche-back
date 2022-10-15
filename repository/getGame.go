@@ -19,6 +19,7 @@ func getGame(tx *sqlx.Tx, gameID int) (domain.Game, error) {
 		&game.CreatedAt,
 		&game.Phase,
 		&deck,
+		&game.Root,
 	)
 
 	if err != nil {
@@ -72,7 +73,7 @@ func (s *GameRepository) ListGames() ([]domain.Game, error) {
 
 	tx := s.db.MustBegin()
 
-	err := tx.Select(&gamesIDs, "SELECT id FROM game")
+	err := tx.Select(&gamesIDs, "SELECT id FROM game WHERE id = root OR root = 0")
 	if err != nil {
 		return nil, err
 	}

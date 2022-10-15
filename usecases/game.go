@@ -149,6 +149,13 @@ func (s *GameUsecases) StartGame(gameID int) error {
 	if err != nil {
 		return err
 	}
+	if game.Phase == domain.Counting {
+		// archive current game
+		_, err = s.Repo.CreateGame(game)
+		if err != nil {
+			return err
+		}
+	}
 	err = game.Start()
 	if err != nil {
 		return err

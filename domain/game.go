@@ -227,6 +227,7 @@ type Game struct {
 	Turns     []Turn
 	Scores    map[string]int
 	Points    map[string]int
+	Root      int
 }
 
 type Player struct {

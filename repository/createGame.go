@@ -17,13 +17,14 @@ func createGame(game domain.Game, tx *sqlx.Tx) (int, error) {
 
 	err = tx.QueryRow(
 		`
-		INSERT INTO game (name, phase, deck) 
-		VALUES ($1, $2, $3) 
+		INSERT INTO game (name, phase, deck, root) 
+		VALUES ($1, $2, $3, $4) 
 		RETURNING id
 		`,
 		game.Name,
 		game.Phase,
 		deck,
+		game.ID,
 	).Scan(&gameID)
 	if err != nil {
 		return 0, err

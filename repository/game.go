@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS game (
 	name text NOT NULL,
 	createdAt timestamp NOT NULL DEFAULT now(),
 	phase integer DEFAULT 0,
-	deck json NOT NULL DEFAULT '[]'
+	deck json NOT NULL DEFAULT '[]',
+  root integer
 )`
 
 type GameRepository struct {

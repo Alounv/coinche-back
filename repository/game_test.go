@@ -22,6 +22,7 @@ func NewGameRepositoryWithData(db *sqlx.DB) (*GameRepository, error) {
 		{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {}, "P2": {}}},
 		newTeamingGame(),
 		newCompleteGame(),
+		{Name: "PREVIOUS GAME ONE", ID: 3, Players: map[string]domain.Player{}, Root: 1},
 	}
 
 	tx := repository.db.MustBegin()
@@ -253,10 +254,10 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want.Players, got.Players)
 	})
 
-	test.Run("list all games", func(test *testing.T) {
+	test.Run("list all games, where root equal id", func(test *testing.T) {
 		want := []domain.Game{
-			{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}},
-			{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {Team: "", Order: 0, InitialOrder: 0, Hand: []domain.CardID(nil)}, "P2": {Team: "", Order: 0, InitialOrder: 0, Hand: []domain.CardID(nil)}}},
+			{Name: "GAME ONE", ID: 1, Players: map[string]domain.Player{}, Root: 1},
+			{Name: "GAME TWO", ID: 2, Players: map[string]domain.Player{"P1": {Team: "", Order: 0, InitialOrder: 0, Hand: []domain.CardID(nil)}, "P2": {Team: "", Order: 0, InitialOrder: 0, Hand: []domain.CardID(nil)}}, Root: 2},
 		}
 
 		got, err := repository.ListGames()
@@ -264,6 +265,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			test.Fatal(err)
 		}
 
+		assert.Equal(4, len(got))
 		assert.Equal(want[0].ID, got[0].ID)
 		assert.Equal(want[0].Players, got[0].Players)
 		assert.Equal(want[1].ID, got[1].ID)
@@ -359,6 +361,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want.Turns[1], got.Turns[1])
 		assert.Equal(want.Points, got.Points)
 		assert.Equal(want.Scores, got.Scores)
+		assert.Equal(want.ID, got.Root)
 	})
 
 	test.Run("reset a game", func(test *testing.T) {
