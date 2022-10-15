@@ -32,10 +32,12 @@ func (repo *MockGameRepo) GetGame(gameID int) (domain.Game, error) {
 func (repo *MockGameRepo) CreateGame(game domain.Game) (int, error) {
 	var gameID int
 	if game.ID == 0 {
-		gameID = len(repo.games)
+		gameID = len(repo.games) + 1
 	} else {
 		gameID = game.ID
 	}
+
+	game.Root = gameID
 
 	repo.creationCalls = repo.creationCalls + 1
 	repo.games[gameID] = game
@@ -65,6 +67,7 @@ func (repo *MockGameRepo) UpdateGame(game domain.Game) error {
 	repoGame.Turns = game.Turns
 	repoGame.Points = game.Points
 	repoGame.Scores = game.Scores
+	repoGame.Root = game.Root
 
 	repo.games[game.ID] = repoGame
 	return nil
@@ -76,6 +79,10 @@ func (repo *MockGameRepo) DeleteGame(gameID int) error {
 }
 
 func NewMockGameRepo(games map[int]domain.Game) MockGameRepo {
+	for gameID, game := range games {
+		game.Root = gameID
+		games[gameID] = game
+	}
 	return MockGameRepo{
 		games:         games,
 		creationCalls: 0,

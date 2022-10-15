@@ -80,6 +80,7 @@ func TestSocketHandler(test *testing.T) {
 			Name:    "GAME ONE",
 			Players: map[string]domain.Player{"P1": {}},
 			Phase:   domain.Teaming,
+			Root:    1,
 		})
 
 		s1, c1 = NewGameWebSocketServer(test, 1, "P1", &hub)

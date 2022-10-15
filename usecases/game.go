@@ -225,3 +225,15 @@ func (s *GameUsecases) PlayCard(gameID int, playerName string, card domain.CardI
 func NewGameUsecases(repository GameRepositoryInterface) *GameUsecases {
 	return &GameUsecases{Repo: repository}
 }
+
+func (s *GameUsecases) ArchiveGame(gameID int) error {
+	game, err := s.Repo.GetGame(gameID)
+	if err != nil {
+		return err
+	}
+
+	game.Root = 0
+
+	err = s.Repo.UpdateGame(game)
+	return err
+}

@@ -265,7 +265,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			test.Fatal(err)
 		}
 
-		assert.Equal(4, len(got))
+		assert.Equal(5, len(got))
 		assert.Equal(want[0].ID, got[0].ID)
 		assert.Equal(want[0].Players, got[0].Players)
 		assert.Equal(want[1].ID, got[1].ID)
@@ -315,6 +315,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 				"A Team": 1000,
 				"B Team": 500,
 			},
+			Root: 2,
 		}
 
 		err := repository.UpdateGame(want)
@@ -341,6 +342,8 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			domain.Eighty: {Player: "P1", Color: domain.Spade, Coinche: 2, Pass: 3},
 		}
 
+		want.Root = 0
+
 		err = repository.UpdateGame(want)
 		if err != nil {
 			test.Fatal(err)
@@ -361,7 +364,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 		assert.Equal(want.Turns[1], got.Turns[1])
 		assert.Equal(want.Points, got.Points)
 		assert.Equal(want.Scores, got.Scores)
-		assert.Equal(want.ID, got.Root)
+		assert.Equal(want.Root, got.Root)
 	})
 
 	test.Run("reset a game", func(test *testing.T) {

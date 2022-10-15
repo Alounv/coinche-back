@@ -66,25 +66,3 @@ func (s *GameRepository) GetGame(gameID int) (domain.Game, error) {
 
 	return game, tx.Commit()
 }
-
-func (s *GameRepository) ListGames() ([]domain.Game, error) {
-	var games []domain.Game
-	gamesIDs := []int{}
-
-	tx := s.db.MustBegin()
-
-	err := tx.Select(&gamesIDs, "SELECT id FROM game WHERE id = root OR root = 0")
-	if err != nil {
-		return nil, err
-	}
-
-	for _, gameID := range gamesIDs {
-		game, err := getGame(tx, gameID)
-		if err != nil {
-			return nil, err
-		}
-		games = append(games, game)
-	}
-
-	return games, tx.Commit()
-}

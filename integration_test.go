@@ -95,6 +95,7 @@ func (s *IntegrationTestSuite) TestCreateGame() {
 		assert.Equal(http.StatusOK, response.Code)
 		assert.Equal("NEW GAME", got.Name)
 		assert.Equal(1, got.ID)
+		assert.Equal(1, got.Root)
 		assert.Equal(map[string]domain.Player{}, got.Players)
 		assert.IsType([]domain.CardID{}, got.Deck)
 		assert.IsType(time.Time{}, got.CreatedAt)

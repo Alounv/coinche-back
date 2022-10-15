@@ -19,12 +19,13 @@ func (r *GameRepository) UpdateGame(game domain.Game) error {
 	_, err = r.db.Exec(
 		`
 		UPDATE game
-		SET phase = $2, Deck = $3 
+		SET phase = $2, Deck = $3, Root = $4
 		WHERE id = $1
 		`,
 		game.ID,
 		game.Phase,
 		deck,
+		game.Root,
 	)
 
 	if err != nil {
