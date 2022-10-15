@@ -58,6 +58,11 @@ func SendMessageOrFatal(connection *websocket.Conn, msg string, origin string, t
 
 func SendMessage(connection *websocket.Conn, msg string, origin string) error {
 	fmt.Println(origin, "> sending message:", msg)
+	err := SendMessageWithoutLog(connection, msg)
+	return err
+}
+
+func SendMessageWithoutLog(connection *websocket.Conn, msg string) error {
 	message, err := json.Marshal(msg)
 	if err != nil {
 		return err

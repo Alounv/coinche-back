@@ -210,7 +210,7 @@ func (s socketHandler) play(content string) {
 }
 
 func (s socketHandler) pong() {
-	err := SendMessage(s.connection, "pong", "S")
+	err := SendMessageWithoutLog(s.connection, "pong")
 	if err != nil {
 		fmt.Println("Error sending pong message: ", err)
 	}
