@@ -1,7 +1,7 @@
 package api
 
 import (
-	"coinche/utilities"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -36,6 +36,10 @@ func (gameAPIs *GameAPIs) JoinGame(context *gin.Context, hub *Hub) {
 	playerName := context.Query("playerName")
 
 	connection, err := wsupgrader.Upgrade(context.Writer, context.Request, nil)
-	utilities.PanicIfErr(err)
+	if err != nil {
+		fmt.Println("Error upgrading socket with new player: ", err)
+		return
+	}
+
 	PlayerSocketHandler(connection, gameID, playerName, hub)
 }

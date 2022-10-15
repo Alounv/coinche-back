@@ -3,7 +3,6 @@ package api
 import (
 	"coinche/domain"
 	"coinche/usecases"
-	"coinche/utilities"
 	"fmt"
 	"strconv"
 	"strings"
@@ -52,7 +51,9 @@ func joinGame(connection *websocket.Conn, usecases *usecases.GameUsecases, gameI
 	game, err := usecases.JoinGame(gameID, playerName)
 	if err != nil {
 		err := SendMessage(connection, fmt.Sprint("Could not join this game: ", err), "S")
-		utilities.PanicIfErr(err)
+		if err != nil {
+			fmt.Println("Error sending closing error in « Join game: ", err)
+		}
 		connection.Close()
 		return domain.Game{}
 	}
@@ -64,7 +65,7 @@ func subscribeAndBroadcast(gameID int, connection *websocket.Conn, game domain.G
 	p := &player{hub: hub, connection: connection, send: make(chan []byte, 256)}
 	p.hub.register <- subscription{player: p, gameID: gameID}
 
-	broadcastGameOrPanic(game, p.hub)
+	broadcastGame(game, p.hub)
 
 	return p
 }
@@ -77,10 +78,12 @@ type socketHandler struct {
 	player       *player
 }
 
-func (s *socketHandler) SendErrorMessageOrPanic(message string, err error) {
+func (s *socketHandler) SendErrorMessage(message string, err error) {
 	errorMessage := fmt.Sprint(message, err)
 	err = SendMessage(s.connection, errorMessage, "S")
-	utilities.PanicIfErr(err)
+	if err != nil {
+		fmt.Println("Error message not sent: ", err)
+	}
 }
 
 func (s *socketHandler) leave(game domain.Game) {
@@ -90,8 +93,8 @@ func (s *socketHandler) leave(game domain.Game) {
 		return
 	}
 	msg := fmt.Sprint(s.playerName, " has left the game")
-	broadcastMessageOrPanic(msg, game.ID, s.player.hub)
-	broadcastGameOrPanic(game, s.player.hub)
+	broadcastMessage(msg, game.ID, s.player.hub)
+	broadcastGame(game, s.player.hub)
 
 	s.player.hub.unregister <- subscription{player: s.player, gameID: s.gameID}
 
@@ -101,54 +104,56 @@ func (s *socketHandler) leave(game domain.Game) {
 func (s *socketHandler) joinTeam(content string) {
 	err := s.gameUsecases.JoinTeam(s.gameID, s.playerName, content)
 	if err != nil {
-		s.SendErrorMessageOrPanic("Could not join team: ", err)
+		s.SendErrorMessage("Could not join team: ", err)
 		return
 	}
 
 	game, err := s.gameUsecases.GetGame(s.gameID)
 	if err != nil {
-		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
+		s.SendErrorMessage("Could not get updated game: ", err)
 		return
 	}
 
-	broadcastGameOrPanic(game, s.player.hub)
+	broadcastGame(game, s.player.hub)
 }
 
 func (s socketHandler) startGame(content string) {
 	err := s.gameUsecases.StartGame(s.gameID)
 	if err != nil {
-		s.SendErrorMessageOrPanic("Could not start game: ", err)
+		s.SendErrorMessage("Could not start game: ", err)
 		return
 	}
 
 	game, err := s.gameUsecases.GetGame(s.gameID)
 
 	if err != nil {
-		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
+		s.SendErrorMessage("Could not get updated game: ", err)
 		return
 	}
 
-	broadcastGameOrPanic(game, s.player.hub)
+	broadcastGame(game, s.player.hub)
 }
 
 func (s socketHandler) bid(content string) {
 	if content == "pass" {
 		err := s.gameUsecases.Pass(s.gameID, s.playerName)
 		if err != nil {
-			s.SendErrorMessageOrPanic("Could not pass: ", err)
+			s.SendErrorMessage("Could not pass: ", err)
 			return
 		}
 	} else if content == "coinche" {
 		err := s.gameUsecases.Coinche(s.gameID, s.playerName)
 		if err != nil {
-			s.SendErrorMessageOrPanic("Could not coinche: ", err)
+			s.SendErrorMessage("Could not coinche: ", err)
 			return
 		}
 	} else {
 		array := strings.Split(content, ",")
 		if len(array) != 2 {
 			err := SendMessage(s.connection, "Invalid bid", "S")
-			utilities.PanicIfErr(err)
+			if err != nil {
+				fmt.Println("Error sendind message « Invalid bid » :" + err.Error())
+			}
 			return
 		}
 
@@ -156,7 +161,7 @@ func (s socketHandler) bid(content string) {
 		valueString := array[1]
 		valueInt, err := strconv.Atoi(valueString)
 		if err != nil {
-			s.SendErrorMessageOrPanic("Could not parse bid value:", err)
+			s.SendErrorMessage("Could not parse bid value:", err)
 			return
 		}
 
@@ -165,41 +170,50 @@ func (s socketHandler) bid(content string) {
 
 		err = s.gameUsecases.Bid(s.gameID, s.playerName, bidValue, bidColor)
 		if err != nil {
-			s.SendErrorMessageOrPanic("Could not bid: ", err)
+			s.SendErrorMessage("Could not bid: ", err)
 			return
 		}
 	}
 
 	game, err := s.gameUsecases.GetGame(s.gameID)
 	if err != nil {
-		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
+		s.SendErrorMessage("Could not get updated game: ", err)
 		return
 	}
 
-	broadcastGameOrPanic(game, s.player.hub)
+	broadcastGame(game, s.player.hub)
 }
 
 func (s socketHandler) play(content string) {
 	card, ok := cards[content]
 	if !ok {
 		err := SendMessage(s.connection, "Invalid card", "S")
-		utilities.PanicIfErr(err)
+		if err != nil {
+			fmt.Println("Error sending message « Invalid card » : " + err.Error())
+		}
 		return
 	}
 
 	err := s.gameUsecases.PlayCard(s.gameID, s.playerName, card)
 	if err != nil {
-		s.SendErrorMessageOrPanic("Could not play: ", err)
+		s.SendErrorMessage("Could not play: ", err)
 		return
 	}
 
 	game, err := s.gameUsecases.GetGame(s.gameID)
 	if err != nil {
-		s.SendErrorMessageOrPanic("Could not get updated game: ", err)
+		s.SendErrorMessage("Could not get updated game: ", err)
 		return
 	}
 
-	broadcastGameOrPanic(game, s.player.hub)
+	broadcastGame(game, s.player.hub)
+}
+
+func (s socketHandler) pong() {
+	err := SendMessage(s.connection, "pong", "S")
+	if err != nil {
+		fmt.Println("Error sending pong message: ", err)
+	}
 }
 
 func PlayerSocketHandler(
@@ -256,10 +270,17 @@ func PlayerSocketHandler(
 				socketHandler.play(content)
 				break
 			}
+		case "ping":
+			{
+				socketHandler.pong()
+				break
+			}
 		default:
 			{
 				err = SendMessage(connection, "Message not understood by the server", "S")
-				utilities.PanicIfErr(err)
+				if err != nil {
+					fmt.Println("Error sending message: « Message not understood by the server » :", err)
+				}
 				break
 			}
 		}

@@ -18,12 +18,17 @@ func main() {
 
 	dsn := connectionInfo + " dbname=" + dbName
 	gameRepository, err := repository.NewGameRepository(dsn)
-	utilities.PanicIfErr(err)
+	if err != nil {
+		panic(err)
+	}
+
 	gameUsecases := usecases.NewGameUsecases(gameRepository)
 
 	router, _ := api.SetupRouter(gameUsecases, []string{authorizedOrigin})
 
 	fmt.Println("Listening on ", addr)
 	err = router.Run(addr)
-	utilities.PanicIfErr(err)
+	if err != nil {
+		panic(err)
+	}
 }

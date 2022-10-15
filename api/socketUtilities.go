@@ -2,7 +2,6 @@ package api
 
 import (
 	"coinche/domain"
-	"coinche/utilities"
 	testUtilities "coinche/utilities/test"
 	"encoding/json"
 	"errors"
@@ -24,20 +23,26 @@ func receive(connection *websocket.Conn) ([]byte, error) {
 	return message, err
 }
 
-func broadcastGameOrPanic(game domain.Game, hub *Hub) {
+func broadcastGame(game domain.Game, hub *Hub) {
 	fmt.Println("S >>> broadcasting game:", game.ID)
 	data, err := json.Marshal(game)
-	utilities.PanicIfErr(err)
+	if err != nil {
+		fmt.Println("Error marshal during broadcasting game: " + err.Error())
+		return
+	}
 
 	m := message{data: data, gameID: game.ID}
 
 	hub.broadcast <- m
 }
 
-func broadcastMessageOrPanic(msg string, gameID int, hub *Hub) {
+func broadcastMessage(msg string, gameID int, hub *Hub) {
 	fmt.Println("S >>> broadcasting message:", msg)
 	data, err := json.Marshal(msg)
-	utilities.PanicIfErr(err)
+	if err != nil {
+		fmt.Println("Error marshal during broadcasting message: " + err.Error())
+		return
+	}
 
 	m := message{data: data, gameID: gameID}
 
