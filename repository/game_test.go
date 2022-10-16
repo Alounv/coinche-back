@@ -265,7 +265,7 @@ func TestGameRepoWithInitialData(test *testing.T) {
 			test.Fatal(err)
 		}
 
-		assert.Equal(5, len(got))
+		assert.Equal(4, len(got))
 		assert.Equal(want[0].ID, got[0].ID)
 		assert.Equal(want[0].Players, got[0].Players)
 		assert.Equal(want[1].ID, got[1].ID)

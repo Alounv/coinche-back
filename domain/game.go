@@ -248,6 +248,7 @@ func NewGame(name string) Game {
 		Phase:   Teaming,
 		Bids:    map[BidValue]Bid{},
 		Deck:    NewDeck(),
+		Root:    0,
 	}
 }
 

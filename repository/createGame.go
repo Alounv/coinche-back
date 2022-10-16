@@ -29,13 +29,19 @@ func createGame(game domain.Game, tx *sqlx.Tx) (int, error) {
 		return 0, err
 	}
 
+	gameRoot := game.Root
+	if gameRoot == 0 {
+		gameRoot = gameID
+	}
+
 	_, err = tx.Exec(
 		`
 		UPDATE game
-		SET root = $1
+		SET root = $2
 		WHERE id = $1
 		`,
 		gameID,
+		gameRoot,
 	)
 	if err != nil {
 		return 0, err
