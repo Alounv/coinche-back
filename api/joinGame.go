@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -14,14 +15,13 @@ var wsupgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		connectionOrigin := r.Header.Get("Origin")
+		fmt.Println(connectionOrigin)
 		if connectionOrigin == "" {
 			return true
 		}
 
-		//authorizedOrigin := os.Getenv("AUTHORIZED_ORIGIN")
-		// fmt.Println("------", authorizedOrigin, connectionOrigin) // we should understand why it's not working
-		// return connectionOrigin == "http://127.0.0.1:5173" || connectionOrigin == "http://localhost:5000"
-		return true
+		authorizedOrigin := os.Getenv("AUTHORIZED_ORIGIN")
+		return connectionOrigin == authorizedOrigin
 	},
 }
 

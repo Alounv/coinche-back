@@ -13,10 +13,13 @@ func SetupRouter(gameUsecases *usecases.GameUsecases, origins []string) (*gin.En
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
-	//fmt.Println("origins", origins) // we should understand why it's not working
-	//config.AllowOrigins = []string{"http://127.0.0.1:5173"}
-	//config.AllowOrigins = origins
-	config.AllowAllOrigins = true
+	if len(origins) >= 1 {
+		config.AllowOrigins = origins
+	} else {
+		config.AllowAllOrigins = true
+	}
+	config.AllowMethods = []string{"PUT", "PATCH", "GET", "DELETE", "POST"}
+
 	router.Use(cors.New(config))
 
 	err := router.SetTrustedProxies(nil)
