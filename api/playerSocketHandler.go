@@ -73,14 +73,15 @@ func subscribeAndBroadcast(gameID int, connection *websocket.Conn, game domain.G
 type socketHandler struct {
 	gameID       int
 	playerName   string
-	connection   *websocket.Conn
 	gameUsecases *usecases.GameUsecases
 	player       *player
 }
 
 func (s *socketHandler) SendErrorMessage(message string, err error) {
 	errorMessage := fmt.Sprint(message, err)
-	err = SendMessage(s.connection, errorMessage, "S")
+	s.player.mu.Lock()
+	defer s.player.mu.Unlock()
+	err = SendMessage(s.player.connection, errorMessage, "S")
 	if err != nil {
 		fmt.Println("Error message not sent: ", err)
 	}
@@ -98,7 +99,7 @@ func (s *socketHandler) leave(game domain.Game) {
 
 	s.player.hub.unregister <- subscription{player: s.player, gameID: s.gameID}
 
-	s.connection.Close()
+	s.player.connection.Close()
 }
 
 func (s *socketHandler) joinTeam(content string) {
@@ -150,7 +151,9 @@ func (s socketHandler) bid(content string) {
 	} else {
 		array := strings.Split(content, ",")
 		if len(array) != 2 {
-			err := SendMessage(s.connection, "Invalid bid", "S")
+			s.player.mu.Lock()
+			defer s.player.mu.Unlock()
+			err := SendMessage(s.player.connection, "Invalid bid", "S")
 			if err != nil {
 				fmt.Println("Error sendind message « Invalid bid » :" + err.Error())
 			}
@@ -187,7 +190,9 @@ func (s socketHandler) bid(content string) {
 func (s socketHandler) play(content string) {
 	card, ok := cards[content]
 	if !ok {
-		err := SendMessage(s.connection, "Invalid card", "S")
+		s.player.mu.Lock()
+		defer s.player.mu.Unlock()
+		err := SendMessage(s.player.connection, "Invalid card", "S")
 		if err != nil {
 			fmt.Println("Error sending message « Invalid card » : " + err.Error())
 		}
@@ -210,7 +215,9 @@ func (s socketHandler) play(content string) {
 }
 
 func (s socketHandler) pong() {
-	err := SendMessageWithoutLog(s.connection, "pong")
+	s.player.mu.Lock()
+	defer s.player.mu.Unlock()
+	err := SendMessageWithoutLog(s.player.connection, "pong")
 	if err != nil {
 		fmt.Println("Error sending pong message: ", err)
 	}
@@ -239,7 +246,6 @@ func PlayerSocketHandler(
 		socketHandler := socketHandler{
 			gameID:       gameID,
 			playerName:   playerName,
-			connection:   connection,
 			gameUsecases: hub.gameUsecases,
 			player:       player,
 		}

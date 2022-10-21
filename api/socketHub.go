@@ -4,6 +4,7 @@ import (
 	"coinche/usecases"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -12,6 +13,7 @@ type player struct {
 	hub        *Hub
 	connection *websocket.Conn
 	send       chan []byte
+	mu         sync.Mutex
 }
 
 type message struct {
@@ -51,6 +53,8 @@ func NewHub(gameUsecases *usecases.GameUsecases) Hub {
 }
 
 func sendToPlayerOrUnregister(h *Hub, player *player, data []byte, gameID int) {
+	player.mu.Lock()
+	defer player.mu.Unlock()
 	err := send(player.connection, data)
 	if err != nil {
 		fmt.Println("Error sending message to player: (", err, "). Closing connection")
